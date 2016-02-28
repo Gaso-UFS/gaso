@@ -3,10 +3,7 @@ package com.ericmguimaraes.gaso.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -17,8 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.ericmguimaraes.gaso.Config;
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.RegisterActivity;
+import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.User;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.ericmguimaraes.gaso.registers.RegisterActivity;
 
 import butterknife.Bind;
 import butterknife.BindDrawable;
@@ -38,11 +39,20 @@ public class MyCarFragment extends Fragment {
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    @BindDrawable(R.drawable.steering_wheel)
-    Drawable wheel;
-
     @Bind(R.id.no_user_text)
     TextView noUserText;
+
+    @Bind(R.id.name)
+    TextView nameText;
+
+    @Bind(R.id.model)
+    TextView modelText;
+
+    @Bind(R.id.description)
+    TextView descriptionText;
+
+    User user;
+    Car car;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -107,7 +117,6 @@ public class MyCarFragment extends Fragment {
         });
 
         fab.setColorFilter(Color.WHITE);
-        noUserText.setVisibility(View.VISIBLE);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,6 +125,29 @@ public class MyCarFragment extends Fragment {
                 startActivity(intent);
             }
         });
+    }
+
+    private void updateCarAndUser() {
+        Config config = Config.getInstance();
+        user = config.currentUser;
+        car = config.currentCar;
+        if(user == null || car == null){
+            nameText.setVisibility(View.GONE);
+            modelText.setVisibility(View.GONE);
+            descriptionText.setVisibility(View.GONE);
+            noUserText.setVisibility(View.VISIBLE);
+            fab.setVisibility(View.VISIBLE);
+        } else {
+            nameText.setVisibility(View.VISIBLE);
+            modelText.setVisibility(View.VISIBLE);
+            descriptionText.setVisibility(View.VISIBLE);
+            noUserText.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+
+            nameText.setText(user.getName());
+            modelText.setText(car.getModel());
+            descriptionText.setText(car.getDescription());
+        }
     }
 
     @Override public void onDestroyView() {
@@ -145,6 +177,12 @@ public class MyCarFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCarAndUser();
     }
 
     /**

@@ -28,10 +28,10 @@ public class UserDAO {
     public UserDAO(Context context){
         this.context = context;
         realmConfig = new RealmConfiguration.Builder(context).build();
-        realm = Realm.getInstance(realmConfig);
     }
 
     public void add(User user){
+        realm = Realm.getInstance(realmConfig);
         if(user.getId()==-1)
             user.setId((int) setUniqueId());
         realm.beginTransaction();
@@ -40,22 +40,44 @@ public class UserDAO {
     }
 
     public void remove(User user){
+        realm = Realm.getInstance(realmConfig);
         RealmQuery<User> query = realm.where(User.class);
         query.equals(user);
         RealmResults<User> result = query.findAll();
-        result.removeLast();
+        realm.beginTransaction();
+        if(!result.isEmpty())
+            result.removeLast();
+        realm.commitTransaction();
     }
 
     public List<User> findAll(){
+        realm = Realm.getInstance(realmConfig);
         RealmQuery<User> query = realm.where(User.class);
         RealmResults<User> result = query.findAll();
-        return new ArrayList<User>(Arrays.<User>asList((User[]) result.toArray()));
+        List<User> list = new ArrayList<>();
+        for(User u: result){
+            list.add(createNewUser(u));
+        }
+        return list;
+    }
+
+    public User findFirst(){
+        realm = Realm.getInstance(realmConfig);
+        return realm.where(User.class).findFirst();
     }
 
     public long setUniqueId() {
+        realm = Realm.getInstance(realmConfig);
         Number num = realm.where(User.class).max("id");
         if (num == null) return 1;
         else return ((long) num + 1);
+    }
+
+    private User createNewUser(User oldUser){
+        User newUser = new User();
+        newUser.setName(oldUser.getName());
+        newUser.setEmail(oldUser.getEmail());
+        return newUser;
     }
 
 }

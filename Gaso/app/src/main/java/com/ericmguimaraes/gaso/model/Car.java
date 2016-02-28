@@ -1,13 +1,15 @@
 package com.ericmguimaraes.gaso.model;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by ericm on 2/27/2016.
  */
 public class Car extends RealmObject {
 
-    private int id;
+    @PrimaryKey
+    private int id = -1;
     private String model;
     private String description;
 

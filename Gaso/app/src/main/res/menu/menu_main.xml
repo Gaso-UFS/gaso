@@ -9,9 +9,15 @@
         app:showAsAction="always"
         android:icon="@drawable/user"/>
 
+    <item android:id="@+id/car_list_menu_item"
+        android:orderInCategory="200"
+        android:title="@string/car_list"
+        app:showAsAction="always"
+        android:icon="@drawable/car"/>
+
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="200"
+        android:orderInCategory="300"
         android:title="@string/action_settings"
         app:showAsAction="never" />
 </menu>

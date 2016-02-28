@@ -17,6 +17,11 @@ import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.SpentFragment;
+import com.ericmguimaraes.gaso.lists.CarListActivity;
+import com.ericmguimaraes.gaso.lists.UserListActivity;
+import com.ericmguimaraes.gaso.model.User;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
 
 import butterknife.Bind;
 import butterknife.BindString;
@@ -56,6 +61,8 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
 
         viewPager.setCurrentItem(1);
 
+        init();
+
     }
 
     @Override
@@ -71,12 +78,18 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
+        Intent intent;
         switch (id) {
             case R.id.action_settings:
             return true;
             case R.id.user_list_menu_item:
+                intent = new Intent(this, UserListActivity.class);
+                startActivity(intent);
             return true;
+            case R.id.car_list_menu_item:
+                intent = new Intent(this, CarListActivity.class);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -91,5 +104,14 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
 
     @Override
     public void onFragmentInteraction(Uri uri) {
+    }
+
+    private void init(){
+        UserDAO userDAO = new UserDAO(getApplicationContext());
+        CarDAO carDAO = new CarDAO(getApplicationContext());
+        if(Config.getInstance().currentUser==null)
+            Config.getInstance().currentUser = userDAO.findFirst();
+        if(Config.getInstance().currentCar==null)
+            Config.getInstance().currentCar = carDAO.findFirst();
     }
 }

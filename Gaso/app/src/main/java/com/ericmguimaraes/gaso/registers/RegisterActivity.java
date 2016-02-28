@@ -1,7 +1,7 @@
-package com.ericmguimaraes.gaso;
+package com.ericmguimaraes.gaso.registers;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
@@ -9,15 +9,20 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.Toast;
 
+import com.ericmguimaraes.gaso.Config;
+import com.ericmguimaraes.gaso.MainActivity;
+import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 
 import butterknife.Bind;
+import butterknife.BindString;
 import butterknife.ButterKnife;
+import io.realm.RealmList;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -38,6 +43,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     @Bind(R.id.btn_confirm)
     Button confirmBtn;
+
+    @BindString(R.string.user_and_car_registered)
+    String userAndCarRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +81,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void saveOnRealm() {
-        UserDAO userDAO = new UserDAO(getApplicationContext());
-        User user = new User();
-        user.setName(inputName.getText().toString());
-        user.setEmail(inputEmail.getText().toString());
-        userDAO.add(user);
 
         CarDAO carDAO = new CarDAO(getApplicationContext());
         Car car = new Car();
@@ -85,7 +88,23 @@ public class RegisterActivity extends AppCompatActivity {
         car.setModel(inputCar.getText().toString());
         carDAO.add(car);
 
-        //TODO launch main acticity
+        UserDAO userDAO = new UserDAO(getApplicationContext());
+        User user = new User();
+        user.setName(inputName.getText().toString());
+        user.setEmail(inputEmail.getText().toString());
+        userDAO.add(user);
+
+        Config.getInstance().currentCar = car;
+        Config.getInstance().currentUser = user;
+
+        CharSequence text = userAndCarRegistered;
+        int duration = Toast.LENGTH_SHORT;
+
+        Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+        toast.show();
+
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
 
     }
 

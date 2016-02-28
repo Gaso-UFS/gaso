@@ -29,10 +29,10 @@ public class CarDAO {
     public CarDAO(Context context){
         this.context = context;
         realmConfig = new RealmConfiguration.Builder(context).build();
-        realm = Realm.getInstance(realmConfig);
     }
 
     public void add(Car car){
+        realm = Realm.getInstance(realmConfig);
         if(car.getId()==-1)
             car.setId((int) setUniqueId());
         realm.beginTransaction();
@@ -41,21 +41,43 @@ public class CarDAO {
     }
 
     public void remove(Car car){
+        realm = Realm.getInstance(realmConfig);
         RealmQuery<Car> query = realm.where(Car.class);
         query.equals(car);
         RealmResults<Car> result = query.findAll();
-        result.removeLast();
+        realm.beginTransaction();
+        if(!result.isEmpty())
+            result.removeLast();
+        realm.commitTransaction();
     }
 
     public List<Car> findAll(){
+        realm = Realm.getInstance(realmConfig);
         RealmQuery<Car> query = realm.where(Car.class);
         RealmResults<Car> result = query.findAll();
-        return new ArrayList<Car>(Arrays.<Car>asList((Car[]) result.toArray()));
+        List<Car> list = new ArrayList<>();
+        for(Car c: result){
+            list.add(createNewCar(c));
+        }
+        return list;
     }
 
     public long setUniqueId() {
+        realm = Realm.getInstance(realmConfig);
         Number num = realm.where(Car.class).max("id");
         if (num == null) return 1;
         else return ((long) num + 1);
+    }
+
+    private Car createNewCar(Car oldCar){
+        Car newCar = new Car();
+        newCar.setModel(oldCar.getModel());
+        newCar.setDescription(oldCar.getDescription());
+        return newCar;
+    }
+
+    public Car findFirst() {
+        realm = Realm.getInstance(realmConfig);
+        return realm.where(Car.class).findFirst();
     }
 }
