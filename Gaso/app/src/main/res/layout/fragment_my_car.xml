@@ -1,0 +1,86 @@
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.ericmguimaraes.gaso.fragments.MyCarFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="100">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="35"
+            android:id="@+id/my_car_header">
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="15dp"
+                card_view:cardCornerRadius="15dp"
+                card_view:cardElevation="3dp"
+                >
+                <TextView
+                    android:id="@+id/no_user_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_user_text"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:layout_margin="30dp"
+                    android:paddingTop="10dp"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:visibility="gone"
+                    />
+
+            </android.support.v7.widget.CardView>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="65">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_shape_btn"
+                android:text="@string/connect"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:elevation="15dp"
+                android:textColor="@color/secondary_text"/>
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="15dp"
+                card_view:cardCornerRadius="15dp"
+                card_view:cardElevation="3dp"
+                android:visibility="gone"
+                >
+
+            </android.support.v7.widget.CardView>
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/add_user"
+        app:layout_anchor="@id/my_car_header"
+        app:layout_anchorGravity="end|bottom"
+        android:elevation="6dp"
+        />
+
+</android.support.design.widget.CoordinatorLayout>

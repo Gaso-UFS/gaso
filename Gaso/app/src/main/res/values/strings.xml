@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Gaso</string>
+    <string name="action_settings">Configurações</string>
+
+    <string name="gas">Gas</string>
+    <string name="my_car">Meu Carro</string>
+    <string name="spent">Gastos</string>
+    <string name="no_user_text">Você ainda não cadastrou nenhum usuario.</string>
+    <string name="connect">Conectar OBD</string>
+    <string name="user_list">Lista de Usuarios</string>
+    <string name="title_activity_register">Cadastro de Usuario</string>
+    <string name="name">Nome</string>
+    <string name="email">Email</string>
+    <string name="car">Carro</string>
+    <string name="car_description">Descrição do Carro</string>
+    <string name="password">Senha</string>
+    <string name="confirm">Confirmar</string>
+
+</resources>
