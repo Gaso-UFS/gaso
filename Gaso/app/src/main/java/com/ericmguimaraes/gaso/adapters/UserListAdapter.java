@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ericmguimaraes.gaso.Config;
+import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.MainActivity;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.User;

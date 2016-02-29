@@ -3,26 +3,29 @@ package com.ericmguimaraes.gaso.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ericmguimaraes.gaso.Config;
+import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.config.SettingsActivity;
+import com.ericmguimaraes.gaso.lists.CarListActivity;
+import com.ericmguimaraes.gaso.lists.UserListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.registers.RegisterActivity;
 
 import butterknife.Bind;
-import butterknife.BindDrawable;
 import butterknife.ButterKnife;
 
 /**
@@ -101,6 +104,7 @@ public class MyCarFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_car, container, false);
         ButterKnife.bind(this, view);
+        setHasOptionsMenu(true);
         return view;
     }
 
@@ -125,6 +129,32 @@ public class MyCarFragment extends Fragment {
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        getActivity().getMenuInflater().inflate(R.menu.menu_my_car, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        Intent intent;
+        switch (id) {
+            case R.id.action_settings:
+                intent = new Intent(getContext(), SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.user_list_menu_item:
+                intent = new Intent(getActivity(), UserListActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.car_list_menu_item:
+                intent = new Intent(getActivity(), CarListActivity.class);
+                startActivity(intent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void updateCarAndUser() {

@@ -37,7 +37,10 @@
         <activity
             android:name=".lists.CarListActivity"
             android:label="@string/title_activity_car_list"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".config.SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

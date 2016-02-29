@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/map_menu_item"
+        android:orderInCategory="100"
+        android:title="@string/map"
+        app:showAsAction="always"
+        android:visible="false"
+        android:icon="@drawable/marker"/>
+
+    <item android:id="@+id/stations_list_menu_item"
+        android:orderInCategory="200"
+        android:title="@string/stations_list"
+        app:showAsAction="always"
+        android:icon="@drawable/list"/>
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="300"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+</menu>

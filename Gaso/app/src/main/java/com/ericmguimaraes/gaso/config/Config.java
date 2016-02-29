@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso;
+package com.ericmguimaraes.gaso.config;
 
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;

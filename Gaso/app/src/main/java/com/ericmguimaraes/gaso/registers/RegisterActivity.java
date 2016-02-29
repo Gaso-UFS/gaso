@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.ericmguimaraes.gaso.Config;
+import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.MainActivity;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
@@ -22,7 +22,6 @@ import com.ericmguimaraes.gaso.persistence.UserDAO;
 import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
-import io.realm.RealmList;
 
 public class RegisterActivity extends AppCompatActivity {
 
