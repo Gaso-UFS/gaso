@@ -2,6 +2,7 @@ package com.ericmguimaraes.gaso.persistence;
 
 import android.content.Context;
 
+import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
 
 import java.util.ArrayList;
@@ -78,6 +79,13 @@ public class UserDAO {
         newUser.setName(oldUser.getName());
         newUser.setEmail(oldUser.getEmail());
         return newUser;
+    }
+
+    public long count(){
+        realm = Realm.getInstance(realmConfig);
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<Car> query = realm.where(Car.class);
+        return query.count();
     }
 
 }

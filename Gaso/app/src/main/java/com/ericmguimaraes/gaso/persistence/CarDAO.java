@@ -80,4 +80,11 @@ public class CarDAO {
         realm = Realm.getInstance(realmConfig);
         return realm.where(Car.class).findFirst();
     }
+
+    public long count(){
+        realm = Realm.getInstance(realmConfig);
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<Car> query = realm.where(Car.class);
+        return query.count();
+    }
 }

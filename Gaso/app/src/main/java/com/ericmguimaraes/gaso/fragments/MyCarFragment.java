@@ -23,7 +23,9 @@ import com.ericmguimaraes.gaso.lists.CarListActivity;
 import com.ericmguimaraes.gaso.lists.UserListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.registers.RegisterActivity;
+import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -134,6 +136,18 @@ public class MyCarFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         getActivity().getMenuInflater().inflate(R.menu.menu_my_car, menu);
+        UserDAO userDAO = new UserDAO(getContext());
+        CarDAO carDAO = new CarDAO(getContext());
+        if(carDAO.count()>0 || userDAO.count()>0)
+            fab.hide();
+        else if(carDAO.count()==0 && userDAO.count()==0){
+            MenuItem carMenuItem = menu.findItem(R.id.car_list_menu_item);
+            if(carMenuItem!=null)
+                carMenuItem.setVisible(false);
+            MenuItem userMenuItem = menu.findItem(R.id.user_list_menu_item);
+            if(userMenuItem!=null)
+                userMenuItem.setVisible(false);
+        }
     }
 
     @Override

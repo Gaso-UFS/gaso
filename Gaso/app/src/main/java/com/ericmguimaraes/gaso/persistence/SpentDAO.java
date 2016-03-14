@@ -59,6 +59,17 @@ public class SpentDAO {
         return list;
     }
 
+    public List<Spent> findByMonth(int month){
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<Spent> query = realm.where(Spent.class).equalTo("month",month);
+        RealmResults<Spent> result = query.findAll();
+        List<Spent> list = new ArrayList<>();
+        for(Spent c: result){
+            list.add(createNewSpent(c));
+        }
+        return list;
+    }
+
     public long setUniqueId() {
         realm = Realm.getInstance(realmConfig);
         Number num = realm.where(Spent.class).max("id");

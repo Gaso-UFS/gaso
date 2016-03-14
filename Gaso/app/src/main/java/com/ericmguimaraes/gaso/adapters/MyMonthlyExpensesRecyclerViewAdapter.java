@@ -1,78 +1,96 @@
 package com.ericmguimaraes.gaso.adapters;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment.OnListFragmentInteractionListener;
-import com.ericmguimaraes.gaso.lists.dummy.DummyContent.DummyItem;
+import com.ericmguimaraes.gaso.config.Config;
+import com.ericmguimaraes.gaso.lists.SpentListActivity;
+import com.ericmguimaraes.gaso.model.MonthSpent;
 
+import java.util.Calendar;
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class MyMonthlyExpensesRecyclerViewAdapter extends RecyclerView.Adapter<MyMonthlyExpensesRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
-    private final OnListFragmentInteractionListener mListener;
+    private List<MonthSpent> monthSpentList;
 
-    public MyMonthlyExpensesRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
-        mListener = listener;
+    Activity activity;
+    RecyclerView recyclerView;
+
+    String[] monthNames = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
+
+    public MyMonthlyExpensesRecyclerViewAdapter(List<MonthSpent> items, Activity activity, RecyclerView recyclerView) {
+        monthSpentList = items;
+        this.activity = activity;
+        this.recyclerView = recyclerView;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_monthlyexpenses, parent, false);
+                .inflate(R.layout.month_item_recyclerview, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+        holder.mItem = monthSpentList.get(position);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(monthSpentList.get(position).getMonth());
+        holder.monthText.setText(monthNames[cal.get(Calendar.MONTH)].subSequence(0,3));
+        holder.valueText.setText(Double.toString(monthSpentList.get(position).getValue()));
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return monthSpentList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public DummyItem mItem;
+    public void resetList(List<MonthSpent> monthSpentList) {
+        this.monthSpentList = monthSpentList;
+        notifyDataSetChanged();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        public final View view;
+
+        @Bind(R.id.monthText)
+        TextView monthText;
+
+        @Bind(R.id.valueText)
+        TextView valueText;
+
+        public MonthSpent mItem;
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            this.view = view;
+            ButterKnife.bind(this, view);
+            view.setOnClickListener(this);
         }
 
         @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+        public void onClick(View v) {
+                int itemPosition = recyclerView.getChildAdapterPosition(v);
+                Intent intent = new Intent(activity, SpentListActivity.class);
+                Calendar car = Calendar.getInstance();
+                car.setTime(monthSpentList.get(itemPosition).getMonth());
+                intent.putExtra("month", car.get(Calendar.MONTH));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.getApplicationContext().startActivity(intent);
         }
     }
 }

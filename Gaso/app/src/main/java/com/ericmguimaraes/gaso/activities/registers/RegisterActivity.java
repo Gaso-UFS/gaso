@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.registers;
+package com.ericmguimaraes.gaso.activities.registers;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.config.Config;
-import com.ericmguimaraes.gaso.MainActivity;
+import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;

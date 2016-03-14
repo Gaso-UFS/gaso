@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso;
+package com.ericmguimaraes.gaso.activities;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,13 +7,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
+import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
 import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
+import com.ericmguimaraes.gaso.fragments.MapGasoFragment;
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
-import com.ericmguimaraes.gaso.fragments.SpentFragment;
+import com.ericmguimaraes.gaso.fragments.StationFragment;
 import com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment;
-import com.ericmguimaraes.gaso.lists.dummy.DummyContent;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 
@@ -21,7 +22,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements GasFragment.OnFragmentInteractionListener, MyCarFragment.OnFragmentInteractionListener, SpentFragment.OnFragmentInteractionListener, MonthlyExpensesFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements GasFragment.OnFragmentInteractionListener, MyCarFragment.OnFragmentInteractionListener, MapGasoFragment.OnFragmentInteractionListener, StationFragment.OnListFragmentInteractionListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -81,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
     }
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+    public void onListFragmentInteraction(com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem item) {
 
     }
 }

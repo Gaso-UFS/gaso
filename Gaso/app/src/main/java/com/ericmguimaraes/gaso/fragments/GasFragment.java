@@ -1,10 +1,12 @@
 package com.ericmguimaraes.gaso.fragments;
 
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +34,9 @@ public class GasFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    Menu menu;
+    boolean isMapAttached = true;
 
     private OnFragmentInteractionListener mListener;
 
@@ -75,22 +80,59 @@ public class GasFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        FragmentTransaction ft;
+        Fragment f;
+        ft = getChildFragmentManager().beginTransaction();
+        f = MapGasoFragment.newInstance("", "");
+        ft.replace(R.id.content,f);
+        ft.commit();
+        isMapAttached = true;
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         getActivity().getMenuInflater().inflate(R.menu.menu_gas, menu);
+        this.menu = menu;
+        if(isMapAttached){
+            menu.findItem(R.id.map_menu_item).setVisible(false);
+            menu.findItem(R.id.stations_list_menu_item).setVisible(true);
+        } else {
+            menu.findItem(R.id.map_menu_item).setVisible(true);
+            menu.findItem(R.id.stations_list_menu_item).setVisible(false);
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         Intent intent;
+
+        FragmentTransaction ft;
+        Fragment f;
         switch (id) {
             case R.id.action_settings:
                 intent = new Intent(getContext(), SettingsActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.map_menu_item:
+                ft = getChildFragmentManager().beginTransaction();
+                f = MapGasoFragment.newInstance("", "");
+                ft.replace(R.id.content,f);
+                ft.commit();
+                menu.findItem(R.id.map_menu_item).setVisible(false);
+                menu.findItem(R.id.stations_list_menu_item).setVisible(true);
+                isMapAttached = true;
                 return true;
             case R.id.stations_list_menu_item:
+                isMapAttached = false;
+                ft = getChildFragmentManager().beginTransaction();
+                f = StationFragment.newInstance(1);
+                ft.replace(R.id.content, f);
+                ft.commit();
+                menu.findItem(R.id.map_menu_item).setVisible(true);
+                menu.findItem(R.id.stations_list_menu_item).setVisible(false);
                 return true;
         }
         return super.onOptionsItemSelected(item);

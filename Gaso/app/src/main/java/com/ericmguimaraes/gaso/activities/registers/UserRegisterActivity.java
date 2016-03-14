@@ -1,8 +1,7 @@
-package com.ericmguimaraes.gaso.registers;
+package com.ericmguimaraes.gaso.activities.registers;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
@@ -12,40 +11,36 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.ericmguimaraes.gaso.MainActivity;
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.lists.CarListActivity;
-import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.lists.UserListActivity;
 import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 
 import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
-import io.realm.RealmList;
 
-public class CarRegisterActivity extends AppCompatActivity {
+public class UserRegisterActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.input_car)
-    TextInputEditText inputCar;
+    @Bind(R.id.input_name)
+    TextInputEditText inputName;
 
-    @Bind(R.id.input_car_description)
-    TextInputEditText inputCarDescrition;
+    @Bind(R.id.input_email)
+    TextInputEditText inputEmail;
 
     @Bind(R.id.btn_confirm)
     Button confirmBtn;
 
-    @BindString(R.string.car_registered)
-    String carRegistered;
+    @BindString(R.string.user_registered)
+    String userRegistered;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_car_register);
+        setContentView(R.layout.activity_user_register);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -63,7 +58,7 @@ public class CarRegisterActivity extends AppCompatActivity {
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(inputCar.getText().length()==0){
+                if(inputName.getText().length()==0 || inputEmail.getText().length()==0){
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
@@ -77,19 +72,19 @@ public class CarRegisterActivity extends AppCompatActivity {
 
     private void saveOnRealm() {
 
-        CarDAO carDAO = new CarDAO(getApplicationContext());
-        Car car = new Car();
-        car.setDescription(inputCarDescrition.getText().toString());
-        car.setModel(inputCar.getText().toString());
-        carDAO.add(car);
+        UserDAO userDAO = new UserDAO(getApplicationContext());
+        User user = new User();
+        user.setName(inputName.getText().toString());
+        user.setEmail(inputEmail.getText().toString());
+        userDAO.add(user);
 
-        CharSequence text = carRegistered;
+        CharSequence text = userRegistered;
         int duration = Toast.LENGTH_SHORT;
 
         Toast toast = Toast.makeText(getApplicationContext(), text, duration);
         toast.show();
 
-        Intent intent = new Intent(this, CarListActivity.class);
+        Intent intent = new Intent(this, UserListActivity.class);
         startActivity(intent);
 
     }

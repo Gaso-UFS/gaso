@@ -13,11 +13,9 @@ import android.view.View;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.CarListAdapter;
-import com.ericmguimaraes.gaso.adapters.UserListAdapter;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
-import com.ericmguimaraes.gaso.registers.CarRegisterActivity;
+import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
 
 import java.util.List;
 
@@ -87,4 +85,9 @@ public class CarListActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
+    }
 }

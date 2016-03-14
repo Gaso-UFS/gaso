@@ -2,7 +2,6 @@ package com.ericmguimaraes.gaso.lists;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,17 +11,17 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.adapters.UserListAdapter;
-import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
-import com.ericmguimaraes.gaso.activities.registers.UserRegisterActivity;
+import com.ericmguimaraes.gaso.adapters.SpentListAdapter;
+import com.ericmguimaraes.gaso.model.Spent;
+import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class UserListActivity extends AppCompatActivity {
+public class SpentListActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -30,15 +29,19 @@ public class UserListActivity extends AppCompatActivity {
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    @Bind(R.id.user_recycler_view)
+    @Bind(R.id.spent_recycler_view)
     RecyclerView recyclerView;
 
-    UserListAdapter adapter;
+    SpentListAdapter adapter;
+
+    int month;
+
+    String[] monthNames = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_list);
+        setContentView(R.layout.activity_spent_list);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -56,14 +59,16 @@ public class UserListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), UserRegisterActivity.class);
+                Intent intent = new Intent(getApplicationContext(), SpentRegisterActivity.class);
                 startActivity(intent);
             }
         });
 
-        UserDAO dao = new UserDAO(getApplicationContext());
-        List<User> users = dao.findAll();
-        adapter = new UserListAdapter(users, recyclerView, getApplicationContext());
+        month = getIntent().getExtras().getInt("month");
+
+        SpentDAO dao = new SpentDAO(getApplicationContext());
+        List<Spent> spents = dao.findByMonth(month);
+        adapter = new SpentListAdapter(spents, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setAdapter(adapter);
@@ -86,9 +91,12 @@ public class UserListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        adapter.notifyDataSetChanged();
+        SpentDAO dao = new SpentDAO(getApplicationContext());
+        List<Spent> spents = dao.findByMonth(month);
+        adapter.resetList(spents);
+        toolbar.setTitle(monthNames[month]);
     }
 
 }

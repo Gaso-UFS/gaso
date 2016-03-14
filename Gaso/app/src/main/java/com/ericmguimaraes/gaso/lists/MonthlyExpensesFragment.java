@@ -3,8 +3,8 @@ package com.ericmguimaraes.gaso.lists;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,40 +13,42 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
+import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
-import com.ericmguimaraes.gaso.lists.dummy.DummyContent;
-import com.ericmguimaraes.gaso.lists.dummy.DummyContent.DummyItem;
+import com.ericmguimaraes.gaso.model.MonthSpent;
+import com.ericmguimaraes.gaso.model.Spent;
+import com.ericmguimaraes.gaso.persistence.SpentDAO;
 
-/**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
- */
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class MonthlyExpensesFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
+    private List<MonthSpent> monthSpentList;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
+    MyMonthlyExpensesRecyclerViewAdapter adapter;
+
+    @Bind(R.id.fab)
+    FloatingActionButton fab;
+
+    @Bind(R.id.list)
+    RecyclerView recyclerView;
+
     public MonthlyExpensesFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static MonthlyExpensesFragment newInstance(int columnCount) {
+    public static MonthlyExpensesFragment newInstance() {
         MonthlyExpensesFragment fragment = new MonthlyExpensesFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,48 +56,74 @@ public class MonthlyExpensesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
         setHasOptionsMenu(true);
+    }
+
+    private void populateMonthList() {
+        List<Spent> spents = getSpentList();
+        monthSpentList = new ArrayList<>();
+        Calendar month=null;
+        double value=-1;
+        MonthSpent monthSpentToSave=null;
+        for(Spent s: spents){
+            Calendar spentDate = Calendar.getInstance();
+            spentDate.setTime(s.getDate());
+            if(month==null || month.get(Calendar.MONTH)!=spentDate.get(Calendar.MONTH) || month.get(Calendar.YEAR)!=spentDate.get(Calendar.YEAR)){
+                if(monthSpentToSave!=null)
+                    monthSpentList.add(monthSpentToSave);
+                monthSpentToSave = new MonthSpent();
+                month = spentDate;
+                value = s.getTotal();
+                monthSpentToSave.setMonth(month.getTime());
+                monthSpentToSave.setValue(value);
+            } else {
+                value += s.getTotal();
+                monthSpentToSave.setValue(value);
+            }
+        }
+        if(monthSpentToSave!=null)
+            monthSpentList.add(monthSpentToSave);
+    }
+
+    private List<Spent> getSpentList() {
+        SpentDAO dao = new SpentDAO(getContext());
+        return dao.findAll();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_monthlyexpenses_list, container, false);
-
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new MyMonthlyExpensesRecyclerViewAdapter(DummyContent.ITEMS, mListener));
-        }
+        ButterKnife.bind(this, view);
+        Context context = view.getContext();
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        populateMonthList();
+        adapter = new MyMonthlyExpensesRecyclerViewAdapter(monthSpentList, getActivity(), recyclerView);
+        recyclerView.setAdapter(adapter);
         return view;
     }
 
-
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        fab.show();
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Config.getInstance().currentCar == null || Config.getInstance().currentUser == null) {
+                    Context context = getContext();
+                    CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
+                    int duration = Toast.LENGTH_LONG;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                } else {
+                    Intent intent = new Intent(getContext(), SpentRegisterActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
     }
 
     @Override
@@ -116,18 +144,11 @@ public class MonthlyExpensesFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+    @Override
+    public void onResume() {
+        super.onResume();
+        populateMonthList();
+        adapter.resetList(monthSpentList);
     }
+
 }

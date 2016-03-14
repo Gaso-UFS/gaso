@@ -1,15 +1,18 @@
 package com.ericmguimaraes.gaso.model;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by ericm on 2/28/2016.
  */
 public class Spent extends RealmObject {
 
-    private int id;
+    @PrimaryKey
+    private int id=-1;
     private double total;
     private Date date;
     private Car car;
@@ -17,6 +20,7 @@ public class Spent extends RealmObject {
     private double amount;
     private Station station;
     private int type;
+    private int month;
 
     public double getTotal() {
         return total;
@@ -32,6 +36,9 @@ public class Spent extends RealmObject {
 
     public void setDate(Date date) {
         this.date = date;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        month=cal.get(Calendar.MONTH);
     }
 
     public Car getCar() {
@@ -80,5 +87,13 @@ public class Spent extends RealmObject {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
     }
 }
