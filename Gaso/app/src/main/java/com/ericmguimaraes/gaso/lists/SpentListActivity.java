@@ -1,5 +1,6 @@
 package com.ericmguimaraes.gaso.lists;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,9 +10,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.SpentListAdapter;
+import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
@@ -59,8 +62,16 @@ public class SpentListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SpentRegisterActivity.class);
-                startActivity(intent);
+                if (Config.getInstance().currentCar == null || Config.getInstance().currentUser == null) {
+                    Context context = getApplicationContext();
+                    CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
+                    int duration = Toast.LENGTH_LONG;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), SpentRegisterActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 

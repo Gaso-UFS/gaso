@@ -1,6 +1,8 @@
 package com.ericmguimaraes.gaso.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -26,6 +28,8 @@ import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.ericmguimaraes.gaso.util.ConnectionDetector;
+import com.ericmguimaraes.gaso.util.GPSTracker;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -227,6 +231,26 @@ public class MyCarFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateCarAndUser();
+        ConnectionDetector connectionDetector = new ConnectionDetector(getContext());
+        if(!connectionDetector.isConnectingToInternet())
+            showNoConnectionDialog();
+        GPSTracker gpsTracker = new GPSTracker(getContext());
+        if(!gpsTracker.canGetLocation()){
+            gpsTracker.showSettingsAlert();
+        }
+    }
+
+    private void showNoConnectionDialog() {
+        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
+        alertDialog.setTitle("No Connection");
+        alertDialog.setMessage("Parece que você não está conectado a internet. Conecte-se para usar todas as funcões do app.");
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 
     /**

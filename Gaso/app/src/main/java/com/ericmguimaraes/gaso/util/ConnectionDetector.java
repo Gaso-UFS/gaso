@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.maps;
+package com.ericmguimaraes.gaso.util;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

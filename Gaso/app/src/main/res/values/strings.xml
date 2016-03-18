@@ -6,7 +6,7 @@
     <string name="gas">Gas</string>
     <string name="my_car">Meu Carro</string>
     <string name="spent">Gastos</string>
-    <string name="no_user_text">Porfavor cadastre e selecione um usuario e carro.</string>
+    <string name="no_user_text">Cadastre e selecione um usuario e carro.</string>
     <string name="connect">Conectar OBD</string>
     <string name="user_list">Lista de Usuarios</string>
     <string name="car_list">Lista de Carros</string>

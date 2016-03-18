@@ -1,5 +1,8 @@
 package com.ericmguimaraes.gaso.activities;
 
+import android.app.AlertDialog;
+import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -17,6 +20,8 @@ import com.ericmguimaraes.gaso.fragments.StationFragment;
 import com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.ericmguimaraes.gaso.util.ConnectionDetector;
+import com.ericmguimaraes.gaso.util.GPSTracker;
 
 import butterknife.Bind;
 import butterknife.BindString;
@@ -83,6 +88,10 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
 
     @Override
     public void onListFragmentInteraction(com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem item) {
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }
