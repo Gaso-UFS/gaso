@@ -13,16 +13,16 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     public ApplicationTest() {
         super(Application.class);
     }
-/*
+
     public void testGooglePlaces(){
-        GooglePlaces googlePlaces = new GooglePlaces();
+    /*    GooglePlaces googlePlaces = new GooglePlaces();
         String result = "";
         try {
             result = googlePlaces.search(-10.9556067,-37.0559822,1000);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        assertTrue(!result.isEmpty());
+        assertTrue(!result.isEmpty()); */
     }
-*/
+
 }

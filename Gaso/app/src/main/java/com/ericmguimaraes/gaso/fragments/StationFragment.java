@@ -11,10 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.adapters.MyStationRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
-
-import java.util.List;
 
 /**
  * A fragment representing a list of Items.

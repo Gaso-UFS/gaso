@@ -5,15 +5,21 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
 import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
+
 import com.ericmguimaraes.gaso.fragments.MapGasoFragment;
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.StationFragment;
@@ -27,7 +33,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements GasFragment.OnFragmentInteractionListener, MyCarFragment.OnFragmentInteractionListener, MapGasoFragment.OnFragmentInteractionListener, StationFragment.OnListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements GasFragment.OnFragmentInteractionListener, MyCarFragment.OnFragmentInteractionListener, StationFragment.OnListFragmentInteractionListener, MapGasoFragment.OnFragmentInteractionListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -47,6 +53,22 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
     @BindString(R.string.my_car)
     String myCar;
 
+    @Bind(R.id.gsp_out)
+    RelativeLayout gpsRecyclerView;
+
+    @Bind(R.id.net_out)
+    RelativeLayout netRecyclerView;
+
+    private final int refreshTime = 1000;
+
+    private Handler servicesHandler;
+
+    private Runnable statusChecker;
+
+    private ConnectionDetector connectionDetector;
+    private GPSTracker gpsTracker;
+    private boolean isGpsAlertShown = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,7 +85,20 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
 
         init();
 
+        servicesHandler = new Handler();
+
+        statusChecker = new Runnable() {
+            @Override
+            public void run() {
+                checkServicesStatus();
+                servicesHandler.postDelayed(statusChecker, refreshTime);
+            }
+        };
+
+        startRepeatingTask();
+
     }
+
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -94,4 +129,51 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
     protected void onResume() {
         super.onResume();
     }
+
+    public void showGpsLayout(){
+        gpsRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    public void hideGpsLayout(){
+        gpsRecyclerView.setVisibility(View.GONE);
+    }
+
+    public void showNetLayout(){
+        netRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    public void hideNetLayout(){
+        netRecyclerView.setVisibility(View.GONE);
+    }
+
+    public boolean checkServicesStatus(){
+        boolean status = true;
+        connectionDetector = new ConnectionDetector(this);
+        gpsTracker = new GPSTracker(this);
+        if(!connectionDetector.isConnectingToInternet()) {
+            showNetLayout();
+            status = false;
+        } else
+            hideNetLayout();
+
+        if(!gpsTracker.canGetLocation()){
+            status = false;
+            if(!isGpsAlertShown){
+                gpsTracker.showSettingsAlert();
+                isGpsAlertShown = true;
+            }
+            showGpsLayout();
+        } else
+            hideGpsLayout();
+        return status;
+    }
+
+    void startRepeatingTask() {
+        statusChecker.run();
+    }
+
+    void stopRepeatingTask() {
+        servicesHandler.removeCallbacks(statusChecker);
+    }
+
 }

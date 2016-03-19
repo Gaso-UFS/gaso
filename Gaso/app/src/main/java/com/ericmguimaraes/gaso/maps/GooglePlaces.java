@@ -2,16 +2,23 @@ package com.ericmguimaraes.gaso.maps;
 
 import android.util.Log;
 
-import java.io.InputStream;
-import java.util.List;
+import com.google.api.client.googleapis.GoogleHeaders;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseException;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
 
 public class GooglePlaces {
 
 	/** Global instance of the HTTP transport. */
-	//private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+	private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
 	// Google API Key
-	private static final String API_KEY = "AIzaSyCRLa4LQZWNQBcjCYcIVYA45i9i8zfClqc"; // place your API key here
+	private static final String API_KEY = "AIzaSyCRLa4LQZWNQBcjCYcIVYA45i9i8zfClqc";
 
 	// Google Places serach url's
 	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
@@ -26,15 +33,14 @@ public class GooglePlaces {
 	 * Searching places
 	 * @param latitude - latitude of place
 	 * @params longitude - longitude of place
-	 * @param radius - radius of searchable area
 	 * @return list of places
 	 * */
-/*	public String search(double latitude, double longitude, double radius)
+	public String search(double latitude, double longitude)
 			throws Exception {
 
 		this._latitude = latitude;
 		this._longitude = longitude;
-		this._radius = radius;
+		this._radius = 100*1000; //m
 		String types="gas_station";
 
 		try {
@@ -49,7 +55,7 @@ public class GooglePlaces {
 			request.getUrl().put("types", types);
 
 			HttpResponse response = request.execute();
-			String str = response.getContent().toString();
+			String str = response.parseAsString();
 			return str;
 
 		} catch (HttpResponseException e) {
@@ -57,14 +63,14 @@ public class GooglePlaces {
 			return null;
 		}
 
-	} */
+	}
 
 	/**
 	 * Searching single place full details
 	 * @param reference - reference id of place
 	 * 				   - which you will get in search api request
 	 * */
-	/*public PlaceDetails getPlaceDetails(String reference) throws Exception {
+	public String getPlaceDetails(String reference) throws Exception {
 		try {
 
 			HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
@@ -74,7 +80,7 @@ public class GooglePlaces {
 			request.getUrl().put("reference", reference);
 			request.getUrl().put("sensor", "false");
 
-			PlaceDetails place = request.execute().parseAs(PlaceDetails.class);
+			String place = request.execute().parseAsString();
 
 			return place;
 
@@ -82,7 +88,7 @@ public class GooglePlaces {
 			Log.e("ErrorDetails", e.getMessage());
 			throw e;
 		}
-	} */
+	}
 
 	/**
 	 * Creating http request Factory
@@ -90,17 +96,14 @@ public class GooglePlaces {
 	/**
 	 * Creating http request Factory
 	 * */
-	/*public static HttpRequestFactory createRequestFactory(
+	public static HttpRequestFactory createRequestFactory(
 			final HttpTransport transport) {
 		return transport.createRequestFactory(new HttpRequestInitializer() {
 			public void initialize(HttpRequest request) {
 				GoogleHeaders headers = new GoogleHeaders();
-				headers.setApplicationName("AndroidHive-Places-Test");
 				request.setHeaders(headers);
-				JsonHttpParser parser = new JsonHttpParser(new JacksonFactory());
-				request.addParser(parser);
 			}
 		});
-	} */
+	}
 
 }

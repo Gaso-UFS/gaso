@@ -6,16 +6,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.config.Config;
@@ -23,6 +26,7 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.lists.CarListActivity;
 import com.ericmguimaraes.gaso.lists.UserListActivity;
+import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
@@ -30,6 +34,9 @@ import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GPSTracker;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -117,14 +124,6 @@ public class MyCarFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         fab.setColorFilter(Color.WHITE);
 
@@ -231,26 +230,6 @@ public class MyCarFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateCarAndUser();
-        ConnectionDetector connectionDetector = new ConnectionDetector(getContext());
-        if(!connectionDetector.isConnectingToInternet())
-            showNoConnectionDialog();
-        GPSTracker gpsTracker = new GPSTracker(getContext());
-        if(!gpsTracker.canGetLocation()){
-            gpsTracker.showSettingsAlert();
-        }
-    }
-
-    private void showNoConnectionDialog() {
-        AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
-        alertDialog.setTitle("No Connection");
-        alertDialog.setMessage("Parece que você não está conectado a internet. Conecte-se para usar todas as funcões do app.");
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
     }
 
     /**
@@ -267,4 +246,5 @@ public class MyCarFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
 }

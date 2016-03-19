@@ -22,6 +22,34 @@
             android:layout_height="wrap_content"
             app:tabMode="fixed"
             app:tabGravity="fill"/>
+
+        <RelativeLayout
+            android:id="@+id/net_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:visibility="gone"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Você está offline."/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/gsp_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:visibility="gone"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sinal de GPS perdido."/>
+        </RelativeLayout>
+
+
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager

@@ -36,10 +36,8 @@ dependencies {
     compile 'io.realm:realm-android:0.87.5'
     compile 'com.android.support:cardview-v7:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
+
     compile 'com.google.android.gms:play-services:8.4.0'
     compile 'com.google.api-client:google-api-client:1.19.1'
 
-    compile 'com.google.code.gson:gson:2.1'
-    compile 'com.google.guava:guava:11.0.1'
-    compile 'com.google.protobuf:protobuf-java:2.2.0'
 }

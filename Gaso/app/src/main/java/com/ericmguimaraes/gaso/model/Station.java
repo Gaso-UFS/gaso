@@ -20,9 +20,7 @@ public class Station extends RealmObject {
 
     private String phone_number;
 
-    private double lat;
-
-    private double lng;
+    private Location location;
 
     private float general_rate;
 
@@ -64,20 +62,12 @@ public class Station extends RealmObject {
         this.phone_number = phone_number;
     }
 
-    public double getLat() {
-        return lat;
+    public Location getLocation() {
+        return location;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
-
-    public double getLng() {
-        return lng;
-    }
-
-    public void setLng(double lng) {
-        this.lng = lng;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public float getGeneral_rate() {
@@ -111,4 +101,5 @@ public class Station extends RealmObject {
     public void setMoney_rate(float money_rate) {
         this.money_rate = money_rate;
     }
+
 }
