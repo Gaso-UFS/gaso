@@ -15,12 +15,6 @@ import com.ericmguimaraes.gaso.adapters.MyStationRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
 
-/**
- * A fragment representing a list of Items.
- * <p/>
- * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
- * interface.
- */
 public class StationFragment extends Fragment {
 
     // TODO: Customize parameter argument names
