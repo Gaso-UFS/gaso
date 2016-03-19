@@ -7,6 +7,8 @@ import io.realm.RealmObject;
  */
 public class Combustive extends RealmObject {
 
+    private long id;
+
     private int type;
 
     private float value;
@@ -25,5 +27,13 @@ public class Combustive extends RealmObject {
 
     public void setValue(float value) {
         this.value = value;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getId() {
+        return id;
     }
 }

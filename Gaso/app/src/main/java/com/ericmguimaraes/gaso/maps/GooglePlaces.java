@@ -2,6 +2,7 @@ package com.ericmguimaraes.gaso.maps;
 
 import android.util.Log;
 
+import com.ericmguimaraes.gaso.model.Station;
 import com.google.api.client.googleapis.GoogleHeaders;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -11,6 +12,8 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+
+import java.util.List;
 
 public class GooglePlaces {
 
@@ -29,13 +32,7 @@ public class GooglePlaces {
 	private double _longitude;
 	private double _radius;
 
-	/**
-	 * Searching places
-	 * @param latitude - latitude of place
-	 * @params longitude - longitude of place
-	 * @return list of places
-	 * */
-	public String search(double latitude, double longitude)
+	public List<Station> getStationsList(double latitude, double longitude)
 			throws Exception {
 
 		this._latitude = latitude;
@@ -56,33 +53,30 @@ public class GooglePlaces {
 
 			HttpResponse response = request.execute();
 			String str = response.parseAsString();
-			return str;
+
+			GooglePlacesParser parser = new GooglePlacesParser();
+			return parser.listFromJson(str);
 
 		} catch (HttpResponseException e) {
 			Log.e("Error:", e.getMessage());
 			return null;
 		}
-
 	}
 
-	/**
-	 * Searching single place full details
-	 * @param reference - reference id of place
-	 * 				   - which you will get in search api request
-	 * */
-	public String getPlaceDetails(String reference) throws Exception {
+	public Station getStationDetails(Station station) throws Exception {
 		try {
 
 			HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
 			HttpRequest request = httpRequestFactory
                     .buildGetRequest(new GenericUrl(PLACES_DETAILS_URL));
 			request.getUrl().put("key", API_KEY);
-			request.getUrl().put("reference", reference);
+			request.getUrl().put("reference", station.getReference());
 			request.getUrl().put("sensor", "false");
 
 			String place = request.execute().parseAsString();
 
-			return place;
+			GooglePlacesParser parser = new GooglePlacesParser();
+			return parser.stationFromJson(station, place);
 
 		} catch (HttpResponseException e) {
 			Log.e("ErrorDetails", e.getMessage());

@@ -1,7 +1,5 @@
 package com.ericmguimaraes.gaso.model;
 
-import java.util.List;
-
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -12,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
 public class Station extends RealmObject {
 
     @PrimaryKey
-    private long id;
+    private String id;
 
     private String name;
 
@@ -30,11 +28,13 @@ public class Station extends RealmObject {
 
     private RealmList<Combustive> combustives;
 
-    public long getId() {
+    private String reference;
+
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -102,4 +102,11 @@ public class Station extends RealmObject {
         this.money_rate = money_rate;
     }
 
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
 }

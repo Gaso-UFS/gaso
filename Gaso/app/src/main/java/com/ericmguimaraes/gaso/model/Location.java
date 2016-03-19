@@ -26,4 +26,5 @@ public class Location extends RealmObject {
     public void setLng(double lng) {
         this.lng = lng;
     }
+
 }

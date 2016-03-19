@@ -4,6 +4,9 @@ import android.app.Application;
 import android.test.ApplicationTestCase;
 
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
+import com.ericmguimaraes.gaso.model.Station;
+
+import java.util.List;
 
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
@@ -15,14 +18,14 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
     }
 
     public void testGooglePlaces(){
-    /*    GooglePlaces googlePlaces = new GooglePlaces();
-        String result = "";
+        GooglePlaces googlePlaces = new GooglePlaces();
+        List<Station> result = null;
         try {
-            result = googlePlaces.search(-10.9556067,-37.0559822,1000);
+            result = googlePlaces.getStationsList(-10.9556067,-37.0559822);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        assertTrue(!result.isEmpty()); */
+        assertTrue(result!=null && !result.isEmpty());
     }
 
 }

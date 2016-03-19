@@ -1,5 +1,6 @@
 package com.ericmguimaraes.gaso.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -138,7 +139,7 @@ public class MyCarFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        getActivity().getMenuInflater().inflate(R.menu.menu_my_car, menu);
+        inflater.inflate(R.menu.menu_my_car, menu);
         UserDAO userDAO = new UserDAO(getContext());
         CarDAO carDAO = new CarDAO(getContext());
         if(carDAO.count()>0 || userDAO.count()>0)
