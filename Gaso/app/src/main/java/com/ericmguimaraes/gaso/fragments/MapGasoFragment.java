@@ -129,6 +129,9 @@ public class MapGasoFragment extends Fragment implements OnMapReadyCallback, Goo
     public void setStationList(List<Station> stationList) {
         MapGasoFragment.stationList = stationList;
         notifyDataChange();
+        if(!((GasFragment) getParentFragment()).isSearching()){
+
+        }
     }
 
     private static void notifyDataChange() {

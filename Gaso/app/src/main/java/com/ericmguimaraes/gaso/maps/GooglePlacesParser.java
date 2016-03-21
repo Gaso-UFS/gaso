@@ -71,7 +71,7 @@ public class GooglePlacesParser {
     }
 
     public boolean hasNextToken(){
-        return nextPageToken!=null & !nextPageToken.isEmpty();
+        return nextPageToken!=null && !nextPageToken.isEmpty();
     }
 
     public String getNextPageToken() {

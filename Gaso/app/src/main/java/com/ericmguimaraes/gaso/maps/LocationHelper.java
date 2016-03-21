@@ -87,4 +87,21 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     public boolean isConnected() {
         return isConnected;
     }
+
+    public double distance(Location l1, Location l2) {
+
+        final int R = 6371; // Radius of the earth
+
+        Double latDistance = Math.toRadians(l2.getLat() - l1.getLat());
+        Double lonDistance = Math.toRadians(l2.getLng() - l1.getLng());
+        Double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(l1.getLat())) * Math.cos(Math.toRadians(l2.getLat()))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        Double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = R * c * 1000; // convert to meters
+
+        distance = Math.pow(distance, 2);
+
+        return Math.sqrt(distance);
+    }
 }

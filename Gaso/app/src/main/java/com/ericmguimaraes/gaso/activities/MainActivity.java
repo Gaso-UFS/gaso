@@ -33,7 +33,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements MyCarFragment.OnFragmentInteractionListener, StationFragment.OnListFragmentInteractionListener, MapGasoFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements MyCarFragment.OnFragmentInteractionListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
     @Bind(R.id.net_out)
     RelativeLayout netRecyclerView;
 
-    private final int refreshTime = 1000;
+    private final int refreshTime = 10000;
 
     private Handler servicesHandler;
 
@@ -125,10 +125,6 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
             Config.getInstance().currentUser = userDAO.findFirst();
         if(Config.getInstance().currentCar==null)
             Config.getInstance().currentCar = carDAO.findFirst();
-    }
-
-    @Override
-    public void onListFragmentInteraction(com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem item) {
     }
 
     @Override

@@ -19,10 +19,10 @@ import java.util.List;
  */
 public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStationRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private List<Station> stationList;
 
-    public MyStationRecyclerViewAdapter(List<DummyItem> items) {
-        mValues = items;
+    public MyStationRecyclerViewAdapter(List<Station> stationList) {
+        this.stationList = stationList;
     }
 
     @Override
@@ -34,9 +34,8 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
+        holder.mItem = stationList.get(position);
+        holder.mContentView.setText(stationList.get(position).getName());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,18 +47,19 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return stationList==null?0:stationList.size();
     }
 
     public void setStationList(List<Station> stationList) {
-
+        this.stationList = stationList;
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mIdView;
         public final TextView mContentView;
-        public DummyItem mItem;
+        public Station mItem;
 
         public ViewHolder(View view) {
             super(view);
