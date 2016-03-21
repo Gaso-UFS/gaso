@@ -7,24 +7,22 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.fragments.StationFragment.OnListFragmentInteractionListener;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
+import com.ericmguimaraes.gaso.model.Station;
 
 import java.util.List;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
+ * specified {@link }.
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStationRecyclerViewAdapter.ViewHolder> {
 
     private final List<DummyItem> mValues;
-    private final OnListFragmentInteractionListener mListener;
 
-    public MyStationRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
+    public MyStationRecyclerViewAdapter(List<DummyItem> items) {
         mValues = items;
-        mListener = listener;
     }
 
     @Override
@@ -43,11 +41,7 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+
             }
         });
     }
@@ -55,6 +49,10 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
     @Override
     public int getItemCount() {
         return mValues.size();
+    }
+
+    public void setStationList(List<Station> stationList) {
+
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

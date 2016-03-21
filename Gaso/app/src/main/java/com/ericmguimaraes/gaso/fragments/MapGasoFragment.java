@@ -1,59 +1,45 @@
 package com.ericmguimaraes.gaso.fragments;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.util.GPSTracker;
+import com.ericmguimaraes.gaso.model.Station;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 
-import butterknife.Bind;
+import java.util.List;
+
 import butterknife.ButterKnife;
 
 public class MapGasoFragment extends Fragment implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
 
     private SupportMapFragment fragment;
     private GoogleMap map;
     private GoogleApiClient mGoogleApiClient;
 
+    private static List<Station> stationList;
+
     public MapGasoFragment() {
         // Required empty public constructor
     }
 
-    // TODO: Rename and change types and number of parameters
-    public static MapGasoFragment newInstance(String param1, String param2) {
+    public static MapGasoFragment newInstance(List<Station> stationList) {
         MapGasoFragment fragment = new MapGasoFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+        MapGasoFragment.stationList = stationList;
         return fragment;
     }
 
@@ -87,8 +73,6 @@ public class MapGasoFragment extends Fragment implements OnMapReadyCallback, Goo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
         mGoogleApiClient = new GoogleApiClient
                 .Builder(getContext())
@@ -109,30 +93,6 @@ public class MapGasoFragment extends Fragment implements OnMapReadyCallback, Goo
     public void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     @Override
@@ -166,7 +126,13 @@ public class MapGasoFragment extends Fragment implements OnMapReadyCallback, Goo
 
     }
 
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
+    public void setStationList(List<Station> stationList) {
+        MapGasoFragment.stationList = stationList;
+        notifyDataChange();
     }
+
+    private static void notifyDataChange() {
+
+    }
+
 }

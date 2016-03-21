@@ -16,6 +16,8 @@ import java.util.List;
  */
 public class GooglePlacesParser {
 
+    private String nextPageToken;
+
     /*
     * Transforma o resultado da chamada de lista de posto
     * em objeto
@@ -25,7 +27,12 @@ public class GooglePlacesParser {
         List<Station> stations = new ArrayList<>();
         if(json!=null && !json.isEmpty())
             try{
-                JSONArray jsonArray = new JSONObject(json).getJSONArray("results");
+                JSONObject jsonObject = new JSONObject(json);
+                if(jsonObject.has("next_page_token"))
+                    nextPageToken = jsonObject.getString("next_page_token");
+                else
+                    nextPageToken = null;
+                JSONArray jsonArray = jsonObject.getJSONArray("results");
                 for (int i = 0; i < jsonArray.length(); i++) {
                     Station station = new Station();
                     station.setId(jsonArray.getJSONObject(i).getString("id"));
@@ -63,4 +70,11 @@ public class GooglePlacesParser {
         return station;
     }
 
+    public boolean hasNextToken(){
+        return nextPageToken!=null & !nextPageToken.isEmpty();
+    }
+
+    public String getNextPageToken() {
+        return nextPageToken;
+    }
 }

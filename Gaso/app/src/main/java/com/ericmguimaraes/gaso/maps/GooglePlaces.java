@@ -2,6 +2,7 @@ package com.ericmguimaraes.gaso.maps;
 
 import android.util.Log;
 
+import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
 import com.google.api.client.googleapis.GoogleHeaders;
 import com.google.api.client.http.GenericUrl;
@@ -32,8 +33,16 @@ public class GooglePlaces {
 	private double _longitude;
 	private double _radius;
 
-	public List<Station> getStationsList(double latitude, double longitude)
-			throws Exception {
+    private GooglePlacesParser parser;
+
+    public GooglePlaces(){
+        parser = new GooglePlacesParser();
+    }
+
+	public List<Station> getStationsList(Location location, String nextPageToken) {
+
+        double latitude = location.getLat();
+        double longitude = location.getLng();
 
 		this._latitude = latitude;
 		this._longitude = longitude;
@@ -51,13 +60,15 @@ public class GooglePlaces {
 			request.getUrl().put("sensor", "false");
 			request.getUrl().put("types", types);
 
+            if(nextPageToken!=null && !nextPageToken.isEmpty())
+                request.getUrl().put("pagetoken",nextPageToken);
+
 			HttpResponse response = request.execute();
 			String str = response.parseAsString();
 
-			GooglePlacesParser parser = new GooglePlacesParser();
 			return parser.listFromJson(str);
 
-		} catch (HttpResponseException e) {
+		} catch (java.io.IOException e) {
 			Log.e("Error:", e.getMessage());
 			return null;
 		}
@@ -75,7 +86,6 @@ public class GooglePlaces {
 
 			String place = request.execute().parseAsString();
 
-			GooglePlacesParser parser = new GooglePlacesParser();
 			return parser.stationFromJson(station, place);
 
 		} catch (HttpResponseException e) {
@@ -100,4 +110,7 @@ public class GooglePlaces {
 		});
 	}
 
+    public GooglePlacesParser getParser() {
+        return parser;
+    }
 }

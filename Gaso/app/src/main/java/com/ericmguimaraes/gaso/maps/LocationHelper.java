@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.ericmguimaraes.gaso.model.Location;
+import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -17,6 +18,8 @@ import com.google.android.gms.location.LocationServices;
  */
 public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
+    private static LocationHelper INSTANCE;
+
     private GoogleApiClient googleApiClient;
 
     private Context context;
@@ -25,7 +28,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     private boolean isConnected = false;
 
-    public LocationHelper(Context context) {
+    private LocationHelper(Context context) {
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -33,6 +36,12 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                 .build();
         googleApiClient.connect();
         this.context = context;
+    }
+
+    public static LocationHelper getINSTANCE(Context context){
+        if(INSTANCE==null)
+            INSTANCE = new LocationHelper(context);
+        return INSTANCE;
     }
 
     public void disconnect() {

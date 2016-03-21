@@ -33,7 +33,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements GasFragment.OnFragmentInteractionListener, MyCarFragment.OnFragmentInteractionListener, StationFragment.OnListFragmentInteractionListener, MapGasoFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements MyCarFragment.OnFragmentInteractionListener, StationFragment.OnListFragmentInteractionListener, MapGasoFragment.OnFragmentInteractionListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -66,8 +66,14 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
     private Runnable statusChecker;
 
     private ConnectionDetector connectionDetector;
+
     private GPSTracker gpsTracker;
+
     private boolean isGpsAlertShown = false;
+
+    private boolean isConnected = false;
+
+    private boolean isGpsConnected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,9 +159,11 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
         if(!connectionDetector.isConnectingToInternet()) {
             showNetLayout();
             status = false;
-        } else
+            isConnected = false;
+        } else {
             hideNetLayout();
-
+            isConnected = true;
+        }
         if(!gpsTracker.canGetLocation()){
             status = false;
             if(!isGpsAlertShown){
@@ -163,8 +171,11 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
                 isGpsAlertShown = true;
             }
             showGpsLayout();
-        } else
+            isGpsConnected = false;
+        } else {
             hideGpsLayout();
+            isGpsConnected = true;
+        }
         return status;
     }
 
@@ -174,6 +185,20 @@ public class MainActivity extends AppCompatActivity implements GasFragment.OnFra
 
     void stopRepeatingTask() {
         servicesHandler.removeCallbacks(statusChecker);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopRepeatingTask();
+    }
+
+    public boolean isConnected() {
+        return isConnected;
+    }
+
+    public boolean isGpsConnected() {
+        return isGpsConnected;
     }
 
 }
