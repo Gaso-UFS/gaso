@@ -33,7 +33,7 @@ public class Station extends RealmObject {
             Location l = new Location(place.getLatLng().latitude,place.getLatLng().longitude);
             location = l;
             generalRate = place.getRating();
-            money_rate = place.getPriceLevel();
+            moneyRate = place.getPriceLevel();
         } else {
             throw new IllegalArgumentException("Place is not a gas station.");
         }
@@ -54,7 +54,7 @@ public class Station extends RealmObject {
 
     private float combustiveRate;
 
-    private float money_rate;
+    private float moneyRate;
 
     private RealmList<Combustive> combustives;
 
@@ -124,12 +124,12 @@ public class Station extends RealmObject {
         this.combustives = combustives;
     }
 
-    public float getMoney_rate() {
-        return money_rate;
+    public float getMoneyRate() {
+        return moneyRate;
     }
 
-    public void setMoney_rate(float money_rate) {
-        this.money_rate = money_rate;
+    public void setMoneyRate(float moneyRate) {
+        this.moneyRate = moneyRate;
     }
 
     public String getReference() {

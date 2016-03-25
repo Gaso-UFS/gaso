@@ -17,7 +17,7 @@ import io.realm.RealmResults;
  * Created by ericm on 2/27/2016.
  */
 public class StationDAO {
-    
+
     Context context;
 
     RealmConfiguration realmConfig;
@@ -31,9 +31,30 @@ public class StationDAO {
 
     public void add(Station station){
         realm = Realm.getInstance(realmConfig);
+        Station fromDatabase = findById(station.getId());
+        Station stationToSave;
+        if(fromDatabase!=null)
+            stationToSave = merge(station,fromDatabase);
+        else
+            stationToSave = station;
         realm.beginTransaction();
-        realm.copyToRealmOrUpdate(station);
+        realm.copyToRealmOrUpdate(stationToSave);
         realm.commitTransaction();
+    }
+
+    private Station merge(Station stationFromMemory, Station stationFromDatabase) {
+        Station returnStation = new Station();
+        returnStation.setId(stationFromMemory.getId());
+        returnStation.setName(stationFromMemory.getName());
+        returnStation.setAddress(stationFromMemory.getAddress());
+        returnStation.setPhoneNumber(stationFromMemory.getPhoneNumber());
+        returnStation.setReference(stationFromMemory.getReference());
+        returnStation.setLocation(stationFromMemory.getLocation());
+        returnStation.setCombustiveRate(stationFromMemory.getCombustiveRate());
+        returnStation.setCombustives(stationFromMemory.getCombustives());
+        returnStation.setGeneralRate((stationFromMemory.getGeneralRate()+stationFromDatabase.getGeneralRate())/2);
+        returnStation.setMoneyRate(stationFromMemory.getMoneyRate());
+        return returnStation;
     }
 
     public void remove(Station station){
@@ -63,6 +84,15 @@ public class StationDAO {
         return realm.where(Station.class).findFirst();
     }
 
+    public Station findById(String id){
+        realm = Realm.getInstance(realmConfig);
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<Station> query = realm.where(Station.class);
+        query.equalTo("id",id);
+        Station result = query.findFirst();
+        return result;
+    }
+
     private Station createNewStation(Station oldStation){
         Station newStation = new Station();
         newStation.setId(oldStation.getId());
@@ -74,7 +104,7 @@ public class StationDAO {
         newStation.setCombustiveRate(oldStation.getCombustiveRate());
         newStation.setCombustives(oldStation.getCombustives());
         newStation.setGeneralRate(oldStation.getGeneralRate());
-        newStation.setMoney_rate(oldStation.getMoney_rate());
+        newStation.setMoneyRate(oldStation.getMoneyRate());
         return newStation;
     }
 
