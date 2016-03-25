@@ -23,7 +23,24 @@
         android:text="A lista de postos está vazia."
         android:textSize="20sp"
         android:textStyle="bold"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:layout_margin="@dimen/activity_horizontal_margin"/>
+
+    <TextView
+        android:id="@+id/gpsLostText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="Por favor ligue o gps para utilizar esse recurso."
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:layout_margin="@dimen/activity_horizontal_margin"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"

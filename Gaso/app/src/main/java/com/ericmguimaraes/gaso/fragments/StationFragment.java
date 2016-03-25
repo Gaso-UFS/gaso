@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.adapters.MyStationRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.model.Station;
 
@@ -32,6 +33,8 @@ public class StationFragment extends Fragment {
     RecyclerView recyclerView;
     @Bind(R.id.emptyListText)
     TextView emptyListTextView;
+    @Bind(R.id.gpsLostText)
+    TextView gpsLostTextView;
 
     Handler recyclerViewUpdateHandler;
 
@@ -73,7 +76,7 @@ public class StationFragment extends Fragment {
         return view;
     }
 
-    public void setStationList(List<Station> stationList) {
+    public synchronized void setStationList(List<Station> stationList) {
         StationFragment.stationList = stationList;
         isNotificationPendent = true;
     }
@@ -89,15 +92,24 @@ public class StationFragment extends Fragment {
         public void run() {
             if(isNotificationPendent)
                 notifyDataChange();
-            if(((GasFragment) getParentFragment()).isSearching()){
+            MainActivity activity = ((MainActivity) getActivity());
+            if(activity!=null && !activity.isGpsConnected()){
+                gpsLostTextView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                emptyListTextView.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.GONE);
+            } else if(((GasFragment) getParentFragment()).isSearching()){
+                gpsLostTextView.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
                 emptyListTextView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.GONE);
             } else if(stationList.isEmpty()) {
+                gpsLostTextView.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
                 emptyListTextView.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
             } else {
+                gpsLostTextView.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
                 emptyListTextView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);

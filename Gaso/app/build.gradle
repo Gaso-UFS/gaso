@@ -15,7 +15,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            resValue "string", "gaso_googlemaps_key", "AIzaSyDjOrfi52YWvso5oy00oYzaH2amMpT2pjI"
+            resValue "string", "gaso_googlemaps_key", "AIzaSyD75hEMtsbrsokY3ypMLgbrauQT0T7uZ_g"
         }
     }
     packagingOptions {

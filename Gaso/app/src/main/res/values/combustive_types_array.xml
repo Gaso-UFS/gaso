@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="combustives_array">
+        <item>Gasolina Comum</item>
+        <item>Gasolina Aditivada</item>
+        <item>Alcool</item>
+        <item>Diesel</item>
+        <item>Outro</item>
+    </string-array>
+</resources>

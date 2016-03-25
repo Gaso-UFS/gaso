@@ -62,7 +62,7 @@ public class GooglePlacesParser {
             try {
                 JSONObject jsonObject = new JSONObject(json);
                 station.setAddress(jsonObject.getString("formatted_address"));
-                station.setPhone_number(jsonObject.getString("formatted_phone_number"));
+                station.setPhoneNumber(jsonObject.getString("formatted_phone_number"));
             } catch (Exception e){
                 Log.e("Parsing json",e.getMessage(),e);
                 return null;

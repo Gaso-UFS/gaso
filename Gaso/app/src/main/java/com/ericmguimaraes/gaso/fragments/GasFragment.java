@@ -1,5 +1,6 @@
 package com.ericmguimaraes.gaso.fragments;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
@@ -31,7 +32,7 @@ public class GasFragment extends Fragment {
 
     Menu menu;
 
-    boolean isMapAttached = true;
+    boolean isMapAttached = false;
 
     LocationHelper locationHelper;
 
@@ -64,18 +65,23 @@ public class GasFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        setHasOptionsMenu(true);
-
-        locationHelper = LocationHelper.getINSTANCE(getContext());
+        locationHelper = LocationHelper.getINSTANCE(context);
         googlePlaces = new GooglePlaces();
 
         nextPageHandler = new Handler();
         locationHandler = new Handler();
 
         locationChecker.run();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -88,12 +94,12 @@ public class GasFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         stationFragment = StationFragment.newInstance(stationsList);
-        mapGasoFragment = MapGasoFragment.newInstance(stationsList);
+        mapGasoFragment = MapGasoFragment.newInstance();
         FragmentTransaction ft;
         ft = getChildFragmentManager().beginTransaction();
-        ft.replace(R.id.content,mapGasoFragment);
+        ft.replace(R.id.content, stationFragment);
         ft.commit();
-        isMapAttached = true;
+        isMapAttached=false;
     }
 
     @Override
@@ -121,12 +127,14 @@ public class GasFragment extends Fragment {
                 startActivity(intent);
                 return true;
             case R.id.map_menu_item:
-                ft = getChildFragmentManager().beginTransaction();
-                ft.replace(R.id.content,mapGasoFragment);
-                ft.commit();
-                menu.findItem(R.id.map_menu_item).setVisible(false);
-                menu.findItem(R.id.stations_list_menu_item).setVisible(true);
-                isMapAttached = true;
+                if(!isSearching && locationHelper!=null && locationHelper.isConnected()) {
+                    ft = getChildFragmentManager().beginTransaction();
+                    ft.replace(R.id.content, mapGasoFragment);
+                    ft.commit();
+                    menu.findItem(R.id.map_menu_item).setVisible(false);
+                    menu.findItem(R.id.stations_list_menu_item).setVisible(true);
+                    isMapAttached = true;
+                }
                 return true;
             case R.id.stations_list_menu_item:
                 isMapAttached = false;
@@ -191,7 +199,6 @@ public class GasFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            isSearching = false;
             updateData();
         }
 
@@ -225,6 +232,8 @@ public class GasFragment extends Fragment {
             if(location!=null && googlePlaces.getParser().hasNextToken()) {
                 new NextSearchPage().execute(location.getLat(), location.getLng());
                 nextPageHandler.postDelayed(this, 4000);
+            } else if(!googlePlaces.getParser().hasNextToken()){
+                isSearching = false;
             }
         }
     }

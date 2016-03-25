@@ -1,6 +1,8 @@
 package com.ericmguimaraes.gaso.model;
 
-import java.io.Serializable;
+import com.google.android.gms.location.places.Place;
+
+import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -11,6 +13,32 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Station extends RealmObject {
 
+    public Station(){
+    }
+
+    public Station(Place place){
+        List<Integer> types = place.getPlaceTypes();
+        boolean isGasStation = false;
+        for (Integer i: types){
+            if(i==Place.TYPE_GAS_STATION){
+                isGasStation = true;
+                break;
+            }
+        }
+        if(isGasStation){
+            id = place.getId();
+            name = place.getName().toString();
+            address = place.getAddress().toString();
+            phoneNumber = place.getPhoneNumber().toString();
+            Location l = new Location(place.getLatLng().latitude,place.getLatLng().longitude);
+            location = l;
+            generalRate = place.getRating();
+            money_rate = place.getPriceLevel();
+        } else {
+            throw new IllegalArgumentException("Place is not a gas station.");
+        }
+    }
+
     @PrimaryKey
     private String id;
 
@@ -18,13 +46,13 @@ public class Station extends RealmObject {
 
     private String address;
 
-    private String phone_number;
+    private String phoneNumber;
 
     private Location location;
 
-    private float general_rate;
+    private float generalRate;
 
-    private float combustive_rate;
+    private float combustiveRate;
 
     private float money_rate;
 
@@ -56,12 +84,12 @@ public class Station extends RealmObject {
         this.address = address;
     }
 
-    public String getPhone_number() {
-        return phone_number;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setPhone_number(String phone_number) {
-        this.phone_number = phone_number;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public Location getLocation() {
@@ -72,20 +100,20 @@ public class Station extends RealmObject {
         this.location = location;
     }
 
-    public float getGeneral_rate() {
-        return general_rate;
+    public float getGeneralRate() {
+        return generalRate;
     }
 
-    public void setGeneral_rate(float general_rate) {
-        this.general_rate = general_rate;
+    public void setGeneralRate(float generalRate) {
+        this.generalRate = generalRate;
     }
 
-    public float getCombustive_rate() {
-        return combustive_rate;
+    public float getCombustiveRate() {
+        return combustiveRate;
     }
 
-    public void setCombustive_rate(float combustive_rate) {
-        this.combustive_rate = combustive_rate;
+    public void setCombustiveRate(float combustiveRate) {
+        this.combustiveRate = combustiveRate;
     }
 
     public RealmList<Combustive> getCombustives() {

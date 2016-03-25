@@ -28,9 +28,10 @@
     <string name="map">Mapa</string>
     <string name="stations_list">Lista de Postos</string>
     <string name="title_activity_settings">Configurações</string>
+    <string name="google_app_id">186075227229</string>
 
     <!-- Strings related to Settings -->
-    <string name="gaso_googlemaps_key">AIzaSyDjOrfi52YWvso5oy00oYzaH2amMpT2pjI</string>
+    <string name="gaso_googlemaps_key">AIzaSyD75hEMtsbrsokY3ypMLgbrauQT0T7uZ_g</string>
 
 
     <!-- Example General settings -->

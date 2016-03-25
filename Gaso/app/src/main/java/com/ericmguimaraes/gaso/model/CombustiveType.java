@@ -5,7 +5,7 @@ package com.ericmguimaraes.gaso.model;
  */
 public enum CombustiveType {
 
-    COMMON_GAS(0), PREMIUM_GAS(1), ALCHOOL(2), GAS(3);
+    COMMON_GAS(0), PREMIUM_GAS(1), ALCHOOL(2), DIESEL(3), OTHER(4);
 
     private int value;
 
@@ -26,7 +26,9 @@ public enum CombustiveType {
             case 2:
                 return ALCHOOL;
             case 3:
-                return GAS;
+                return DIESEL;
+            case 4:
+                return OTHER;
         }
         return null;
     }
