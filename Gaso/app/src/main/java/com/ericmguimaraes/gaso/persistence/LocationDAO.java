@@ -16,7 +16,6 @@ import io.realm.RealmResults;
  * Created by ericm on 2/27/2016.
  */
 public class LocationDAO {
-    //TODO
 
     Context context;
 
@@ -58,7 +57,7 @@ public class LocationDAO {
         return list;
     }
 
-    public long setUniqueId() {
+    private long setUniqueId() {
         realm = Realm.getInstance(realmConfig);
         Number num = realm.where(Location.class).max("id");
         if (num == null) return 1;
@@ -67,6 +66,8 @@ public class LocationDAO {
 
     private Location createNewLocation(Location oldLocation){
         Location newLocation = new Location();
+        newLocation.setLng(oldLocation.getLng());
+        newLocation.setLat(oldLocation.getLat());
         return newLocation;
     }
 

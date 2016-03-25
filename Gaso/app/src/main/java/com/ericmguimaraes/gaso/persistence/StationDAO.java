@@ -17,9 +17,7 @@ import io.realm.RealmResults;
  * Created by ericm on 2/27/2016.
  */
 public class StationDAO {
-
-    //TODO
-
+    
     Context context;
 
     RealmConfiguration realmConfig;
@@ -65,16 +63,18 @@ public class StationDAO {
         return realm.where(Station.class).findFirst();
     }
 
-    public long setUniqueId() {
-        realm = Realm.getInstance(realmConfig);
-        Number num = realm.where(Station.class).max("id");
-        if (num == null) return 1;
-        else return ((long) num + 1);
-    }
-
     private Station createNewStation(Station oldStation){
         Station newStation = new Station();
+        newStation.setId(oldStation.getId());
         newStation.setName(oldStation.getName());
+        newStation.setAddress(oldStation.getAddress());
+        newStation.setPhoneNumber(oldStation.getPhoneNumber());
+        newStation.setReference(oldStation.getReference());
+        newStation.setLocation(oldStation.getLocation());
+        newStation.setCombustiveRate(oldStation.getCombustiveRate());
+        newStation.setCombustives(oldStation.getCombustives());
+        newStation.setGeneralRate(oldStation.getGeneralRate());
+        newStation.setMoney_rate(oldStation.getMoney_rate());
         return newStation;
     }
 
