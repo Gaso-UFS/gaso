@@ -17,8 +17,8 @@ public enum CombustiveType {
         return value;
     }
 
-    public static CombustiveType fromInteger(int x) {
-        switch(x) {
+    public static CombustiveType fromInteger(int i) {
+        switch(i) {
             case 0:
                 return COMMON_GAS;
             case 1:
@@ -30,7 +30,24 @@ public enum CombustiveType {
             case 4:
                 return OTHER;
         }
-        return null;
+        return COMMON_GAS;
+    }
+
+    @Override
+    public String toString() {
+        switch(value) {
+            case 0:
+                return "Gasolina Comum";
+            case 1:
+                return "Gasolina Aditivada";
+            case 2:
+                return "Alcool";
+            case 3:
+                return "Diesel";
+            case 4:
+                return "Outro";
+        }
+        return super.toString();
     }
 
 }

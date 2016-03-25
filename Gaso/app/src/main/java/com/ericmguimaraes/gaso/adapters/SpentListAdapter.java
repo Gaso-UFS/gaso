@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.CombustiveType;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
@@ -54,11 +55,11 @@ public class SpentListAdapter extends RecyclerView.Adapter<SpentListAdapter.View
         holder.carText.setText(car==null?"Esse carro foi excluido.":car.getModel());
         SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yy hh:mm");
         holder.dateText.setText(formater.format(spent.getDate()));
-        holder.typeText.setText(Integer.toString(spent.getType()));
+        holder.typeText.setText(CombustiveType.fromInteger(spent.getType()).toString());
         User user = spent.getUser();
         holder.userText.setText(user==null?"Esse usuario foi excluido.":user.getName());
         holder.valueText.setText("R$"+Double.toString(spent.getTotal()));
-        //holder.stationText.setText(spent.getStation().toString());
+        holder.stationText.setText(spent.getStation().getName());
     }
 
     @Override
