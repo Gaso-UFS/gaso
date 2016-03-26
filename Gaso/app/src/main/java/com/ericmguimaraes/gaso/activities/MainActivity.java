@@ -3,6 +3,7 @@ package com.ericmguimaraes.gaso.activities;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +25,7 @@ import com.ericmguimaraes.gaso.fragments.MapGasoFragment;
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.StationFragment;
 import com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment;
+import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
@@ -195,6 +197,22 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
 
     public boolean isGpsConnected() {
         return isGpsConnected;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case LocationHelper.LOCATION_PERMISSION_REQUEST: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //TODO permission granted
+                } else {
+                    //TODO permission denied
+                }
+                return;
+            }
+        }
     }
 
 }

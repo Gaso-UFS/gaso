@@ -67,7 +67,7 @@ public class StationFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new MyStationRecyclerViewAdapter(stationList, getContext());
+        adapter = new MyStationRecyclerViewAdapter(stationList, getActivity());
         recyclerView.setAdapter(adapter);
 
         recyclerViewUpdateHandler = new Handler();

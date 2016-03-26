@@ -1,6 +1,7 @@
 package com.ericmguimaraes.gaso.maps;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -24,23 +25,28 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     private Context context;
 
+    Activity activity;
+
     private android.location.Location lastLocation;
 
     private boolean isConnected = false;
 
-    private LocationHelper(Context context) {
+    public static final int LOCATION_PERMISSION_REQUEST = 1;
+
+    private LocationHelper(Activity activity) {
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
         googleApiClient.connect();
-        this.context = context;
+        this.context = activity.getApplicationContext();
+        this.activity = activity;
     }
 
-    public static LocationHelper getINSTANCE(Context context){
+    public static LocationHelper getINSTANCE(Activity activity){
         if(INSTANCE==null)
-            INSTANCE = new LocationHelper(context);
+            INSTANCE = new LocationHelper(activity);
         return INSTANCE;
     }
 
@@ -71,6 +77,8 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PERMISSION_REQUEST);
             Log.e("getting location", "NO PERMISSION");
             return null;
         }

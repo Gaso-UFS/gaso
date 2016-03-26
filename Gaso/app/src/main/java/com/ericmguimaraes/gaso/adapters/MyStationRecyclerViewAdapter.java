@@ -1,5 +1,6 @@
 package com.ericmguimaraes.gaso.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -25,9 +26,12 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
 
     Context context;
 
-    public MyStationRecyclerViewAdapter(List<Station> stationList, Context context) {
+    Activity activity;
+
+    public MyStationRecyclerViewAdapter(List<Station> stationList, Activity activity) {
         this.stationList = stationList;
-        this.context = context;
+        this.context = activity.getApplicationContext();
+        this.activity = activity;
     }
 
     @Override
@@ -42,7 +46,7 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
         holder.mItem = stationList.get(position);
         holder.stationNameText.setText(stationList.get(position).getName());
         holder.ratingBar.setRating(stationList.get(position).getCombustiveRate());
-        LocationHelper locationHelper = LocationHelper.getINSTANCE(context);
+        LocationHelper locationHelper = LocationHelper.getINSTANCE(activity);
         Location userLocation = locationHelper.getLastKnownLocation();
         double distance = 0;
         if(userLocation!=null)

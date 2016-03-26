@@ -68,7 +68,7 @@ public class GasFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        locationHelper = LocationHelper.getINSTANCE(context);
+        locationHelper = LocationHelper.getINSTANCE(getActivity());
         googlePlaces = new GooglePlaces();
 
         nextPageHandler = new Handler();
