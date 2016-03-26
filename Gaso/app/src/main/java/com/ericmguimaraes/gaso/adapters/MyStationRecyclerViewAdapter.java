@@ -10,7 +10,6 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
