@@ -34,14 +34,14 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
     public static final int LOCATION_PERMISSION_REQUEST = 1;
 
     private LocationHelper(Activity activity) {
+        this.context = activity.getApplicationContext();
+        this.activity = activity;
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
         googleApiClient.connect();
-        this.context = activity.getApplicationContext();
-        this.activity = activity;
     }
 
     public static LocationHelper getINSTANCE(Activity activity){
