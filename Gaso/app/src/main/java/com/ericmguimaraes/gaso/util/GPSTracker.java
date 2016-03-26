@@ -172,7 +172,7 @@ public class GPSTracker extends Service implements LocationListener {
 	 * lauch Settings Options
 	 * */
 	public void showSettingsAlert() {
-		AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+		AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
 
 		// Setting Dialog Title
 		alertDialog.setTitle("GPS Settings");

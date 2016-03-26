@@ -103,8 +103,6 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
             }
         };
 
-        startRepeatingTask();
-
     }
 
 
@@ -132,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
     @Override
     protected void onResume() {
         super.onResume();
+        startRepeatingTask();
     }
 
     public void showGpsLayout(){
