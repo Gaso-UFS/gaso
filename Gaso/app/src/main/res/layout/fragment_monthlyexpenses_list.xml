@@ -14,8 +14,6 @@
     android:name="com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
     tools:context="com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment"
     tools:listitem="@layout/month_item_recyclerview" />

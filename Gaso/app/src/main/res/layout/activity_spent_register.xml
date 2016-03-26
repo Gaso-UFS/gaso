@@ -80,7 +80,7 @@
                     android:id="@+id/input_station"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="text"
                     android:hint="Posto de Gasolina" />
             </android.support.design.widget.TextInputLayout>
 
@@ -94,7 +94,7 @@
                     android:id="@+id/input_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="date"
                     android:hint="Data" />
             </android.support.design.widget.TextInputLayout>
 
@@ -108,7 +108,7 @@
                     android:id="@+id/input_hour"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="time"
                     android:hint="Hora" />
             </android.support.design.widget.TextInputLayout>
 

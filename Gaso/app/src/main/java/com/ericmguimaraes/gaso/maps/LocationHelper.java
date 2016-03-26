@@ -88,7 +88,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         return isConnected;
     }
 
-    public double distance(Location l1, Location l2) {
+    public static double distance(Location l1, Location l2) {
 
         final int R = 6371; // Radius of the earth
 

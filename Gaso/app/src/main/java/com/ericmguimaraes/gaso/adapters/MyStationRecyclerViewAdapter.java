@@ -1,28 +1,33 @@
 package com.ericmguimaraes.gaso.adapters;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
+import com.ericmguimaraes.gaso.maps.LocationHelper;
+import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
 
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link }.
- * TODO: Replace the implementation with code for your data type.
- */
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStationRecyclerViewAdapter.ViewHolder> {
 
     private List<Station> stationList;
 
-    public MyStationRecyclerViewAdapter(List<Station> stationList) {
+    Context context;
+
+    public MyStationRecyclerViewAdapter(List<Station> stationList, Context context) {
         this.stationList = stationList;
+        this.context = context;
     }
 
     @Override
@@ -35,9 +40,15 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = stationList.get(position);
-        holder.mContentView.setText(stationList.get(position).getName());
-
-        holder.mView.setOnClickListener(new View.OnClickListener() {
+        holder.stationNameText.setText(stationList.get(position).getName());
+        holder.ratingBar.setRating(stationList.get(position).getCombustiveRate());
+        LocationHelper locationHelper = LocationHelper.getINSTANCE(context);
+        Location userLocation = locationHelper.getLastKnownLocation();
+        double distance = 0;
+        if(userLocation!=null)
+            distance = LocationHelper.distance(userLocation,stationList.get(position).getLocation());
+        holder.distanceText.setText(String.format("%1$,.2f", distance)+" metros");
+        holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -56,21 +67,24 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
+        @Bind(R.id.stationNameText)
+        TextView stationNameText;
+
+        @Bind(R.id.rating)
+        RatingBar ratingBar;
+
+        @Bind(R.id.distanceText)
+        TextView distanceText;
+
+        public View view;
+
         public Station mItem;
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            this.view = view;
+            ButterKnife.bind(this, view);
         }
 
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
-        }
     }
 }

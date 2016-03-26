@@ -65,9 +65,6 @@ public class MyCarFragment extends Fragment {
     @Bind(R.id.model)
     TextView modelText;
 
-    @Bind(R.id.description)
-    TextView descriptionText;
-
     User user;
     Car car;
 
@@ -182,19 +179,16 @@ public class MyCarFragment extends Fragment {
         if(user == null || car == null){
             nameText.setVisibility(View.GONE);
             modelText.setVisibility(View.GONE);
-            descriptionText.setVisibility(View.GONE);
             noUserText.setVisibility(View.VISIBLE);
             fab.setVisibility(View.VISIBLE);
         } else {
             nameText.setVisibility(View.VISIBLE);
             modelText.setVisibility(View.VISIBLE);
-            descriptionText.setVisibility(View.VISIBLE);
             noUserText.setVisibility(View.GONE);
             fab.setVisibility(View.GONE);
 
             nameText.setText(user.getName());
             modelText.setText(car.getModel());
-            descriptionText.setText(car.getDescription());
         }
     }
 
@@ -232,17 +226,7 @@ public class MyCarFragment extends Fragment {
         super.onResume();
         updateCarAndUser();
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);

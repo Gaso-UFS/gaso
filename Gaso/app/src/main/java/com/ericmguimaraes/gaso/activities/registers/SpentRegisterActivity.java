@@ -1,5 +1,6 @@
 package com.ericmguimaraes.gaso.activities.registers;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -9,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,6 +25,7 @@ import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
+import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -121,6 +124,15 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
 
         setSpinner();
 
+        MaskEditTextChangedListener maskAmount = new MaskEditTextChangedListener("##.##L", inputAmount);
+        inputAmount.addTextChangedListener(maskAmount);
+
+        MaskEditTextChangedListener maskDate = new MaskEditTextChangedListener("##/##/##", inputDate);
+        inputDate.addTextChangedListener(maskDate);
+
+        MaskEditTextChangedListener maskHour = new MaskEditTextChangedListener("##:##", inputHour);
+        inputHour.addTextChangedListener(maskHour);
+
     }
 
     public void setSpinner(){
@@ -135,6 +147,7 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
         @Override
         public void onClick(View v) {
             callPlacePicker();
+            hideSoftKeyboard(v);
         }
     };
 
@@ -142,6 +155,7 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
         @Override
         public void onClick(View v) {
             callDatePicker();
+            hideSoftKeyboard(v);
         }
     };
 
@@ -149,32 +163,44 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
         @Override
         public void onClick(View v) {
             callHourPicker();
+            hideSoftKeyboard(v);
         }
     };
 
     View.OnFocusChangeListener inputStationOnFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus)
+            if(hasFocus){
                 callPlacePicker();
+                hideSoftKeyboard(v);
+            }
         }
     };
 
     View.OnFocusChangeListener inputDateOnFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus)
+            if(hasFocus){
                 callDatePicker();
+                hideSoftKeyboard(v);
+            }
         }
     };
 
     View.OnFocusChangeListener inputHourOnFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus)
+            if(hasFocus) {
                 callHourPicker();
+                hideSoftKeyboard(v);
+            }
         }
     };
+
+    private void hideSoftKeyboard(View view){
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
     private void callHourPicker() {
         DialogFragment newFragment = new TimePickerFragment(this);
@@ -206,7 +232,7 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
         s.setType(typeSelected);
         s.setTotal(Double.parseDouble(inputTotal.getText().toString()));
         s.setStation(stationSelected);
-        s.setAmount(Double.parseDouble(inputAmount.getText().toString()));
+        s.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
         dao.add(s);
 
         CharSequence text = "Gasto adicionado com sucesso.";
