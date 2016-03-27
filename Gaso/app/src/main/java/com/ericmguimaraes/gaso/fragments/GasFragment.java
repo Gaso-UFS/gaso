@@ -163,8 +163,10 @@ public class GasFragment extends Fragment {
         public void run() {
             location = locationHelper.getLastKnownLocation();
             if(location!=null) {
-                double distance = LocationHelper.distance(location,lastLocation);
+                double distance = -1;
                 boolean firstTime = lastLocation==null;
+                if(!firstTime)
+                    distance = LocationHelper.distance(location,lastLocation);
                 if(firstTime || distance>STATIONS_REFRESH_DISTANCE){
                     lastLocation=location;
                     StationSearch task = new StationSearch();

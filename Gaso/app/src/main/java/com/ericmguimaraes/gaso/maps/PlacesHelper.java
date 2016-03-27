@@ -95,4 +95,5 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
     public interface PlacesHelperInterface{
         void OnIsAtGasStationResult(Station station);
     }
+
 }
