@@ -24,6 +24,7 @@ import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
@@ -133,6 +134,14 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
         MaskEditTextChangedListener maskHour = new MaskEditTextChangedListener("##:##", inputHour);
         inputHour.addTextChangedListener(maskHour);
 
+        Intent intent = getIntent();
+        if(intent!=null){
+            if(intent.hasExtra("station_id")){
+                StationDAO dao = new StationDAO(getApplicationContext());
+                stationSelected = dao.findById(intent.getStringExtra("station_id"));
+                inputStation.setText(stationSelected.getName());
+            }
+        }
     }
 
     public void setSpinner(){
