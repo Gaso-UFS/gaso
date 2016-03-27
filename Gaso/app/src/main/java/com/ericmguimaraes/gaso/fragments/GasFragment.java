@@ -19,6 +19,7 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
+import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
 
@@ -27,14 +28,17 @@ import java.util.List;
 
 public class GasFragment extends Fragment {
 
-    private static int LOCATION_REFRESH_TIME = 5000; //millis
+    private static int LOCATION_REFRESH_TIME = 2*60*1000; //millis
     private static int STATIONS_REFRESH_DISTANCE = 1000; //m
+    private int REQUEST_PLACE_REFRESH_DISTANCE = 500;
 
     Menu menu;
 
     boolean isMapAttached = false;
 
     LocationHelper locationHelper;
+
+    PlacesHelper placesHelper;
 
     GooglePlaces googlePlaces;
 
@@ -70,6 +74,8 @@ public class GasFragment extends Fragment {
 
         locationHelper = LocationHelper.getINSTANCE(getActivity());
         googlePlaces = new GooglePlaces();
+
+        placesHelper = new PlacesHelper(getActivity());
 
         nextPageHandler = new Handler();
         locationHandler = new Handler();
@@ -157,16 +163,29 @@ public class GasFragment extends Fragment {
         public void run() {
             location = locationHelper.getLastKnownLocation();
             if(location!=null) {
-                if(lastLocation==null || locationHelper.distance(location,lastLocation)>STATIONS_REFRESH_DISTANCE){
+                double distance = LocationHelper.distance(location,lastLocation);
+                boolean firstTime = lastLocation==null;
+                if(firstTime || distance>STATIONS_REFRESH_DISTANCE){
                     lastLocation=location;
                     StationSearch task = new StationSearch();
                     task.execute(location.getLat(), location.getLng());
+                }
+                if(firstTime || distance>REQUEST_PLACE_REFRESH_DISTANCE){
+                    placesHelper.isAtGasStationAsync(new PlacesHelper.PlacesHelperInterface() {
+                        @Override
+                        public void OnIsAtGasStationResult(Station station) {
+                            showSpentRequestDialog(station);
+                        }
+                    });
                 }
             }
             locationHandler.postDelayed(locationChecker, LOCATION_REFRESH_TIME);
         }
     };
 
+    private void showSpentRequestDialog(Station station) {
+        //TODO
+    }
 
 
     private void updateData() {

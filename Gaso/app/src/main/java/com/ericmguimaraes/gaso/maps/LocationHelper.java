@@ -9,10 +9,18 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.ericmguimaraes.gaso.model.Location;
+import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.PlaceDetectionApi;
+import com.google.android.gms.location.places.PlaceFilter;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.PlaceReport;
+import com.google.android.gms.location.places.Places;
 
 /**
  * Created by ericm on 3/19/2016.
@@ -112,4 +120,5 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
         return Math.sqrt(distance);
     }
+
 }

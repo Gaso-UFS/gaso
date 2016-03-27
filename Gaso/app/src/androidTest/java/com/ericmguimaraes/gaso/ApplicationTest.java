@@ -1,9 +1,12 @@
 package com.ericmguimaraes.gaso;
 
 import android.app.Application;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.ApplicationTestCase;
 
+import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
+import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
 
@@ -12,13 +15,17 @@ import java.util.List;
 /**
  * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
  */
-public class ApplicationTest extends ApplicationTestCase<Application> {
+public class ApplicationTest extends ActivityInstrumentationTestCase2 {
 
-    public ApplicationTest() {
-        super(Application.class);
+    public ApplicationTest(Class activityClass) {
+        super(activityClass);
     }
 
-    public void testGooglePlaces(){
+    public ApplicationTest() {
+        super(MainActivity.class);
+    }
+
+    public void testCaseGooglePlaces(){
         GooglePlaces googlePlaces = new GooglePlaces();
         List<Station> result = null;
         try {
@@ -35,7 +42,13 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        assertTrue(result!=null && !result.isEmpty() && result.size()>20);
+        assertTrue(result != null && !result.isEmpty() && result.size() > 20);
+    }
+
+    public void testCaseCurrentLocation(){
+        PlacesHelper placesHelper = new PlacesHelper(getActivity());
+        boolean result = placesHelper.isAtGasStation();
+        assertTrue(result);
     }
 
 }
