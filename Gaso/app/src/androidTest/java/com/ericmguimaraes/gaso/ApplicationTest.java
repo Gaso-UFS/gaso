@@ -47,8 +47,13 @@ public class ApplicationTest extends ActivityInstrumentationTestCase2 {
 
     public void testCaseCurrentLocation(){
         PlacesHelper placesHelper = new PlacesHelper(getActivity());
-        boolean result = placesHelper.isAtGasStation();
-        assertTrue(result);
+        placesHelper.isAtGasStationAsync(new PlacesHelper.PlacesHelperInterface() {
+            @Override
+            public void OnIsAtGasStationResult(Station station) {
+
+            }
+        });
+        assertTrue(true);
     }
 
 }

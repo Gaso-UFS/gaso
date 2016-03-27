@@ -23,9 +23,12 @@ import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.model.MonthSpent;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.util.SpentComparator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.Bind;
@@ -66,6 +69,7 @@ public class MonthlyExpensesFragment extends Fragment {
         monthSpentList = new ArrayList<>();
         Calendar month=null;
         double value=-1;
+        Collections.sort(spents,new SpentComparator());
         MonthSpent monthSpentToSave=null;
         for(Spent s: spents){
             Calendar spentDate = Calendar.getInstance();
