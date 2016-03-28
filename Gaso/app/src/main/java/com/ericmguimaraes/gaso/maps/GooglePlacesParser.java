@@ -35,7 +35,7 @@ public class GooglePlacesParser {
                 JSONArray jsonArray = jsonObject.getJSONArray("results");
                 for (int i = 0; i < jsonArray.length(); i++) {
                     Station station = new Station();
-                    station.setId(jsonArray.getJSONObject(i).getString("id"));
+                    station.setId(jsonArray.getJSONObject(i).getString("place_id"));
                     station.setName(jsonArray.getJSONObject(i).getString("name"));
                     station.setAddress(jsonArray.getJSONObject(i).getString("vicinity"));
                     station.setReference(jsonArray.getJSONObject(i).getString("reference"));

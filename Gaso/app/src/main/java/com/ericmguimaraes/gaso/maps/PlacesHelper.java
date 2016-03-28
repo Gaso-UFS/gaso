@@ -13,11 +13,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
-import com.google.android.gms.location.places.PlaceTypes;
 import com.google.android.gms.location.places.Places;
 
 import java.util.List;
@@ -44,11 +43,12 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Places.PLACE_DETECTION_API)
+                .addApi(Places.GEO_DATA_API)
                 .build();
         googleApiClient.connect();
     }
 
-    public void isAtGasStationAsync(final PlacesHelperInterface placesHelperInterface) {
+    public void isAtGasStationAsync(final CurrentPlaceListener currentPlaceListener) {
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LocationHelper.LOCATION_PERMISSION_REQUEST);
@@ -60,12 +60,12 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
             @Override
             public void onResult(PlaceLikelihoodBuffer likelyPlaces) {
                 for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    if (placeLikelihood.getLikelihood()>LIKELIHOOD_ACCEPTABLE){
+                    if (placeLikelihood.getLikelihood() > LIKELIHOOD_ACCEPTABLE) {
                         List<Integer> types = placeLikelihood.getPlace().getPlaceTypes();
-                        for(int t:types){
-                            if(t==Place.TYPE_GAS_STATION){
+                        for (int t : types) {
+                            if (t == Place.TYPE_GAS_STATION) {
                                 lastStation = new Station(placeLikelihood.getPlace());
-                                placesHelperInterface.OnIsAtGasStationResult(lastStation);
+                                currentPlaceListener.OnIsAtGasStationResult(lastStation);
                                 break;
                             }
                         }
@@ -74,6 +74,22 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
                 likelyPlaces.release();
             }
         });
+    }
+
+    public void findStationByID(String placeId, final StationFoundListener stationFoundListener){
+        Places.GeoDataApi.getPlaceById(googleApiClient, placeId)
+                .setResultCallback(new ResultCallback<PlaceBuffer>() {
+                    @Override
+                    public void onResult(PlaceBuffer places) {
+                        if (places.getStatus().isSuccess() && places.getCount() > 0) {
+                            Station station = new Station(places.get(0));
+                            stationFoundListener.OnFindStationResult(station);
+                        } else {
+                            stationFoundListener.OnFindStationResult(null);
+                        }
+                        places.release();
+                    }
+                });
     }
 
 
@@ -92,8 +108,12 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
 
     }
 
-    public interface PlacesHelperInterface{
+    public interface CurrentPlaceListener {
         void OnIsAtGasStationResult(Station station);
+    }
+
+    public interface StationFoundListener {
+        void OnFindStationResult(Station station);
     }
 
 }

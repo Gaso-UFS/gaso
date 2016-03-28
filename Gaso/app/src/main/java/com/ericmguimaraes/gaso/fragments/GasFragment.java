@@ -176,7 +176,7 @@ public class GasFragment extends Fragment {
                     task.execute(location.getLat(), location.getLng());
                 }
                 if(firstTime || distance>REQUEST_PLACE_REFRESH_DISTANCE){
-                    placesHelper.isAtGasStationAsync(new PlacesHelper.PlacesHelperInterface() {
+                    placesHelper.isAtGasStationAsync(new PlacesHelper.CurrentPlaceListener() {
                         @Override
                         public void OnIsAtGasStationResult(Station station) {
                             showSpentRequestDialog(station);
@@ -232,7 +232,6 @@ public class GasFragment extends Fragment {
             l.setLat(lat);
             l.setLng(lgn);
             stationsList.addAll(googlePlaces.getStationsList(l, null));
-            Log.d("STATION SEARCH SIZE", Integer.toString(stationsList.size()));
             nextPageHandler.postDelayed(new NextPageGetter(l), 4000);
             return null;
         }
@@ -241,6 +240,7 @@ public class GasFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             updateData();
+            isSearching = false;
         }
 
     }
@@ -274,7 +274,7 @@ public class GasFragment extends Fragment {
                 new NextSearchPage().execute(location.getLat(), location.getLng());
                 nextPageHandler.postDelayed(this, 4000);
             } else if(!googlePlaces.getParser().hasNextToken()){
-                isSearching = false;
+                //isSearching = false;
             }
         }
     }

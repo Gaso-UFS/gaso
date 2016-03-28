@@ -1,8 +1,6 @@
 package com.ericmguimaraes.gaso;
 
-import android.app.Application;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.ApplicationTestCase;
 
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
@@ -47,7 +45,7 @@ public class ApplicationTest extends ActivityInstrumentationTestCase2 {
 
     public void testCaseCurrentLocation(){
         PlacesHelper placesHelper = new PlacesHelper(getActivity());
-        placesHelper.isAtGasStationAsync(new PlacesHelper.PlacesHelperInterface() {
+        placesHelper.isAtGasStationAsync(new PlacesHelper.CurrentPlaceListener() {
             @Override
             public void OnIsAtGasStationResult(Station station) {
 

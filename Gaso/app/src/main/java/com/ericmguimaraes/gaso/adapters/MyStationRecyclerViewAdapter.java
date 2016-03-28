@@ -2,7 +2,9 @@ package com.ericmguimaraes.gaso.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.StationDetailsActivity;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
@@ -54,7 +57,9 @@ public class MyStationRecyclerViewAdapter extends RecyclerView.Adapter<MyStation
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(activity, StationDetailsActivity.class);
+                intent.putExtra("station_id",holder.mItem.getId());
+                activity.startActivity(intent);
             }
         });
     }

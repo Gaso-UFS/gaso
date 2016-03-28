@@ -29,7 +29,7 @@ public class StationDAO {
         realmConfig = new RealmConfiguration.Builder(context).build();
     }
 
-    public void add(Station station){
+    public Station addOrMerge(Station station){
         realm = Realm.getInstance(realmConfig);
         Station fromDatabase = findById(station.getId());
         Station stationToSave;
@@ -40,6 +40,7 @@ public class StationDAO {
         realm.beginTransaction();
         realm.copyToRealmOrUpdate(stationToSave);
         realm.commitTransaction();
+        return stationToSave;
     }
 
     private Station merge(Station stationFromMemory, Station stationFromDatabase) {
