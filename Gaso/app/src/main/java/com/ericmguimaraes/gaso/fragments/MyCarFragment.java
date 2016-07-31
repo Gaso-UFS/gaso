@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,6 +61,12 @@ public class MyCarFragment extends Fragment {
 
     @Bind(R.id.obd_connect_button)
     Button obdConnectButton;
+
+    @Bind(R.id.obd_data_card)
+    CardView obdDataCardView;
+
+    @Bind(R.id.fab_bluetooth)
+    FloatingActionButton fabBluetooth;
 
     User user;
     Car car;
@@ -190,6 +197,9 @@ public class MyCarFragment extends Fragment {
         if(Session.getInstance().isToStartAndBindService) {
             Intent intent = new Intent(getContext(), ObdService.class);
             getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+            fabBluetooth.setVisibility(View.VISIBLE);
+            obdDataCardView.setVisibility(View.VISIBLE);
             //TODO INICIAR EXIBICAO DOS DADOS DO OBD2
         }
     }
