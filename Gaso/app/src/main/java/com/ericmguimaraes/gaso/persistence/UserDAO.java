@@ -47,7 +47,7 @@ public class UserDAO {
         RealmResults<User> result = query.findAll();
         realm.beginTransaction();
         if(!result.isEmpty())
-            result.removeLast();
+            result.deleteLastFromRealm();
         realm.commitTransaction();
     }
 

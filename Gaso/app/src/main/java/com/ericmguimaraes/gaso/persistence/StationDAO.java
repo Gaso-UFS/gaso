@@ -65,7 +65,7 @@ public class StationDAO {
         RealmResults<Station> result = query.findAll();
         realm.beginTransaction();
         if(!result.isEmpty())
-            result.removeLast();
+            result.deleteLastFromRealm();
         realm.commitTransaction();
     }
 

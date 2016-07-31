@@ -9,4 +9,6 @@ import io.realm.RealmObject;
 public class ObdData extends RealmObject {
     //TODO determinar quais dados serao gravados aqui
 
+    int test;
+
 }

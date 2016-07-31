@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.fragments.BluetoothFragment.OnBluetoothDeviceListFragmentInteractionListener;
-import com.ericmguimaraes.gaso.fragments.dummy.DummyContent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,9 +44,9 @@ public class MyBluetoothRecyclerViewAdapter extends RecyclerView.Adapter<MyBluet
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        //holder.mIdView.setText(mValues.get(position).id);
         String name = mValues.get(position).getName();
-        holder.mContentView.setText(name);
+        holder.mNameView.setText(name);
+        holder.mAddressView.setText(mValues.get(position).getAddress());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,20 +86,20 @@ public class MyBluetoothRecyclerViewAdapter extends RecyclerView.Adapter<MyBluet
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
+        public final TextView mNameView;
+        public final TextView mAddressView;
         public BluetoothDevice mItem;
 
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            mNameView = (TextView) view.findViewById(R.id.nameText);
+            mAddressView = (TextView) view.findViewById(R.id.addressText);
         }
 
         @Override
         public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
+            return super.toString() + " '" + mAddressView.getText() + "'";
         }
     }
 }

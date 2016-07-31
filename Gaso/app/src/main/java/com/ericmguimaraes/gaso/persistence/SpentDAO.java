@@ -44,7 +44,7 @@ public class SpentDAO {
         RealmResults<Spent> result = query.findAll();
         realm.beginTransaction();
         if(!result.isEmpty())
-            result.removeLast();
+            result.deleteLastFromRealm();
         realm.commitTransaction();
     }
 

@@ -46,7 +46,7 @@ public class CombustiveDAO {
         RealmResults<Combustive> result = query.findAll();
         realm.beginTransaction();
         if(!result.isEmpty())
-            result.removeLast();
+            result.deleteLastFromRealm();
         realm.commitTransaction();
     }
 

@@ -47,7 +47,7 @@ public class CarDAO {
         RealmResults<Car> result = query.findAll();
         realm.beginTransaction();
         if(!result.isEmpty())
-            result.removeLast();
+            result.deleteLastFromRealm();
         realm.commitTransaction();
     }
 
