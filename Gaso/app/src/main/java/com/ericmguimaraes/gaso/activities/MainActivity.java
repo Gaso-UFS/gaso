@@ -1,30 +1,23 @@
 package com.ericmguimaraes.gaso.activities;
 
-import android.app.AlertDialog;
-import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
-import com.ericmguimaraes.gaso.config.Config;
+import com.ericmguimaraes.gaso.config.Session;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
 
-import com.ericmguimaraes.gaso.fragments.MapGasoFragment;
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
-import com.ericmguimaraes.gaso.fragments.StationFragment;
-import com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment;
+import com.ericmguimaraes.gaso.fragments.MonthlyExpensesFragment;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.obd.BluetoothHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
@@ -36,7 +29,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements MyCarFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -112,23 +105,19 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new GasFragment(), gas);
-        adapter.addFragment(new MyCarFragment(), myCar);
-        adapter.addFragment(new MonthlyExpensesFragment(), spent);
+        adapter.addFragment(GasFragment.newInstance(), gas);
+        adapter.addFragment(MyCarFragment.newInstance(), myCar);
+        adapter.addFragment(MonthlyExpensesFragment.newInstance(), spent);
         viewPager.setAdapter(adapter);
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
     }
 
     private void init(){
         UserDAO userDAO = new UserDAO(getApplicationContext());
         CarDAO carDAO = new CarDAO(getApplicationContext());
-        if(Config.getInstance().currentUser==null)
-            Config.getInstance().currentUser = userDAO.findFirst();
-        if(Config.getInstance().currentCar==null)
-            Config.getInstance().currentCar = carDAO.findFirst();
+        if(Session.getInstance().currentUser==null)
+            Session.getInstance().currentUser = userDAO.findFirst();
+        if(Session.getInstance().currentCar==null)
+            Session.getInstance().currentCar = carDAO.findFirst();
     }
 
     @Override
@@ -222,7 +211,4 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
         }
     }
 
-    public void onBluetoothSelectionPressed() {
-
-    }
 }

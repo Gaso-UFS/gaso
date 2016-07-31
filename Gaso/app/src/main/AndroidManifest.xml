@@ -45,19 +45,19 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".lists.UserListActivity"
+            android:name=".activities.UserListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_user_list"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".lists.CarListActivity"
+            android:name=".activities.CarListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_car_list"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".config.SettingsActivity"
+            android:name=".session.SettingsActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait" />
@@ -67,7 +67,7 @@
             android:value="@string/gaso_googlemaps_key" />
 
         <activity
-            android:name=".lists.SpentListActivity"
+            android:name=".activities.SpentListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />

@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.lists.UserListActivity;
+import com.ericmguimaraes.gaso.activities.UserListActivity;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 

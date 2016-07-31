@@ -1,8 +1,8 @@
-package com.ericmguimaraes.gaso.lists;
+package com.ericmguimaraes.gaso.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,19 +10,21 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.adapters.CarListAdapter;
-import com.ericmguimaraes.gaso.model.Car;
-import com.ericmguimaraes.gaso.persistence.CarDAO;
-import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
+import com.ericmguimaraes.gaso.adapters.SpentListAdapter;
+import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.model.Spent;
+import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class CarListActivity extends AppCompatActivity {
+public class SpentListActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -30,15 +32,19 @@ public class CarListActivity extends AppCompatActivity {
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    @Bind(R.id.car_recycler_view)
+    @Bind(R.id.spent_recycler_view)
     RecyclerView recyclerView;
 
-    CarListAdapter adapter;
+    SpentListAdapter adapter;
+
+    int month;
+
+    String[] monthNames = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_car_list);
+        setContentView(R.layout.activity_spent_list);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -56,14 +62,24 @@ public class CarListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), CarRegisterActivity.class);
-                startActivity(intent);
+                if (Session.getInstance().currentCar == null || Session.getInstance().currentUser == null) {
+                    Context context = getApplicationContext();
+                    CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
+                    int duration = Toast.LENGTH_LONG;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), SpentRegisterActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 
-        CarDAO dao = new CarDAO(getApplicationContext());
-        List<Car> cars = dao.findAll();
-        adapter = new CarListAdapter(cars, recyclerView, getApplicationContext());
+        month = getIntent().getExtras().getInt("month");
+
+        SpentDAO dao = new SpentDAO(getApplicationContext());
+        List<Spent> spents = dao.findByMonth(month);
+        adapter = new SpentListAdapter(spents, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setAdapter(adapter);
@@ -86,8 +102,12 @@ public class CarListActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        adapter.notifyDataSetChanged();
+        SpentDAO dao = new SpentDAO(getApplicationContext());
+        List<Spent> spents = dao.findByMonth(month);
+        adapter.resetList(spents);
+        toolbar.setTitle(monthNames[month]);
     }
+
 }

@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.lists;
+package com.ericmguimaraes.gaso.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,17 +12,17 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.adapters.UserListAdapter;
-import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
-import com.ericmguimaraes.gaso.activities.registers.UserRegisterActivity;
+import com.ericmguimaraes.gaso.adapters.CarListAdapter;
+import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
+import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
 
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class UserListActivity extends AppCompatActivity {
+public class CarListActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -30,15 +30,15 @@ public class UserListActivity extends AppCompatActivity {
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    @Bind(R.id.user_recycler_view)
+    @Bind(R.id.car_recycler_view)
     RecyclerView recyclerView;
 
-    UserListAdapter adapter;
+    CarListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_list);
+        setContentView(R.layout.activity_car_list);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -56,14 +56,14 @@ public class UserListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), UserRegisterActivity.class);
+                Intent intent = new Intent(getApplicationContext(), CarRegisterActivity.class);
                 startActivity(intent);
             }
         });
 
-        UserDAO dao = new UserDAO(getApplicationContext());
-        List<User> users = dao.findAll();
-        adapter = new UserListAdapter(users, recyclerView, getApplicationContext());
+        CarDAO dao = new CarDAO(getApplicationContext());
+        List<Car> cars = dao.findAll();
+        adapter = new CarListAdapter(cars, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setAdapter(adapter);
@@ -90,5 +90,4 @@ public class UserListActivity extends AppCompatActivity {
         super.onResume();
         adapter.notifyDataSetChanged();
     }
-
 }

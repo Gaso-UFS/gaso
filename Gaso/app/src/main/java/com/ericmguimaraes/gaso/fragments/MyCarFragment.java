@@ -1,19 +1,16 @@
 package com.ericmguimaraes.gaso.fragments;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,38 +18,28 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
-import com.ericmguimaraes.gaso.activities.MainActivity;
-import com.ericmguimaraes.gaso.config.Config;
+import com.ericmguimaraes.gaso.config.Session;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
-import com.ericmguimaraes.gaso.lists.CarListActivity;
-import com.ericmguimaraes.gaso.lists.UserListActivity;
-import com.ericmguimaraes.gaso.maps.GooglePlaces;
+import com.ericmguimaraes.gaso.activities.CarListActivity;
+import com.ericmguimaraes.gaso.activities.UserListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
 import com.ericmguimaraes.gaso.obd.BluetoothHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
-import com.ericmguimaraes.gaso.util.ConnectionDetector;
-import com.ericmguimaraes.gaso.util.GPSTracker;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.ericmguimaraes.gaso.services.ObdService;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MyCarFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link MyCarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
@@ -77,35 +64,16 @@ public class MyCarFragment extends Fragment {
     User user;
     Car car;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
+    private ObdService mService;
+    private boolean mBound;
 
     public MyCarFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MyCarFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MyCarFragment newInstance(String param1, String param2) {
+    public static MyCarFragment newInstance() {
         MyCarFragment fragment = new MyCarFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -114,8 +82,6 @@ public class MyCarFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -194,9 +160,9 @@ public class MyCarFragment extends Fragment {
     }
 
     private void updateCarAndUser() {
-        Config config = Config.getInstance();
-        user = config.currentUser;
-        car = config.currentCar;
+        Session session = Session.getInstance();
+        user = session.currentUser;
+        car = session.currentCar;
         if(user == null || car == null){
             nameText.setVisibility(View.GONE);
             modelText.setVisibility(View.GONE);
@@ -218,28 +184,23 @@ public class MyCarFragment extends Fragment {
         ButterKnife.unbind(this);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+        if(Session.getInstance().isToStartAndBindService) {
+            Intent intent = new Intent(getContext(), ObdService.class);
+            getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            //TODO INICIAR EXIBICAO DOS DADOS DO OBD2
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        if (mBound) {
+            getActivity().unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     @Override
@@ -248,9 +209,24 @@ public class MyCarFragment extends Fragment {
         updateCarAndUser();
     }
 
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            ObdService.ObdServiceBinder binder = (ObdService.ObdServiceBinder) service;
+            mService = binder.getService();
+            mService.setDevice(Session.getInstance().device);
+            mService.setSocket(Session.getInstance().socket);
+            mService.startReadingThread();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
 }

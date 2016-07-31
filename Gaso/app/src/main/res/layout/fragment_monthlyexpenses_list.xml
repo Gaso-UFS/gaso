@@ -15,7 +15,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
-    tools:context="com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment"
+    tools:context=".fragments.MonthlyExpensesFragment"
     tools:listitem="@layout/month_item_recyclerview" />
 
     <android.support.design.widget.FloatingActionButton

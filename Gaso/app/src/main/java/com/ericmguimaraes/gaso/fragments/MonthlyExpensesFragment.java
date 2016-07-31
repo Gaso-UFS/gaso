@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.lists;
+package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
-import com.ericmguimaraes.gaso.config.Config;
+import com.ericmguimaraes.gaso.config.Session;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.model.MonthSpent;
 import com.ericmguimaraes.gaso.model.Spent;
@@ -27,7 +27,6 @@ import com.ericmguimaraes.gaso.util.SpentComparator;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -116,7 +115,7 @@ public class MonthlyExpensesFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Config.getInstance().currentCar == null || Config.getInstance().currentUser == null) {
+                if (Session.getInstance().currentCar == null || Session.getInstance().currentUser == null) {
                     Context context = getContext();
                     CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
                     int duration = Toast.LENGTH_LONG;

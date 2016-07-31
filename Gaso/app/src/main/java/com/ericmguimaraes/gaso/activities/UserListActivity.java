@@ -1,8 +1,8 @@
-package com.ericmguimaraes.gaso.lists;
+package com.ericmguimaraes.gaso.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,21 +10,19 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
-import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.adapters.SpentListAdapter;
-import com.ericmguimaraes.gaso.config.Config;
-import com.ericmguimaraes.gaso.model.Spent;
-import com.ericmguimaraes.gaso.persistence.SpentDAO;
-import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
+import com.ericmguimaraes.gaso.adapters.UserListAdapter;
+import com.ericmguimaraes.gaso.model.User;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.ericmguimaraes.gaso.activities.registers.UserRegisterActivity;
 
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class SpentListActivity extends AppCompatActivity {
+public class UserListActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -32,19 +30,15 @@ public class SpentListActivity extends AppCompatActivity {
     @Bind(R.id.fab)
     FloatingActionButton fab;
 
-    @Bind(R.id.spent_recycler_view)
+    @Bind(R.id.user_recycler_view)
     RecyclerView recyclerView;
 
-    SpentListAdapter adapter;
-
-    int month;
-
-    String[] monthNames = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
+    UserListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_spent_list);
+        setContentView(R.layout.activity_user_list);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -62,24 +56,14 @@ public class SpentListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (Config.getInstance().currentCar == null || Config.getInstance().currentUser == null) {
-                    Context context = getApplicationContext();
-                    CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
-                    int duration = Toast.LENGTH_LONG;
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                } else {
-                    Intent intent = new Intent(getApplicationContext(), SpentRegisterActivity.class);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(getApplicationContext(), UserRegisterActivity.class);
+                startActivity(intent);
             }
         });
 
-        month = getIntent().getExtras().getInt("month");
-
-        SpentDAO dao = new SpentDAO(getApplicationContext());
-        List<Spent> spents = dao.findByMonth(month);
-        adapter = new SpentListAdapter(spents, recyclerView, getApplicationContext());
+        UserDAO dao = new UserDAO(getApplicationContext());
+        List<User> users = dao.findAll();
+        adapter = new UserListAdapter(users, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setAdapter(adapter);
@@ -102,12 +86,9 @@ public class SpentListActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
-        SpentDAO dao = new SpentDAO(getApplicationContext());
-        List<Spent> spents = dao.findByMonth(month);
-        adapter.resetList(spents);
-        toolbar.setTitle(monthNames[month]);
+        adapter.notifyDataSetChanged();
     }
 
 }
