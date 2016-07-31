@@ -26,6 +26,7 @@ import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.StationFragment;
 import com.ericmguimaraes.gaso.lists.MonthlyExpensesFragment;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
+import com.ericmguimaraes.gaso.obd.BluetoothHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
@@ -60,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
 
     @Bind(R.id.net_out)
     RelativeLayout netRecyclerView;
+
+    @Bind(R.id.blue_out)
+    RelativeLayout blueRecyclerView;
 
     private final int refreshTime = 10000;
 
@@ -131,6 +135,10 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
     protected void onResume() {
         super.onResume();
         startRepeatingTask();
+        BluetoothHelper.getInstance().initBluetoothHelper(this);
+        if(!BluetoothHelper.getInstance().isBluetoothSupported()){
+            blueRecyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void showGpsLayout(){
@@ -214,4 +222,7 @@ public class MainActivity extends AppCompatActivity implements MyCarFragment.OnF
         }
     }
 
+    public void onBluetoothSelectionPressed() {
+
+    }
 }

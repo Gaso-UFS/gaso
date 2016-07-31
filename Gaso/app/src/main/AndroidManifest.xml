@@ -75,7 +75,10 @@
         <activity
             android:name=".activities.StationDetailsActivity"
             android:label="@string/title_activity_station_details"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+        <activity android:name=".activities.BluetoothConnectionActivity">
+        </activity>
+        <service android:name=".services.ObdService" />
     </application>
 
 </manifest>

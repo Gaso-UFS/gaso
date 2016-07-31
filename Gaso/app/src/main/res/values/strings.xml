@@ -93,5 +93,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="title_activity_spent_list">Lista de Gastos</string>
     <string name="title_activity_station_details">Detalhes do posto</string>
+    <string name="title_activity_bluetooth_device">BluetoothDeviceActivity</string>
 
 </resources>

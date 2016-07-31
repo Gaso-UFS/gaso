@@ -187,6 +187,7 @@ public class GPSTracker extends Service implements LocationListener {
 					public void onClick(DialogInterface dialog, int which) {
 						Intent intent = new Intent(
 								Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						mContext.startActivity(intent);
 					}
 				});

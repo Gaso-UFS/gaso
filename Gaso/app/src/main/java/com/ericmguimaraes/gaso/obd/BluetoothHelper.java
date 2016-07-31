@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
@@ -18,7 +21,7 @@ import static android.support.v4.app.ActivityCompat.startActivityForResult;
 public class BluetoothHelper {
 
     private static final int REQUEST_ENABLE_BT = 2;
-    public static BluetoothHelper instance;
+    private static BluetoothHelper instance;
 
     BluetoothAdapter mBluetoothAdapter;
 
@@ -26,18 +29,25 @@ public class BluetoothHelper {
 
     Activity activity;
 
-    Set<BluetoothDevice> pairedDevices;
+    OnNewDeviceFoundListener listener;
 
-    Set<BluetoothDevice> devicesFound;
+    private HashMap<String,BluetoothDevice> devicesFound;
 
-    private BluetoothHelper(Activity activity){
-        this.activity=activity;
+    private BluetoothHelper(){
+        devicesFound = new HashMap<>();
     }
 
-    public BluetoothHelper getInstance(Activity activity){
+    public static BluetoothHelper getInstance(){
         if(instance==null)
-            instance = new BluetoothHelper(activity);
+            instance = new BluetoothHelper();
         return instance;
+    }
+
+    public void initBluetoothHelper(Activity activity){
+        if(this.activity==null) {
+            this.activity = activity;
+            setUpBluetooth();
+        }
     }
 
     private void setUpBluetooth(){
@@ -55,6 +65,8 @@ public class BluetoothHelper {
     }
 
     private void enableBluetooth() {
+        if(activity==null)
+            throw new RuntimeException("Call initBluetoothHelper before using this method.");
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(activity,enableBtIntent, REQUEST_ENABLE_BT,null);
@@ -65,13 +77,12 @@ public class BluetoothHelper {
         return isBluetoothSupported;
     }
 
-    private void getPairedDevices(){
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice device : pairedDevices) {
-                pairedDevices.add(device);
-            }
-        }
+    public List<BluetoothDevice> getPairedDevices(){
+        List<BluetoothDevice> list = new ArrayList<>();
+        list.addAll(mBluetoothAdapter.getBondedDevices());
+        for(BluetoothDevice device:list)
+            devicesFound.put(device.getAddress(),device);
+        return list;
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -79,16 +90,28 @@ public class BluetoothHelper {
             String action = intent.getAction();
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                devicesFound.add(device);
+                devicesFound.put(device.getAddress(),device);
+                listener.onNewDeviceFoundListener(device);
             }
         }
     };
 
-    private void discoverDevices(){
+    public void discoverDevices(OnNewDeviceFoundListener listener){
+        if(activity==null)
+            throw new RuntimeException("Call initBluetoothHelper before using this method.");
+
+        this.listener = listener;
+
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         activity.registerReceiver(mReceiver, filter);
     }
 
+    public HashMap<String, BluetoothDevice> getDevicesFound() {
+        return devicesFound;
+    }
 
+    public interface OnNewDeviceFoundListener {
+        void onNewDeviceFoundListener(BluetoothDevice bluetoothDevice);
+    }
 
 }

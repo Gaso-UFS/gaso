@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -19,9 +20,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
+import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.config.Config;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
@@ -31,6 +36,7 @@ import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
+import com.ericmguimaraes.gaso.obd.BluetoothHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
@@ -64,6 +70,9 @@ public class MyCarFragment extends Fragment {
 
     @Bind(R.id.model)
     TextView modelText;
+
+    @Bind(R.id.obd_connect_button)
+    Button obdConnectButton;
 
     User user;
     Car car;
@@ -141,14 +150,26 @@ public class MyCarFragment extends Fragment {
         CarDAO carDAO = new CarDAO(getContext());
         if(carDAO.count()>0 || userDAO.count()>0)
             fab.hide();
-        else if(carDAO.count()==0 && userDAO.count()==0){
+        else if(carDAO.count()==0 && userDAO.count()==0) {
             MenuItem carMenuItem = menu.findItem(R.id.car_list_menu_item);
-            if(carMenuItem!=null)
+            if (carMenuItem != null)
                 carMenuItem.setVisible(false);
             MenuItem userMenuItem = menu.findItem(R.id.user_list_menu_item);
-            if(userMenuItem!=null)
+            if (userMenuItem != null)
                 userMenuItem.setVisible(false);
         }
+
+        obdConnectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(BluetoothHelper.getInstance().isBluetoothSupported()){
+                    Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getContext(),"Não foi possivel conectar ao bluetooth e não há suporte a conexão wifi.",Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     @Override

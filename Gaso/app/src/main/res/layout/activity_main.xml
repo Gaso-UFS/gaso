@@ -49,6 +49,19 @@
                 android:text="Sinal de GPS perdido."/>
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/blue_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:visibility="gone"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Adaptador bluetooth não encontrado."/>
+        </RelativeLayout>
+
 
     </android.support.design.widget.AppBarLayout>
 
