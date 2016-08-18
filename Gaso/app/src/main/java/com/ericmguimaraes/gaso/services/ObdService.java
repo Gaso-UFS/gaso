@@ -1,23 +1,61 @@
 package com.ericmguimaraes.gaso.services;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.MainActivity;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.model.ObdData;
 import com.ericmguimaraes.gaso.obd.BluetoothConnectThread;
+import com.github.pires.obd.commands.control.DistanceMILOnCommand;
+import com.github.pires.obd.commands.control.DistanceSinceCCCommand;
+import com.github.pires.obd.commands.control.IgnitionMonitorCommand;
+import com.github.pires.obd.commands.control.ModuleVoltageCommand;
+import com.github.pires.obd.commands.control.PendingTroubleCodesCommand;
+import com.github.pires.obd.commands.control.VinCommand;
+import com.github.pires.obd.commands.engine.AbsoluteLoadCommand;
+import com.github.pires.obd.commands.engine.LoadCommand;
+import com.github.pires.obd.commands.engine.MassAirFlowCommand;
+import com.github.pires.obd.commands.engine.OilTempCommand;
+import com.github.pires.obd.commands.engine.RPMCommand;
+import com.github.pires.obd.commands.engine.RuntimeCommand;
+import com.github.pires.obd.commands.engine.ThrottlePositionCommand;
+import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
+import com.github.pires.obd.commands.fuel.ConsumptionRateCommand;
+import com.github.pires.obd.commands.fuel.FindFuelTypeCommand;
+import com.github.pires.obd.commands.fuel.FuelLevelCommand;
+import com.github.pires.obd.commands.fuel.FuelTrimCommand;
+import com.github.pires.obd.commands.fuel.WidebandAirFuelRatioCommand;
+import com.github.pires.obd.commands.pressure.BarometricPressureCommand;
+import com.github.pires.obd.commands.pressure.FuelPressureCommand;
+import com.github.pires.obd.commands.pressure.FuelRailPressureCommand;
+import com.github.pires.obd.commands.pressure.IntakeManifoldPressureCommand;
+import com.github.pires.obd.commands.temperature.AirIntakeTemperatureCommand;
+import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
+import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
+import com.github.pires.obd.enums.AvailableCommandNames;
+import com.github.pires.obd.exceptions.UnsupportedCommandException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by ericm on 30-Jul-16.
@@ -37,11 +75,40 @@ public class ObdService extends Service {
 
     ReadObdThread readObdThread;
 
+    public static final int NOTIFICATION_ID = 1;
+    private static final String TAG = ObdService.class.getName();
+    protected Context ctx;
+    protected boolean isRunning = false;
+    protected Long queueCounter = 0L;
+    protected BlockingQueue<ObdCommandJob> jobsQueue = new LinkedBlockingQueue<>();
+
+    SharedPreferences prefs;
+    protected NotificationManager notificationManager;
+
+    private BluetoothDevice dev = null;
+    private BluetoothSocket sock = null;
+
+    // Run the executeQueue in a different thread to lighten the UI thread
+    Thread t = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                executeQueue();
+            } catch (InterruptedException e) {
+                t.interrupt();
+            }
+        }
+    });
+
+
     @Override
     public void onCreate() {
         super.onCreate();
         if(listeners==null)
             listeners = new ArrayList<>();
+        Log.d(TAG, "Creating service..");
+        t.start();
+        Log.d(TAG, "Service created.");
     }
 
     @Nullable
@@ -74,6 +141,11 @@ public class ObdService extends Service {
     public void onDestroy() {
         super.onDestroy();
         closeSocket();
+        super.onDestroy();
+        Log.d(TAG, "Destroying service...");
+        notificationManager.cancel(NOTIFICATION_ID);
+        t.interrupt();
+        Log.d(TAG, "Service destroyed.");
     }
 
     public void startReadingThread() {
@@ -221,5 +293,209 @@ public class ObdService extends Service {
         startForeground(ONGOING_NOTIFICATION_ID, mBuilder.build());
          */
     }
+
+    /**
+     * This method will add a job to the queue while setting its ID to the
+     * internal queue counter.
+     *
+     * @param job the job to queue.
+     */
+    public void queueJob(ObdCommandJob job) {
+        // This is a good place to enforce the imperial units option
+        job.getCommand().useImperialUnits(prefs.getBoolean(Constants.IMPERIAL_UNITS_KEY, false));
+
+        queueCounter++;
+        Log.d(TAG, "Adding job[" + queueCounter + "] to queue..");
+
+        job.setId(queueCounter);
+        try {
+            jobsQueue.put(job);
+            Log.d(TAG, "Job queued successfully.");
+        } catch (InterruptedException e) {
+            job.setState(ObdCommandJob.ObdCommandJobState.QUEUE_ERROR);
+            Log.e(TAG, "Failed to queue job.");
+        }
+    }
+
+    /**
+     * Runs the queue until the service is stopped
+     */
+    protected void executeQueue() throws InterruptedException {
+        Log.d(TAG, "Executing queue..");
+        while (!Thread.currentThread().isInterrupted()) {
+            ObdCommandJob job = null;
+            try {
+                job = jobsQueue.take();
+
+                // log job
+                Log.d(TAG, "Taking job[" + job.getId() + "] from queue..");
+
+                if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NEW)) {
+                    Log.d(TAG, "Job state is NEW. Run it..");
+                    job.setState(ObdCommandJob.ObdCommandJobState.RUNNING);
+                    if (sock.isConnected()) {
+                        job.getCommand().run(sock.getInputStream(), sock.getOutputStream());
+                    } else {
+                        job.setState(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR);
+                        Log.e(TAG, "Can't run command on a closed socket.");
+                    }
+                } else
+                    // log not new job
+                    Log.e(TAG,
+                            "Job state was not new, so it shouldn't be in queue. BUG ALERT!");
+            } catch (InterruptedException i) {
+                Thread.currentThread().interrupt();
+            } catch (UnsupportedCommandException u) {
+                if (job != null) {
+                    job.setState(ObdCommandJob.ObdCommandJobState.NOT_SUPPORTED);
+                }
+                Log.d(TAG, "Command not supported. -> " + u.getMessage());
+            } catch (IOException io) {
+                if (job != null) {
+                    if(io.getMessage().contains("Broken pipe"))
+                        job.setState(ObdCommandJob.ObdCommandJobState.BROKEN_PIPE);
+                    else
+                        job.setState(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR);
+                }
+                Log.e(TAG, "IO error. -> " + io.getMessage());
+            } catch (Exception e) {
+                if (job != null) {
+                    job.setState(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR);
+                }
+                Log.e(TAG, "Failed to run command. -> " + e.getMessage());
+            }
+
+            if (job != null) {
+                final ObdCommandJob job2 = job;
+                stateUpdate(job2);
+            }
+
+            if(queueEmpty())
+                resetQueue();
+        }
+
+    }
+
+    private void resetQueue(){
+        if(jobsQueue==null)
+            jobsQueue = new LinkedBlockingQueue<>();
+        jobsQueue.clear();
+        jobsQueue.add(new ObdCommandJob(new IgnitionMonitorCommand()));
+        jobsQueue.add(new ObdCommandJob(new ModuleVoltageCommand()));
+        jobsQueue.add(new ObdCommandJob(new PendingTroubleCodesCommand()));
+        jobsQueue.add(new ObdCommandJob(new VinCommand()));
+        jobsQueue.add(new ObdCommandJob(new AbsoluteLoadCommand()));
+        jobsQueue.add(new ObdCommandJob(new LoadCommand()));
+        jobsQueue.add(new ObdCommandJob(new MassAirFlowCommand()));
+        jobsQueue.add(new ObdCommandJob(new OilTempCommand()));
+        jobsQueue.add(new ObdCommandJob(new RPMCommand()));
+        jobsQueue.add(new ObdCommandJob(new RuntimeCommand()));
+        jobsQueue.add(new ObdCommandJob(new ThrottlePositionCommand()));
+        jobsQueue.add(new ObdCommandJob(new AirFuelRatioCommand()));
+        jobsQueue.add(new ObdCommandJob(new ConsumptionRateCommand()));
+        jobsQueue.add(new ObdCommandJob(new FindFuelTypeCommand()));
+        jobsQueue.add(new ObdCommandJob(new FuelLevelCommand()));
+        jobsQueue.add(new ObdCommandJob(new FuelTrimCommand()));
+        jobsQueue.add(new ObdCommandJob(new WidebandAirFuelRatioCommand()));
+        jobsQueue.add(new ObdCommandJob(new BarometricPressureCommand()));
+        jobsQueue.add(new ObdCommandJob(new FuelPressureCommand()));
+        jobsQueue.add(new ObdCommandJob(new FuelRailPressureCommand()));
+        jobsQueue.add(new ObdCommandJob(new IntakeManifoldPressureCommand()));
+        jobsQueue.add(new ObdCommandJob(new AirIntakeTemperatureCommand()));
+        jobsQueue.add(new ObdCommandJob(new AmbientAirTemperatureCommand()));
+        jobsQueue.add(new ObdCommandJob(new EngineCoolantTemperatureCommand()));
+    }
+
+    /**
+     * Stop OBD connection and queue processing.
+     */
+    public void stopService() {
+        Log.d(TAG, "Stopping service..");
+
+        notificationManager.cancel(NOTIFICATION_ID);
+        jobsQueue.clear();
+        isRunning = false;
+
+        if (sock != null)
+            // close socket
+            try {
+                sock.close();
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+
+        // kill service
+        stopSelf();
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public boolean queueEmpty() {
+        return jobsQueue.isEmpty();
+    }
+
+    protected void showNotification(String contentTitle, String contentText, int icon, boolean ongoing, boolean notify, boolean vibrate) {
+        final PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, new Intent(ctx, MainActivity.class), 0);
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(ctx);
+        notificationBuilder.setContentTitle(contentTitle)
+                .setContentText(contentText).setSmallIcon(icon)
+                .setContentIntent(contentIntent)
+                .setWhen(System.currentTimeMillis());
+        // can cancel?
+        if (ongoing) {
+            notificationBuilder.setOngoing(true);
+        } else {
+            notificationBuilder.setAutoCancel(true);
+        }
+        if (vibrate) {
+            notificationBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+        }
+        if (notify) {
+            notificationManager.notify(NOTIFICATION_ID, notificationBuilder.getNotification());
+        }
+    }
+
+    public void setContext(Context c) {
+        ctx = c;
+    }
+
+    public void stateUpdate(final ObdCommandJob job) {
+        final String cmdName = job.getCommand().getName();
+        String cmdResult = "";
+        final String cmdID = LookUpCommand(cmdName);
+
+        if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
+            cmdResult = job.getCommand().getResult();
+            if (cmdResult != null && isServiceBound) {
+                obdStatusTextView.setText(cmdResult.toLowerCase());
+            }
+        } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.BROKEN_PIPE)) {
+            if (isServiceBound)
+                stopLiveData();
+        } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NOT_SUPPORTED)) {
+            cmdResult = getString(R.string.status_obd_no_support);
+        } else {
+            cmdResult = job.getCommand().getFormattedResult();
+            if(isServiceBound)
+                obdStatusTextView.setText(getString(R.string.status_obd_data));
+        }
+
+        if (vv.findViewWithTag(cmdID) != null) {
+            TextView existingTV = (TextView) vv.findViewWithTag(cmdID);
+            existingTV.setText(cmdResult);
+        } else addTableRow(cmdID, cmdName, cmdResult);
+        commandResult.put(cmdID, cmdResult);
+        updateTripStatistic(job, cmdID);
+    }
+
+    public static String LookUpCommand(String txt) {
+        for (AvailableCommandNames item : AvailableCommandNames.values()) {
+            if (item.getValue().equals(txt)) return item.name();
+        }
+        return txt;
+    }
+
 
 }
