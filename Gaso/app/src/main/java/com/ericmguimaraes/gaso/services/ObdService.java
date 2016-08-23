@@ -9,7 +9,6 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.LocationManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -20,10 +19,8 @@ import android.widget.TextView;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.config.Constants;
-import com.ericmguimaraes.gaso.model.ObdData;
+import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.obd.BluetoothConnectThread;
-import com.github.pires.obd.commands.control.DistanceMILOnCommand;
-import com.github.pires.obd.commands.control.DistanceSinceCCCommand;
 import com.github.pires.obd.commands.control.IgnitionMonitorCommand;
 import com.github.pires.obd.commands.control.ModuleVoltageCommand;
 import com.github.pires.obd.commands.control.PendingTroubleCodesCommand;
@@ -215,7 +212,7 @@ public class ObdService extends Service {
         }
         startForegroundService();
         while(socket.isConnected()) {
-            ObdData data = getObdData();
+            ObdLog data = getObdData();
             saveObdData(data);
             if(listeners!=null)
                 for (OnDataReceivedListener listener : listeners)
@@ -235,7 +232,7 @@ public class ObdService extends Service {
     }
 
     interface OnDataReceivedListener {
-        void onDataReceived(ObdData obdData);
+        void onDataReceived(ObdLog obdLog);
     }
 
     public void addOnDataReceivedListener(OnDataReceivedListener listener) {
@@ -260,11 +257,11 @@ public class ObdService extends Service {
         this.socket = socket;
     }
 
-    private void saveObdData(ObdData data) {
+    private void saveObdData(ObdLog data) {
         //TODO salvar os dados no realm
     }
 
-    private ObdData getObdData() {
+    private ObdLog getObdData() {
         //TODO iniciar a leitura dos dados com o biblioteca
         return null;
     }
@@ -465,6 +462,9 @@ public class ObdService extends Service {
         final String cmdName = job.getCommand().getName();
         String cmdResult = "";
         final String cmdID = LookUpCommand(cmdName);
+
+        ObdLog obdLog = new ObdLog();
+        obdLog.setData();
 
         if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
             cmdResult = job.getCommand().getResult();
