@@ -49,7 +49,7 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
     }
 
     public void isAtGasStationAsync(final CurrentPlaceListener currentPlaceListener) {
-        if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!LocationHelper.isLocationPermissionAsked && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LocationHelper.LOCATION_PERMISSION_REQUEST);
             Log.e("getting location", "NO PERMISSION");

@@ -206,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     //TODO permission denied
                 }
+                LocationHelper.isLocationPermissionAsked = true;
                 return;
             }
         }

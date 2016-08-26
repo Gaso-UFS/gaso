@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -29,6 +30,7 @@ import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.UserListActivity;
 import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
 import com.ericmguimaraes.gaso.obd.BluetoothHelper;
@@ -44,7 +46,7 @@ import butterknife.ButterKnife;
  * Use the {@link MyCarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MyCarFragment extends Fragment {
+public class MyCarFragment extends Fragment implements ObdService.OnDataReceivedListener {
 
 
     @Bind(R.id.fab)
@@ -230,6 +232,7 @@ public class MyCarFragment extends Fragment {
             mService.setDevice(Session.getInstance().device);
             mService.setSocket(Session.getInstance().socket);
             mService.startReadingThread();
+            mService.addOnDataReceivedListener(MyCarFragment.this);
             mBound = true;
         }
 
@@ -238,5 +241,23 @@ public class MyCarFragment extends Fragment {
             mBound = false;
         }
     };
+
+    Handler handler;
+
+    @Override
+    public void onDataReceived(ObdLog obdLog) {
+        handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateObdView();
+            }
+        },50);
+
+    }
+
+    private void updateObdView() {
+
+    }
 
 }

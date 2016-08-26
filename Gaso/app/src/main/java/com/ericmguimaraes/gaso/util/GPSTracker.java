@@ -71,7 +71,7 @@ public class GPSTracker extends Service implements LocationListener {
 			} else {
 				this.canGetLocation = true;
 				if (isNetworkEnabled) {
-					if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+					if (!LocationHelper.isLocationPermissionAsked && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 						ActivityCompat.requestPermissions(activity,
 								new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LocationHelper.LOCATION_PERMISSION_REQUEST);
 						Log.e("getting location", "NO PERMISSION");
@@ -124,7 +124,7 @@ public class GPSTracker extends Service implements LocationListener {
 	 * */
 	public void stopUsingGPS() {
 		if (locationManager != null) {
-			if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			if (!LocationHelper.isLocationPermissionAsked && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, LocationHelper.LOCATION_PERMISSION_REQUEST);
                 Log.e("getting location", "NO PERMISSION");

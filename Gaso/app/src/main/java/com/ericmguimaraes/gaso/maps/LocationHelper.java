@@ -41,6 +41,8 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
 
     public static final int LOCATION_PERMISSION_REQUEST = 1;
 
+    public static boolean isLocationPermissionAsked = false;
+
     private LocationHelper(Activity activity) {
         this.context = activity.getApplicationContext();
         this.activity = activity;
@@ -81,7 +83,7 @@ public class LocationHelper implements GoogleApiClient.ConnectionCallbacks, Goog
         if(!isConnected)
             return null;
         Location location = null;
-        if (ActivityCompat.checkSelfPermission(context,
+        if (!LocationHelper.isLocationPermissionAsked && ActivityCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {

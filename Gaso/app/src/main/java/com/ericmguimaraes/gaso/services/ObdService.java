@@ -96,6 +96,7 @@ public class ObdService extends Service {
             }
         }
     });
+    private boolean isServiceBound = true;
 
 
     @Override
@@ -231,7 +232,7 @@ public class ObdService extends Service {
         return true;
     }
 
-    interface OnDataReceivedListener {
+    public interface OnDataReceivedListener {
         void onDataReceived(ObdLog obdLog);
     }
 
@@ -464,30 +465,31 @@ public class ObdService extends Service {
         final String cmdID = LookUpCommand(cmdName);
 
         ObdLog obdLog = new ObdLog();
-        obdLog.setData();
+        obdLog.setPid(job.getCommand().getCommandPID());
+        obdLog.setParsed(true);
 
         if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
             cmdResult = job.getCommand().getResult();
-            if (cmdResult != null && isServiceBound) {
-                obdStatusTextView.setText(cmdResult.toLowerCase());
-            }
+            obdLog.setStatus(job.getState().toString());
         } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.BROKEN_PIPE)) {
             if (isServiceBound)
                 stopLiveData();
         } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NOT_SUPPORTED)) {
-            cmdResult = getString(R.string.status_obd_no_support);
+            cmdResult = "Não suportado";
         } else {
             cmdResult = job.getCommand().getFormattedResult();
-            if(isServiceBound)
-                obdStatusTextView.setText(getString(R.string.status_obd_data));
         }
 
-        if (vv.findViewWithTag(cmdID) != null) {
-            TextView existingTV = (TextView) vv.findViewWithTag(cmdID);
-            existingTV.setText(cmdResult);
-        } else addTableRow(cmdID, cmdName, cmdResult);
-        commandResult.put(cmdID, cmdResult);
-        updateTripStatistic(job, cmdID);
+        obdLog.setData(cmdResult);
+
+        for(OnDataReceivedListener l:listeners){
+            l.onDataReceived(obdLog);
+        }
+    }
+
+    private void stopLiveData() {
+        //TODO
+        this.stopSelf();
     }
 
     public static String LookUpCommand(String txt) {

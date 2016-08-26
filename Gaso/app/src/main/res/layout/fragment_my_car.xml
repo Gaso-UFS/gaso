@@ -75,6 +75,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top|center_horizontal"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:layout_margin="@dimen/text_margin"
+                android:text="TEST"/>
+
             <Button
                 android:id="@+id/obd_connect_button"
                 android:layout_width="wrap_content"
