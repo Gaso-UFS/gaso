@@ -57,7 +57,7 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".session.SettingsActivity"
+            android:name=".config.SettingsActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait" />
