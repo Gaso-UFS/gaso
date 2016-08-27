@@ -9,9 +9,9 @@ import com.ericmguimaraes.gaso.model.User;
 /**
  * Created by ericm on 2/28/2016.
  */
-public class Session {
+public class SessionSingleton {
 
-    private static Session instance;
+    private static SessionSingleton instance;
 
     public User currentUser;
     public Car currentCar;
@@ -19,13 +19,13 @@ public class Session {
     public BluetoothSocket socket;
     public boolean isToStartAndBindService = false;
 
-    private Session(){
+    private SessionSingleton(){
     }
 
-    public static Session getInstance(){
+    public static SessionSingleton getInstance(){
         if(instance!=null)
             return instance;
-        instance = new Session();
+        instance = new SessionSingleton();
         return instance;
     }
 

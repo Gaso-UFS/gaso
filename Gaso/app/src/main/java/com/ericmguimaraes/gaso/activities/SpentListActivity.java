@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.SpentListAdapter;
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
@@ -62,7 +62,7 @@ public class SpentListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (Session.getInstance().currentCar == null || Session.getInstance().currentUser == null) {
+                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().currentUser == null) {
                     Context context = getApplicationContext();
                     CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
                     int duration = Toast.LENGTH_LONG;

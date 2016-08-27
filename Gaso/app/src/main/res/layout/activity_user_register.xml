@@ -56,6 +56,33 @@
                 android:hint="@string/email" />
         </android.support.design.widget.TextInputLayout>
 
+        <!-- Email Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/input_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:hint="@string/password" />
+        </android.support.design.widget.TextInputLayout>
+
+        <!-- Email Label -->
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/input_passwordConfirmation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:hint="@string/passwordConfirmation" />
+        </android.support.design.widget.TextInputLayout>
 
         <!-- Signup Button -->
         <Button
@@ -67,9 +94,9 @@
             android:padding="12dp"
             android:background="@color/colorAccent"
             android:textColor="@color/secondary_text"
-            android:text="@string/confirm"
             android:textSize="15sp"
             android:textStyle="bold"
+            android:text="@string/confirm"
             />
 
     </LinearLayout>

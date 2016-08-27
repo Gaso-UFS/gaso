@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.model.MonthSpent;
 import com.ericmguimaraes.gaso.model.Spent;
@@ -115,7 +115,7 @@ public class MonthlyExpensesFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Session.getInstance().currentCar == null || Session.getInstance().currentUser == null) {
+                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().currentUser == null) {
                     Context context = getContext();
                     CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
                     int duration = Toast.LENGTH_LONG;

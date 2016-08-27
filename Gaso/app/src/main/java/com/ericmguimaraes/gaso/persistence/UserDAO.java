@@ -62,6 +62,12 @@ public class UserDAO {
         return list;
     }
 
+    public User findbyEmail(String email){
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<User> query = realm.where(User.class).equalTo("email",email);
+        return query.findFirst();
+    }
+
     public User findFirst(){
         realm = Realm.getInstance(realmConfig);
         return realm.where(User.class).findFirst();
@@ -88,4 +94,11 @@ public class UserDAO {
         return query.count();
     }
 
+    public List<String> findAllEmails() {
+        List<User> users = findAll();
+        List<String> emails = new ArrayList<>();
+        for(User u: users)
+            emails.add(u.getEmail());
+        return emails;
+    }
 }

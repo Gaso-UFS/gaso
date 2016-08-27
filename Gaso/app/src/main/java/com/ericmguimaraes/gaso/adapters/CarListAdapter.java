@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
@@ -81,9 +81,9 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
             dao.remove(lastRemoved);
 
             if(carList.isEmpty())
-                Session.getInstance().currentCar = null;
+                SessionSingleton.getInstance().currentCar = null;
             else
-                Session.getInstance().currentCar = carList.get(0);
+                SessionSingleton.getInstance().currentCar = carList.get(0);
 
             notifyDataSetChanged();
         } catch (Exception e){
@@ -115,8 +115,8 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
             int itemPosition = recyclerView.getChildAdapterPosition(v);
             Car c = carList.get(itemPosition);
             Toast.makeText(context, "Carro "+c.getModel()+" selecionado com sucesso.", Toast.LENGTH_LONG).show();
-            Session session = Session.getInstance();
-            session.currentCar = c;
+            SessionSingleton sessionSingleton = SessionSingleton.getInstance();
+            sessionSingleton.currentCar = c;
             Intent intent = new Intent(context, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

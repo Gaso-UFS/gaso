@@ -20,7 +20,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
@@ -235,8 +235,8 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
 
         SpentDAO dao = new SpentDAO(getApplicationContext());
         Spent s = new Spent();
-        s.setUser(Session.getInstance().currentUser);
-        s.setCar(Session.getInstance().currentCar);
+        s.setUser(SessionSingleton.getInstance().currentUser);
+        s.setCar(SessionSingleton.getInstance().currentCar);
         s.setDate(calendarSelected==null?new Date():calendarSelected.getTime());
         s.setType(typeSelected);
         s.setTotal(Double.parseDouble(inputTotal.getText().toString()));

@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.User;
@@ -81,9 +81,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             dao.remove(lastRemoved);
 
             if(userList.isEmpty())
-                Session.getInstance().currentUser = null;
+                SessionSingleton.getInstance().currentUser = null;
             else
-                Session.getInstance().currentUser = userList.get(0);
+                SessionSingleton.getInstance().currentUser = userList.get(0);
 
             notifyDataSetChanged();
         } catch (Exception e){
@@ -115,8 +115,8 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             int itemPosition = recyclerView.getChildAdapterPosition(v);
             User u = userList.get(itemPosition);
             Toast.makeText(context, "Usuario "+u.getName()+" selecionado com sucesso.", Toast.LENGTH_LONG).show();
-            Session session = Session.getInstance();
-            session.currentUser = u;
+            SessionSingleton sessionSingleton = SessionSingleton.getInstance();
+            sessionSingleton.currentUser = u;
             Intent intent = new Intent(context, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

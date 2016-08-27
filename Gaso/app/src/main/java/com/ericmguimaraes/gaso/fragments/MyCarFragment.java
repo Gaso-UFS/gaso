@@ -1,12 +1,9 @@
 package com.ericmguimaraes.gaso.fragments;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,18 +21,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
-import com.ericmguimaraes.gaso.activities.UserListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.activities.registers.RegisterActivity;
 import com.ericmguimaraes.gaso.obd.BluetoothHelper;
-import com.ericmguimaraes.gaso.persistence.CarDAO;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.services.ObdService;
 
 import butterknife.Bind;
@@ -48,12 +41,8 @@ import butterknife.ButterKnife;
  */
 public class MyCarFragment extends Fragment implements ObdService.OnDataReceivedListener {
 
-
-    @Bind(R.id.fab)
-    FloatingActionButton fab;
-
-    @Bind(R.id.no_user_text)
-    TextView noUserText;
+    @Bind(R.id.no_car_text)
+    TextView noCarText;
 
     @Bind(R.id.name)
     TextView nameText;
@@ -69,6 +58,9 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     @Bind(R.id.fab_bluetooth)
     FloatingActionButton fabBluetooth;
+
+    @Bind(R.id.obd_info_test)
+    TextView obdInfoTest;
 
     User user;
     Car car;
@@ -92,6 +84,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
         }
+        handler = new Handler();
     }
 
     @Override
@@ -104,35 +97,8 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        fab.setColorFilter(Color.WHITE);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), RegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_my_car, menu);
-        UserDAO userDAO = new UserDAO(getContext());
-        CarDAO carDAO = new CarDAO(getContext());
-        if(carDAO.count()>0 || userDAO.count()>0)
-            fab.hide();
-        else if(carDAO.count()==0 && userDAO.count()==0) {
-            MenuItem carMenuItem = menu.findItem(R.id.car_list_menu_item);
-            if (carMenuItem != null)
-                carMenuItem.setVisible(false);
-            MenuItem userMenuItem = menu.findItem(R.id.user_list_menu_item);
-            if (userMenuItem != null)
-                userMenuItem.setVisible(false);
-        }
 
         obdConnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,10 +122,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
                 intent = new Intent(getContext(), SettingsActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.user_list_menu_item:
-                intent = new Intent(getActivity(), UserListActivity.class);
-                startActivity(intent);
-                return true;
             case R.id.car_list_menu_item:
                 intent = new Intent(getActivity(), CarListActivity.class);
                 startActivity(intent);
@@ -169,19 +131,17 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     }
 
     private void updateCarAndUser() {
-        Session session = Session.getInstance();
-        user = session.currentUser;
-        car = session.currentCar;
-        if(user == null || car == null){
+        SessionSingleton sessionSingleton = SessionSingleton.getInstance();
+        user = sessionSingleton.currentUser;
+        car = sessionSingleton.currentCar;
+        if(car == null){
             nameText.setVisibility(View.GONE);
             modelText.setVisibility(View.GONE);
-            noUserText.setVisibility(View.VISIBLE);
-            fab.setVisibility(View.VISIBLE);
+            noCarText.setVisibility(View.VISIBLE);
         } else {
             nameText.setVisibility(View.VISIBLE);
             modelText.setVisibility(View.VISIBLE);
-            noUserText.setVisibility(View.GONE);
-            fab.setVisibility(View.GONE);
+            noCarText.setVisibility(View.GONE);
 
             nameText.setText(user.getName());
             modelText.setText(car.getModel());
@@ -191,19 +151,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     @Override public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if(Session.getInstance().isToStartAndBindService) {
-            Intent intent = new Intent(getContext(), ObdService.class);
-            getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-
-            fabBluetooth.setVisibility(View.VISIBLE);
-            obdDataCardView.setVisibility(View.VISIBLE);
-            //TODO INICIAR EXIBICAO DOS DADOS DO OBD2
-        }
     }
 
     @Override
@@ -219,6 +166,16 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     public void onResume() {
         super.onResume();
         updateCarAndUser();
+
+        if(SessionSingleton.getInstance().isToStartAndBindService) {
+            Intent intent = new Intent(getContext(), ObdService.class);
+            getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+            fabBluetooth.setVisibility(View.VISIBLE);
+            obdDataCardView.setVisibility(View.VISIBLE);
+            //TODO INICIAR EXIBICAO DOS DADOS DO OBD2
+        }
+
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -229,10 +186,11 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
                                        IBinder service) {
             ObdService.ObdServiceBinder binder = (ObdService.ObdServiceBinder) service;
             mService = binder.getService();
-            mService.setDevice(Session.getInstance().device);
-            mService.setSocket(Session.getInstance().socket);
-            mService.startReadingThread();
+            mService.setDevice(SessionSingleton.getInstance().device);
+            mService.setSocket(SessionSingleton.getInstance().socket);
+            mService.setContext(getContext());
             mService.addOnDataReceivedListener(MyCarFragment.this);
+            mService.startReadingThread();
             mBound = true;
         }
 
@@ -245,19 +203,19 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     Handler handler;
 
     @Override
-    public void onDataReceived(ObdLog obdLog) {
-        handler = new Handler();
+    public void onDataReceived(final ObdLog obdLog) {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                updateObdView();
+                updateObdView(obdLog);
             }
         },50);
 
     }
 
-    private void updateObdView() {
-
+    private void updateObdView(ObdLog obdLog) {
+        if(obdLog!=null)
+            obdInfoTest.setText(obdLog.getData());
     }
 
 }

@@ -2,7 +2,7 @@ package com.ericmguimaraes.gaso.activities;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
@@ -12,11 +12,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.fragments.BluetoothFragment;
 import com.ericmguimaraes.gaso.obd.BluetoothConnectThread;
 import com.ericmguimaraes.gaso.obd.BluetoothHelper;
-import com.ericmguimaraes.gaso.services.ObdService;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -28,6 +27,8 @@ public class BluetoothConnectionActivity extends AppCompatActivity implements Bl
 
     @Bind(R.id.coordinator)
     CoordinatorLayout coordinator;
+
+    Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class BluetoothConnectionActivity extends AppCompatActivity implements Bl
         });
         BluetoothHelper.getInstance().initBluetoothHelper(this);
 
+        handler = new Handler();
     }
 
     @Override
@@ -75,14 +77,15 @@ public class BluetoothConnectionActivity extends AppCompatActivity implements Bl
                     Snackbar snackbar = Snackbar
                             .make(coordinator, "Conectado com sucesso.", Snackbar.LENGTH_LONG);
                     snackbar.show();
-                    Session.getInstance().device = bluetoothDevice;
-                    Session.getInstance().socket = socket;
-                    Session.getInstance().isToStartAndBindService = true;
-                    onBackPressed();
+                    SessionSingleton.getInstance().device = bluetoothDevice;
+                    SessionSingleton.getInstance().socket = socket;
+                    SessionSingleton.getInstance().isToStartAndBindService = true;
                 }
             }
         });
 
         thread.start();
     }
+
+
 }

@@ -3,12 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.MainActivity">
 
-    <item android:id="@+id/user_list_menu_item"
-        android:orderInCategory="100"
-        android:title="@string/user_list"
-        app:showAsAction="always"
-        android:icon="@drawable/user"/>
-
     <item android:id="@+id/car_list_menu_item"
         android:orderInCategory="200"
         android:title="@string/car_list"

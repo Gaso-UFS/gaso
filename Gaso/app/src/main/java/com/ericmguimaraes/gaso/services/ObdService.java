@@ -14,7 +14,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.MainActivity;
@@ -74,7 +73,7 @@ public class ObdService extends Service {
 
     public static final int NOTIFICATION_ID = 1;
     private static final String TAG = ObdService.class.getName();
-    protected Context ctx;
+    protected Context context;
     protected boolean isRunning = false;
     protected Long queueCounter = 0L;
     protected BlockingQueue<ObdCommandJob> jobsQueue = new LinkedBlockingQueue<>();
@@ -82,20 +81,6 @@ public class ObdService extends Service {
     SharedPreferences prefs;
     protected NotificationManager notificationManager;
 
-    private BluetoothDevice dev = null;
-    private BluetoothSocket sock = null;
-
-    // Run the executeQueue in a different thread to lighten the UI thread
-    Thread t = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            try {
-                executeQueue();
-            } catch (InterruptedException e) {
-                t.interrupt();
-            }
-        }
-    });
     private boolean isServiceBound = true;
 
 
@@ -105,8 +90,6 @@ public class ObdService extends Service {
         if(listeners==null)
             listeners = new ArrayList<>();
         Log.d(TAG, "Creating service..");
-        t.start();
-        Log.d(TAG, "Service created.");
     }
 
     @Nullable
@@ -125,7 +108,7 @@ public class ObdService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         retryCount=0;
-        if(device!=null)
+        if(device !=null)
             startReadingThread();
         return START_STICKY;
     }
@@ -142,11 +125,12 @@ public class ObdService extends Service {
         super.onDestroy();
         Log.d(TAG, "Destroying service...");
         notificationManager.cancel(NOTIFICATION_ID);
-        t.interrupt();
+        readObdThread.interrupt();
         Log.d(TAG, "Service destroyed.");
     }
 
     public void startReadingThread() {
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if(readObdThread==null)
             readObdThread = new ReadObdThread();
         if(readObdThread.isInterrupted() || !readObdThread.isAlive())
@@ -158,7 +142,7 @@ public class ObdService extends Service {
         public void run() {
             try {
                 while(!isInterrupted()){
-                    if(device==null) {
+                    if(device ==null) {
                         retryCount++;
                         if(retryCount-1>RETRY_LIMIT){
                             stopSelf();
@@ -177,7 +161,7 @@ public class ObdService extends Service {
     }
 
     private void closeSocket() {
-        if(socket!=null)
+        if(socket !=null)
             try {
                 socket.close();
             } catch (IOException e) {
@@ -199,25 +183,25 @@ public class ObdService extends Service {
                     retry();
                 } else {
                     ObdService.this.socket = socket;
-                    startReading();
+                    try {
+                        startReading();
+                    } catch (InterruptedException e) {
+                        Log.d("ERROR_WAITING",e.getMessage(),e);
+                    }
                 }
             }
         });
         thread.start();
     }
 
-    private void startReading() {
-        if(socket==null || !socket.isConnected()){
+    private void startReading() throws InterruptedException {
+        if(socket ==null || !socket.isConnected()){
             retry();
             return;
         }
-        startForegroundService();
+        showNotification("title","test",R.drawable.ic_bluetooth,true,true,true);
         while(socket.isConnected()) {
-            ObdLog data = getObdData();
-            saveObdData(data);
-            if(listeners!=null)
-                for (OnDataReceivedListener listener : listeners)
-                    listener.onDataReceived(data);
+            executeQueue();
         }
         retry();
     }
@@ -262,36 +246,6 @@ public class ObdService extends Service {
         //TODO salvar os dados no realm
     }
 
-    private ObdLog getObdData() {
-        //TODO iniciar a leitura dos dados com o biblioteca
-        return null;
-    }
-
-    private void startForegroundService(){
-        //TODO criar notificacao melhor
-        Notification notification = new Notification(R.drawable.ic_globe_notification, "Gaso - OBD2 Conectado!", System.currentTimeMillis());
-        Intent notificationIntent = new Intent(this, ObdService.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-        startForeground(ONGOING_NOTIFICATION_ID, notification);
-
-        /*
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_globe_notification)
-                        .setContentTitle("Gaso")
-                        .setContentText("OBD2 Conectado!")
-                        .setOngoing(true);
-
-        Intent resultIntent = new Intent(this, ObdService.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(ObdService.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
-        mBuilder.setContentIntent(resultPendingIntent);
-        startForeground(ONGOING_NOTIFICATION_ID, mBuilder.build());
-         */
-    }
-
     /**
      * This method will add a job to the queue while setting its ID to the
      * internal queue counter.
@@ -320,6 +274,7 @@ public class ObdService extends Service {
      */
     protected void executeQueue() throws InterruptedException {
         Log.d(TAG, "Executing queue..");
+        resetQueue();
         while (!Thread.currentThread().isInterrupted()) {
             ObdCommandJob job = null;
             try {
@@ -331,8 +286,8 @@ public class ObdService extends Service {
                 if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NEW)) {
                     Log.d(TAG, "Job state is NEW. Run it..");
                     job.setState(ObdCommandJob.ObdCommandJobState.RUNNING);
-                    if (sock.isConnected()) {
-                        job.getCommand().run(sock.getInputStream(), sock.getOutputStream());
+                    if (socket.isConnected()) {
+                        job.getCommand().run(socket.getInputStream(), socket.getOutputStream());
                     } else {
                         job.setState(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR);
                         Log.e(TAG, "Can't run command on a closed socket.");
@@ -378,30 +333,31 @@ public class ObdService extends Service {
         if(jobsQueue==null)
             jobsQueue = new LinkedBlockingQueue<>();
         jobsQueue.clear();
-        jobsQueue.add(new ObdCommandJob(new IgnitionMonitorCommand()));
-        jobsQueue.add(new ObdCommandJob(new ModuleVoltageCommand()));
-        jobsQueue.add(new ObdCommandJob(new PendingTroubleCodesCommand()));
-        jobsQueue.add(new ObdCommandJob(new VinCommand()));
-        jobsQueue.add(new ObdCommandJob(new AbsoluteLoadCommand()));
-        jobsQueue.add(new ObdCommandJob(new LoadCommand()));
-        jobsQueue.add(new ObdCommandJob(new MassAirFlowCommand()));
-        jobsQueue.add(new ObdCommandJob(new OilTempCommand()));
-        jobsQueue.add(new ObdCommandJob(new RPMCommand()));
-        jobsQueue.add(new ObdCommandJob(new RuntimeCommand()));
-        jobsQueue.add(new ObdCommandJob(new ThrottlePositionCommand()));
-        jobsQueue.add(new ObdCommandJob(new AirFuelRatioCommand()));
-        jobsQueue.add(new ObdCommandJob(new ConsumptionRateCommand()));
-        jobsQueue.add(new ObdCommandJob(new FindFuelTypeCommand()));
-        jobsQueue.add(new ObdCommandJob(new FuelLevelCommand()));
-        jobsQueue.add(new ObdCommandJob(new FuelTrimCommand()));
-        jobsQueue.add(new ObdCommandJob(new WidebandAirFuelRatioCommand()));
-        jobsQueue.add(new ObdCommandJob(new BarometricPressureCommand()));
-        jobsQueue.add(new ObdCommandJob(new FuelPressureCommand()));
-        jobsQueue.add(new ObdCommandJob(new FuelRailPressureCommand()));
-        jobsQueue.add(new ObdCommandJob(new IntakeManifoldPressureCommand()));
-        jobsQueue.add(new ObdCommandJob(new AirIntakeTemperatureCommand()));
-        jobsQueue.add(new ObdCommandJob(new AmbientAirTemperatureCommand()));
-        jobsQueue.add(new ObdCommandJob(new EngineCoolantTemperatureCommand()));
+        queueCounter = 0L;
+        queueJob(new ObdCommandJob(new IgnitionMonitorCommand()));
+        queueJob(new ObdCommandJob(new ModuleVoltageCommand()));
+        queueJob(new ObdCommandJob(new PendingTroubleCodesCommand()));
+        queueJob(new ObdCommandJob(new VinCommand()));
+        queueJob(new ObdCommandJob(new AbsoluteLoadCommand()));
+        queueJob(new ObdCommandJob(new LoadCommand()));
+        queueJob(new ObdCommandJob(new MassAirFlowCommand()));
+        queueJob(new ObdCommandJob(new OilTempCommand()));
+        queueJob(new ObdCommandJob(new RPMCommand()));
+        queueJob(new ObdCommandJob(new RuntimeCommand()));
+        queueJob(new ObdCommandJob(new ThrottlePositionCommand()));
+        queueJob(new ObdCommandJob(new AirFuelRatioCommand()));
+        queueJob(new ObdCommandJob(new ConsumptionRateCommand()));
+        queueJob(new ObdCommandJob(new FindFuelTypeCommand()));
+        queueJob(new ObdCommandJob(new FuelLevelCommand()));
+        queueJob(new ObdCommandJob(new FuelTrimCommand()));
+        queueJob(new ObdCommandJob(new WidebandAirFuelRatioCommand()));
+        queueJob(new ObdCommandJob(new BarometricPressureCommand()));
+        queueJob(new ObdCommandJob(new FuelPressureCommand()));
+        queueJob(new ObdCommandJob(new FuelRailPressureCommand()));
+        queueJob(new ObdCommandJob(new IntakeManifoldPressureCommand()));
+        queueJob(new ObdCommandJob(new AirIntakeTemperatureCommand()));
+        queueJob(new ObdCommandJob(new AmbientAirTemperatureCommand()));
+        queueJob(new ObdCommandJob(new EngineCoolantTemperatureCommand()));
     }
 
     /**
@@ -414,13 +370,16 @@ public class ObdService extends Service {
         jobsQueue.clear();
         isRunning = false;
 
-        if (sock != null)
+        if (socket != null)
             // close socket
             try {
-                sock.close();
+                socket.close();
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
             }
+
+        if(readObdThread!=null)
+            readObdThread.interrupt();
 
         // kill service
         stopSelf();
@@ -435,8 +394,8 @@ public class ObdService extends Service {
     }
 
     protected void showNotification(String contentTitle, String contentText, int icon, boolean ongoing, boolean notify, boolean vibrate) {
-        final PendingIntent contentIntent = PendingIntent.getActivity(ctx, 0, new Intent(ctx, MainActivity.class), 0);
-        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(ctx);
+        final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context);
         notificationBuilder.setContentTitle(contentTitle)
                 .setContentText(contentText).setSmallIcon(icon)
                 .setContentIntent(contentIntent)
@@ -456,7 +415,7 @@ public class ObdService extends Service {
     }
 
     public void setContext(Context c) {
-        ctx = c;
+        context = c;
     }
 
     public void stateUpdate(final ObdCommandJob job) {
@@ -465,7 +424,11 @@ public class ObdService extends Service {
         final String cmdID = LookUpCommand(cmdName);
 
         ObdLog obdLog = new ObdLog();
-        obdLog.setPid(job.getCommand().getCommandPID());
+        try {
+            obdLog.setPid(job.getCommand().getCommandPID());
+        } catch (IndexOutOfBoundsException e){
+            obdLog.setPid(job.getCommand().getName());
+        }
         obdLog.setParsed(true);
 
         if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
@@ -473,7 +436,7 @@ public class ObdService extends Service {
             obdLog.setStatus(job.getState().toString());
         } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.BROKEN_PIPE)) {
             if (isServiceBound)
-                stopLiveData();
+                stopService();
         } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NOT_SUPPORTED)) {
             cmdResult = "Não suportado";
         } else {
@@ -485,11 +448,8 @@ public class ObdService extends Service {
         for(OnDataReceivedListener l:listeners){
             l.onDataReceived(obdLog);
         }
-    }
+        saveObdData(obdLog);
 
-    private void stopLiveData() {
-        //TODO
-        this.stopSelf();
     }
 
     public static String LookUpCommand(String txt) {

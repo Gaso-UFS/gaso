@@ -11,7 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
@@ -93,8 +93,8 @@ public class RegisterActivity extends AppCompatActivity {
         user.setEmail(inputEmail.getText().toString());
         userDAO.add(user);
 
-        Session.getInstance().currentCar = car;
-        Session.getInstance().currentUser = user;
+        SessionSingleton.getInstance().currentCar = car;
+        SessionSingleton.getInstance().currentUser = user;
 
         CharSequence text = userAndCarRegistered;
         int duration = Toast.LENGTH_SHORT;

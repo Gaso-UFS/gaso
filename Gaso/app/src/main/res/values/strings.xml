@@ -6,7 +6,7 @@
     <string name="gas">Gas</string>
     <string name="my_car">Meu Carro</string>
     <string name="spent">Gastos</string>
-    <string name="no_user_text">Cadastre e selecione um usuario e carro.</string>
+    <string name="no_car_text">Cadastre e selecione um carro.</string>
     <string name="connect">Conectar OBD</string>
     <string name="user_list">Lista de Usuarios</string>
     <string name="car_list">Lista de Carros</string>
@@ -16,7 +16,7 @@
     <string name="car">Carro</string>
     <string name="model">Modelo do Carro</string>
     <string name="car_description">Descrição do Carro</string>
-    <string name="password">Senha</string>
+    <string name="password">Senha (Opcional) </string>
     <string name="confirm">Confirmar</string>
     <string name="user_and_car_registered">Usuario e carro cadastrados com sucesso</string>
     <string name="user_registered">Usuario cadastrado com sucesso</string>
@@ -93,5 +93,21 @@
     <string name="title_activity_spent_list">Lista de Gastos</string>
     <string name="title_activity_station_details">Detalhes do posto</string>
     <string name="title_activity_bluetooth_device">BluetoothDeviceActivity</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Senha (optional)</string>
+    <string name="action_sign_in">Entrar</string>
+    <string name="action_sign_in_short">Entrar</string>
+    <string name="error_invalid_email">Email Invalido</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="action_create_account">Criar conta</string>
+    <string name="passwordConfirmation">Confirmação de senha (Opcional) </string>
 
 </resources>

@@ -1,7 +1,6 @@
 package com.ericmguimaraes.gaso.activities;
 
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
@@ -13,7 +12,7 @@ import android.widget.RelativeLayout;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
-import com.ericmguimaraes.gaso.config.Session;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
 
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
@@ -112,12 +111,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
-        UserDAO userDAO = new UserDAO(getApplicationContext());
         CarDAO carDAO = new CarDAO(getApplicationContext());
-        if(Session.getInstance().currentUser==null)
-            Session.getInstance().currentUser = userDAO.findFirst();
-        if(Session.getInstance().currentCar==null)
-            Session.getInstance().currentCar = carDAO.findFirst();
+        if(SessionSingleton.getInstance().currentCar==null)
+            SessionSingleton.getInstance().currentCar = carDAO.findFirst();
     }
 
     @Override
@@ -200,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case LocationHelper.LOCATION_PERMISSION_REQUEST: {
-                if (grantResults.length > 0
+                if (grantResults .length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //TODO permission granted
                 } else {

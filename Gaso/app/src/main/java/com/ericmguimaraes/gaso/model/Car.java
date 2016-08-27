@@ -12,6 +12,7 @@ public class Car extends RealmObject {
     private int id = -1;
     private String model;
     private String description;
+    private User user;
 
     public String getModel() {
         return model;
@@ -35,5 +36,13 @@ public class Car extends RealmObject {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
