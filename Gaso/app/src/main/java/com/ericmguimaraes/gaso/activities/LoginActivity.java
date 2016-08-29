@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -36,6 +38,7 @@ import java.util.Locale;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.registers.UserRegisterActivity;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
@@ -138,6 +141,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        User u = getUserLogged();
+        if(u!=null)
+            login(u);
     }
 
     private void populateAutoComplete() {
@@ -367,11 +378,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             if(user!=null) {
                 // copia usuario pois objetos criados pelo realm só podem
                 // ser acessados na mesma thread
-                userCopy = new User();
-                userCopy.setPassword(user.getPassword());
-                userCopy.setEmail(user.getEmail());
-                userCopy.setName(user.getName());
-                userCopy.setId(user.getId());
+                userCopy = copyUser(user);
                 return user.getPassword() == null || user.getPassword().isEmpty() || user.getPassword().equals(mPassword);
             }
 
@@ -385,10 +392,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
 
-                SessionSingleton.getInstance().currentUser = userCopy;
-
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
+                login(userCopy);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
@@ -400,6 +404,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    private User copyUser(@Nullable User user) {
+        if(user==null)
+            return null;
+        User userCopy = new User();
+        userCopy.setPassword(user.getPassword());
+        userCopy.setEmail(user.getEmail());
+        userCopy.setName(user.getName());
+        userCopy.setId(user.getId());
+        return userCopy;
     }
 
     @Override
@@ -426,10 +441,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 UserDAO dao = new UserDAO(getApplicationContext());
                 dao.add(user);
 
-                SessionSingleton.getInstance().currentUser = user;
-
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+                login(user);
 
             } else
                 showConnectionFailSnackBar();
@@ -437,6 +449,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showConnectionFailSnackBar();
         }
     }
+
+    private void login(User user) {
+        SessionSingleton.getInstance().currentUser = user;
+
+        saveUserLogged(user.getEmail());
+
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
+
+    private void saveUserLogged(String email) {
+        SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(Constants.USER_LOGGED_TAG, email);
+        editor.apply();
+    }
+
+    private User getUserLogged(){
+        SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME, 0);
+        String email = settings.getString(Constants.USER_LOGGED_TAG,"");
+        UserDAO dao = new UserDAO(getApplicationContext());
+        User u = dao.findbyEmail(email);
+        u = copyUser(u);
+        return u;
+    }
+
 
 }
 

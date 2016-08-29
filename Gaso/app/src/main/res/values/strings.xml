@@ -109,5 +109,6 @@
     </string>
     <string name="action_create_account">Criar conta</string>
     <string name="passwordConfirmation">Confirmação de senha (Opcional) </string>
+    <string name="action_logout">Sair</string>
 
 </resources>

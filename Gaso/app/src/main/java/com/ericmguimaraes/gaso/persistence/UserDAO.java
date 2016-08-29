@@ -32,6 +32,9 @@ public class UserDAO {
     }
 
     public void add(User user){
+        User userFound = findbyEmail(user.getEmail());
+        if(userFound!=null)
+            user.setId(userFound.getId());
         realm = Realm.getInstance(realmConfig);
         if(user.getId()==-1)
             user.setId((int) setUniqueId());
