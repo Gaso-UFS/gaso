@@ -2,12 +2,14 @@ package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +20,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
@@ -153,6 +157,12 @@ public class GasFragment extends Fragment {
                 menu.findItem(R.id.map_menu_item).setVisible(true);
                 menu.findItem(R.id.stations_list_menu_item).setVisible(false);
                 return true;
+            case R.id.action_logout:
+                forgetLoggedUser();
+                intent = new Intent(getActivity(), LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -277,5 +287,12 @@ public class GasFragment extends Fragment {
                 //isSearching = false;
             }
         }
+    }
+
+    private void forgetLoggedUser() {
+        SharedPreferences settings = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(Constants.USER_LOGGED_TAG, "");
+        editor.apply();
     }
 }

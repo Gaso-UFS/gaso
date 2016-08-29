@@ -7,4 +7,10 @@
         android:orderInCategory="300"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="300"
+        android:title="@string/action_logout"
+        app:showAsAction="never" />
 </menu>

@@ -2,9 +2,11 @@ package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,8 +18,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.model.MonthSpent;
@@ -143,6 +147,12 @@ public class MonthlyExpensesFragment extends Fragment {
                 intent = new Intent(getContext(), SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.action_logout:
+                forgetLoggedUser();
+                intent = new Intent(getActivity(), LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -152,6 +162,13 @@ public class MonthlyExpensesFragment extends Fragment {
         super.onResume();
         populateMonthList();
         adapter.resetList(monthSpentList);
+    }
+
+    private void forgetLoggedUser() {
+        SharedPreferences settings = getActivity().getSharedPreferences(Constants.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(Constants.USER_LOGGED_TAG, "");
+        editor.apply();
     }
 
 }
