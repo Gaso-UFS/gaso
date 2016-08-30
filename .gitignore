@@ -31,3 +31,5 @@ proguard/
 # Android Studio captures folder
 captures/
 Gaso/app/google-services.json
+
+Gaso/.idea/
