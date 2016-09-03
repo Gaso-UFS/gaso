@@ -107,7 +107,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="action_create_account">Criar conta</string>
+    <string name="action_create_account">Não tem uma conta? Cadastre-se</string>
     <string name="passwordConfirmation">Confirmação de senha (Opcional) </string>
     <string name="action_logout">Sair</string>
     <string name="title_activity_login2">Sign in2</string>

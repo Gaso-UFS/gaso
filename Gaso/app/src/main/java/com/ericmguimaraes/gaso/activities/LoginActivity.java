@@ -80,7 +80,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     SignInButton signInButton;
 
     @Bind(R.id.create_account_button)
-    Button createAccountButton;
+    TextView createAccountButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
