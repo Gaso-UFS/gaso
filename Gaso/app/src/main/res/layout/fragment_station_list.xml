@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text="Por favor ligue o gps para utilizar esse recurso."
+        android:text="Por favor ligue o gps e permita o acesso a sua localização para utilizar esse recurso."
         android:textSize="20sp"
         android:textStyle="bold"
         android:visibility="gone"

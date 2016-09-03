@@ -103,7 +103,7 @@ public class StationFragment extends Fragment {
                 progressBar.setVisibility(View.VISIBLE);
                 emptyListTextView.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.GONE);
-            } else if(stationList.isEmpty()) {
+            } else if(stationList!=null && stationList.isEmpty()) {
                 gpsLostTextView.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
                 emptyListTextView.setVisibility(View.VISIBLE);
