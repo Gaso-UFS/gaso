@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.CardView;
@@ -105,6 +106,9 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         obdConnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(SessionSingleton.getInstance().currentCar==null)
+                    Snackbar.make(v,"Por favor, cadastre e/ou selecione um carro antes de conectar o seu OBD2",Snackbar.LENGTH_LONG).show();
+
                 if(BluetoothHelper.getInstance().isBluetoothSupported()){
                     Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
                     startActivity(intent);
