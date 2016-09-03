@@ -12,13 +12,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;

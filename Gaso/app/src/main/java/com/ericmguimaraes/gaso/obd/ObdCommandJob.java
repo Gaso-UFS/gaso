@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.services;
+package com.ericmguimaraes.gaso.obd;
 
 import com.github.pires.obd.commands.ObdCommand;
 

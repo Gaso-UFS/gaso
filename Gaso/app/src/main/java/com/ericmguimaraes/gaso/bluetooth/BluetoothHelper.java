@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.obd;
+package com.ericmguimaraes.gaso.bluetooth;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
 

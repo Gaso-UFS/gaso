@@ -14,8 +14,8 @@ import android.view.View;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.fragments.BluetoothFragment;
-import com.ericmguimaraes.gaso.obd.BluetoothConnectThread;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothConnectThread;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

@@ -20,7 +20,7 @@ import com.ericmguimaraes.gaso.fragments.MonthlyExpensesFragment;
 import com.ericmguimaraes.gaso.fragments.ObdLogFragment;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.model.ObdLog;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GPSTracker;

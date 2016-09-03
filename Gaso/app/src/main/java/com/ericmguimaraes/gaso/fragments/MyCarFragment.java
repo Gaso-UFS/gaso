@@ -33,7 +33,7 @@ import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.services.ObdService;
 
 import butterknife.Bind;

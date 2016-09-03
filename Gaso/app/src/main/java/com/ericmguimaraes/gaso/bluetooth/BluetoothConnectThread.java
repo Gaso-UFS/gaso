@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.obd;
+package com.ericmguimaraes.gaso.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
