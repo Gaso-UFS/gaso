@@ -63,14 +63,12 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     @Bind(R.id.fab_bluetooth)
     FloatingActionButton fabBluetooth;
 
-    @Bind(R.id.obd_info_test)
-    TextView obdInfoTest;
-
     User user;
     Car car;
 
     private ObdService mService;
     private boolean mBound;
+    private ObdLogFragment obdFragment;
 
     public MyCarFragment() {
         // Required empty public constructor
@@ -190,7 +188,10 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
             fabBluetooth.setVisibility(View.VISIBLE);
             obdDataCardView.setVisibility(View.VISIBLE);
-            //TODO INICIAR EXIBICAO DOS DADOS DO OBD2
+
+            obdFragment = ObdLogFragment.newInstance();
+            getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
+
         }
 
     }
@@ -231,8 +232,9 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     }
 
     private void updateObdView(ObdLog obdLog) {
-        if(obdLog!=null)
-            obdInfoTest.setText(obdLog.getData());
+        if(obdLog!=null && obdFragment!=null){
+            obdFragment.addOrUpdateJob(obdLog);
+        }
     }
 
 }

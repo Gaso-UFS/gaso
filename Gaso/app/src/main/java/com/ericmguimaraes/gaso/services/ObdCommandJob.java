@@ -10,9 +10,20 @@ import com.github.pires.obd.commands.ObdCommand;
  */
 public class ObdCommandJob {
 
-    private Long _id;
+    private Long _id = -1L;
     private ObdCommand _command;
     private ObdCommandJobState _state;
+
+    /**
+     * Default ctor.
+     *
+     * @param command the ObCommand to encapsulate.
+     */
+    public ObdCommandJob(Long id, ObdCommand command) {
+        _command = command;
+        _state = ObdCommandJobState.NEW;
+        _id = id;
+    }
 
     /**
      * Default ctor.
@@ -65,4 +76,7 @@ public class ObdCommandJob {
         NOT_SUPPORTED
     }
 
+    public void set_command(ObdCommand _command) {
+        this._command = _command;
+    }
 }

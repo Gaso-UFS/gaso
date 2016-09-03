@@ -9,6 +9,8 @@ public class ObdLog extends RealmObject {
 
     private long id;
 
+    private String name;
+
     private String pid;
 
     private String mode;
@@ -85,5 +87,13 @@ public class ObdLog extends RealmObject {
 
     public void setParsed(Boolean parsed) {
         this.parsed = parsed;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

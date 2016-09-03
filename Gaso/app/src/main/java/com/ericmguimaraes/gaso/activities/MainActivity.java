@@ -17,10 +17,11 @@ import com.ericmguimaraes.gaso.fragments.GasFragment;
 
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.MonthlyExpensesFragment;
+import com.ericmguimaraes.gaso.fragments.ObdLogFragment;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
+import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.obd.BluetoothHelper;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GPSTracker;
 
@@ -28,7 +29,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ObdLogFragment.OnObdLogListFragmentInteractionListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -208,4 +209,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onObdLogListFragmentInteraction(ObdLog log) {
+        //TODO do something with log
+    }
 }
