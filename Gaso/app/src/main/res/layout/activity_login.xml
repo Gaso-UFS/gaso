@@ -40,7 +40,21 @@
             android:gravity="center_horizontal"
             android:layout_below="@id/gaso_icon"
             android:layout_marginTop="20dp"
-            android:layout_centerHorizontal="true"/>
+            android:layout_centerHorizontal="true"
+            android:transitionName="gaso_icon"/>
+
+        <TextView
+            android:id="@+id/beta_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Beta"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_below="@id/gaso_title"
+            android:layout_toEndOf="@id/gaso_title"
+            android:layout_toRightOf="@id/gaso_title"
+            android:rotation="-25"
+            android:textColor="@color/colorAccent"/>
 
         <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button"

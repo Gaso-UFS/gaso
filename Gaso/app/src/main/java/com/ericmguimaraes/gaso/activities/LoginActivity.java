@@ -51,6 +51,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.vision.text.Text;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -75,6 +76,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Bind(R.id.gaso_title)
     TextView gasoTitle;
+
+    @Bind(R.id.beta_text)
+    TextView betaText;
+
+    private boolean isToAnimate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,10 +110,51 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             public void onClick(View view) {
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 startActivityForResult(signInIntent, RC_SIGN_IN);
+                showProgress(true);
             }
         });
 
         setGooglePlusButtonText();
+
+        if(!isBeta())
+            betaText.setVisibility(View.GONE);
+
+    }
+
+    public boolean isBeta(){
+        return getResources().getBoolean(R.bool.isBeta) || getResources().getBoolean(R.bool.isDebug);
+    }
+
+
+    private void animateShowView(View view, int time) {
+
+        time=time==0?750:time;
+        int distance = 50;
+
+        // Prepare the View for the animation
+        view.setVisibility(View.VISIBLE);
+        view.setY(-distance);
+        view.setAlpha(0.0f);
+
+        // Start the animation
+        view.animate()
+                .translationYBy(distance)
+                .setDuration(time)
+                .alpha(1.0f);
+    }
+
+    private void animate(){
+        if(isBeta())
+            animateShowView(betaText,300);
+        animateShowView(gasoTitle,500);
+        animateShowView(signInButton,700);
+    }
+
+    private void hide(){
+        if(isBeta())
+            betaText.setVisibility(View.INVISIBLE);
+        gasoTitle.setVisibility(View.INVISIBLE);
+        signInButton.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -116,6 +163,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         User u = getUserLogged();
         if(u!=null)
             login(u);
+        if(isToAnimate) {
+            hide();
+            animate();
+            isToAnimate = false;
+        }
     }
 
     /**
@@ -210,6 +262,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             } else
                 showConnectionFailSnackBar();
         }
+        showProgress(false);
     }
 
     private User createDebugUser() {

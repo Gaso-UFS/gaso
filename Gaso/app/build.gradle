@@ -19,10 +19,17 @@ android {
 
             resValue "bool", "isRelease", "true"
             resValue "bool", "isDebug", "false"
+            resValue "bool", "isBeta", "false"
         }
         debug {
             resValue "bool", "isRelease", "false"
             resValue "bool", "isDebug", "true"
+            resValue "bool", "isBeta", "false"
+        }
+        beta {
+            resValue "bool", "isRelease", "false"
+            resValue "bool", "isDebug", "false"
+            resValue "bool", "isBeta", "true"
         }
     }
     packagingOptions {
