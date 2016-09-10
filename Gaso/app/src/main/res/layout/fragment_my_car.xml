@@ -115,7 +115,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
         android:src="@drawable/ic_bluetooth"
-        app:layout_anchor="@id/obd_data_card"
+        app:layout_anchor="@id/user_item_root_layout"
         app:layout_anchorGravity="end|bottom"
         android:elevation="6dp"
         android:visibility="gone"
