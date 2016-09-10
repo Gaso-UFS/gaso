@@ -28,7 +28,6 @@ import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
@@ -124,10 +123,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         int id = item.getItemId();
         Intent intent;
         switch (id) {
-            case R.id.action_settings:
-                intent = new Intent(getContext(), SettingsActivity.class);
-                startActivity(intent);
-                return true;
             case R.id.car_list_menu_item:
                 intent = new Intent(getActivity(), CarListActivity.class);
                 startActivity(intent);

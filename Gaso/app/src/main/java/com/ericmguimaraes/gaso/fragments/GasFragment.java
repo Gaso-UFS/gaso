@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +22,6 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.config.Constants;
-import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
@@ -135,10 +133,6 @@ public class GasFragment extends Fragment {
 
         FragmentTransaction ft;
         switch (id) {
-            case R.id.action_settings:
-                intent = new Intent(getContext(), SettingsActivity.class);
-                startActivity(intent);
-                return true;
             case R.id.map_menu_item:
                 if(!isSearching && locationHelper!=null && locationHelper.isConnected()) {
                     ft = getChildFragmentManager().beginTransaction();
