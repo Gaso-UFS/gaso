@@ -140,7 +140,8 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
             if(intent.hasExtra("station_id")){
                 StationDAO dao = new StationDAO(getApplicationContext());
                 stationSelected = dao.findById(intent.getStringExtra("station_id"));
-                inputStation.setText(stationSelected.getName());
+                if(stationSelected!=null)
+                    inputStation.setText(stationSelected.getName());
             }
         }
 

@@ -194,9 +194,9 @@ public class GasFragment extends Fragment {
 
     private void showSpentRequestDialog(final Station station) {
         new AlertDialog.Builder(getContext())
-                .setTitle("Ei")
+                .setTitle("Abastecendo?")
                 .setMessage("Você está num posto? Deseja cadastrar um gasto?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(getActivity(), SpentRegisterActivity.class);
                         intent.putExtra("station_id",station.getId());
@@ -204,7 +204,7 @@ public class GasFragment extends Fragment {
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
