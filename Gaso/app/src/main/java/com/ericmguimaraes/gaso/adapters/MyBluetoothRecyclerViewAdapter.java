@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.fragments;
+package com.ericmguimaraes.gaso.adapters;
 
 import android.bluetooth.BluetoothDevice;
 import android.support.v7.widget.RecyclerView;
@@ -22,7 +22,7 @@ import java.util.List;
 public class MyBluetoothRecyclerViewAdapter extends RecyclerView.Adapter<MyBluetoothRecyclerViewAdapter.ViewHolder> {
 
     private List<BluetoothDevice> mValues;
-    private final BluetoothFragment.OnBluetoothDeviceListFragmentInteractionListener mListener;
+    private final OnBluetoothDeviceListFragmentInteractionListener mListener;
     private HashMap<String,BluetoothDevice> devicesHashMap;
 
     public MyBluetoothRecyclerViewAdapter(List<BluetoothDevice> items, OnBluetoothDeviceListFragmentInteractionListener listener) {

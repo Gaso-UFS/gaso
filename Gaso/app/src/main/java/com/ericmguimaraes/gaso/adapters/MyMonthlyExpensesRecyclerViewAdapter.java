@@ -85,6 +85,7 @@ public class MyMonthlyExpensesRecyclerViewAdapter extends RecyclerView.Adapter<M
                 Calendar car = Calendar.getInstance();
                 car.setTime(monthSpentList.get(itemPosition).getMonth());
                 intent.putExtra("month", car.get(Calendar.MONTH));
+                intent.putExtra("year", car.get(Calendar.YEAR));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 activity.getApplicationContext().startActivity(intent);
         }

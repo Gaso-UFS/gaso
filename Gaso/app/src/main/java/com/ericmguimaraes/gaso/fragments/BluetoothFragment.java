@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.adapters.MyBluetoothRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 
 import java.util.Iterator;

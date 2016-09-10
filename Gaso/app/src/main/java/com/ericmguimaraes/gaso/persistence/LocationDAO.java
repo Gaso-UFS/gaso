@@ -25,7 +25,7 @@ public class LocationDAO {
 
     public LocationDAO(Context context){
         this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).build();
+        realmConfig = new RealmConfiguration.Builder(context).deleteRealmIfMigrationNeeded().build();
     }
 
     public void add(Location location){

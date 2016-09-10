@@ -26,7 +26,7 @@ public class StationDAO {
 
     public StationDAO(Context context){
         this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).build();
+        realmConfig = new RealmConfiguration.Builder(context).deleteRealmIfMigrationNeeded().build();
     }
 
     public Station addOrMerge(Station station){

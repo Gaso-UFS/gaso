@@ -25,6 +25,12 @@ public class Constants {
     public static final String DIRECTORY_FULL_LOGGING_KEY = "dirname_full_logging";
     public static final String DEV_EMAIL_KEY = "dev_email";
 
+
+    /* PERMISSION REQUESTS */
+    public static final int LOCATION_PERMISSION_REQUEST = 1;
+    public static final int WRITE_ALL_SPENTS = 2;
+    public static final int WRITE_MONTH_SPENT = 3;
+
     public static final String PREFS_NAME = "config";
     public static final String USER_LOGGED_TAG = "user_logged";
 }

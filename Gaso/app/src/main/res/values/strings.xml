@@ -111,5 +111,6 @@
     <string name="passwordConfirmation">Confirmação de senha (Opcional) </string>
     <string name="action_logout">Sair</string>
     <string name="title_activity_login2">Sign in2</string>
+    <string name="action_export">Exportar dados para csv</string>
 
 </resources>

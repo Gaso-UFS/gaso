@@ -153,7 +153,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         SessionSingleton sessionSingleton = SessionSingleton.getInstance();
         user = sessionSingleton.currentUser;
         car = sessionSingleton.currentCar;
-        if(car == null){
+        if(car == null || user == null){
             nameText.setVisibility(View.GONE);
             modelText.setVisibility(View.GONE);
             noCarText.setVisibility(View.VISIBLE);

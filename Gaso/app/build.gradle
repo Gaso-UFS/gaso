@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.ericmguimaraes.gaso"
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -38,6 +38,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:9.4.0'
     compile 'com.google.api-client:google-api-client:1.19.1'
     compile 'com.github.pires:obd-java-api:1.0-RC16'
+    compile group: 'net.sf.opencsv', name: 'opencsv', version: '2.3'
 }
 
 apply plugin: 'com.google.gms.google-services'

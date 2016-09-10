@@ -27,7 +27,7 @@ public class CombustiveDAO {
 
     public CombustiveDAO(Context context){
         this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).build();
+        realmConfig = new RealmConfiguration.Builder(context).deleteRealmIfMigrationNeeded().build();
     }
 
     public void add(Combustive combustive){
