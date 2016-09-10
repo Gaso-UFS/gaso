@@ -63,6 +63,17 @@ public class CarDAO {
         return list;
     }
 
+    public List<Car> findAllbyUser(User user){
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<Car> query = realm.where(Car.class).equalTo("user.id",user.getId());
+        RealmResults<Car> result = query.findAll();
+        List<Car> list = new ArrayList<>();
+        for(Car c: result){
+            list.add(createNewCar(c));
+        }
+        return list;
+    }
+
     public long setUniqueId() {
         realm = Realm.getInstance(realmConfig);
         Number num = realm.where(Car.class).max("id");
@@ -77,9 +88,9 @@ public class CarDAO {
         return newCar;
     }
 
-    public Car findFirst() {
+    public Car findFirst(User user) {
         realm = Realm.getInstance(realmConfig);
-        return realm.where(Car.class).findFirst();
+        return realm.where(Car.class).equalTo("user.id",user.getId()).findFirst();
     }
 
     public long count(){

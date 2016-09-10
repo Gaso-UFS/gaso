@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.CarListAdapter;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
@@ -62,7 +63,7 @@ public class CarListActivity extends AppCompatActivity {
         });
 
         CarDAO dao = new CarDAO(getApplicationContext());
-        List<Car> cars = dao.findAll();
+        List<Car> cars = dao.findAllbyUser(SessionSingleton.getInstance().currentUser);
         adapter = new CarListAdapter(cars, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));

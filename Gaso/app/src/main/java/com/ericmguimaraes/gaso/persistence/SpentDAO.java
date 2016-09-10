@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Spent;
+import com.ericmguimaraes.gaso.model.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,9 +55,9 @@ public class SpentDAO {
         realm.commitTransaction();
     }
 
-    public List<Spent> findAll(){
+    public List<Spent> findAll(User user){
         realm = Realm.getInstance(realmConfig);
-        RealmQuery<Spent> query = realm.where(Spent.class);
+        RealmQuery<Spent> query = realm.where(Spent.class).equalTo("user.id",user.getId());
         RealmResults<Spent> result = query.findAll();
         List<Spent> list = new ArrayList<>();
         for(Spent c: result){
@@ -65,7 +66,7 @@ public class SpentDAO {
         return list;
     }
 
-    public List<Spent> findByMonthAndYear(Date date){
+    public List<Spent> findByMonthAndYear(Date date,User user){
         Calendar firstDay = Calendar.getInstance();
         firstDay.setTime(date);
         firstDay.set(Calendar.DAY_OF_MONTH,firstDay.getActualMinimum(Calendar.DAY_OF_MONTH));
@@ -86,7 +87,8 @@ public class SpentDAO {
         RealmQuery<Spent> query = realm.
                 where(Spent.class)
                 .equalTo("user.email", SessionSingleton.getInstance().currentUser.getEmail())
-                .between("date",firstDay.getTime(),lastDay.getTime());
+                .between("date",firstDay.getTime(),lastDay.getTime())
+                .equalTo("user.id",user.getId());
         RealmResults<Spent> result = query.findAll();
         List<Spent> list = new ArrayList<>();
         for(Spent c: result){

@@ -96,7 +96,7 @@ public class MonthlyExpensesFragment extends Fragment {
 
     private List<Spent> getSpentList() {
         SpentDAO dao = new SpentDAO(getContext());
-        return dao.findAll();
+        return dao.findAll(SessionSingleton.getInstance().currentUser);
     }
 
     @Override

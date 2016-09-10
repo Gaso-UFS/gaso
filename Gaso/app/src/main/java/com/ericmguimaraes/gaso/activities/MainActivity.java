@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
     private void init(){
         CarDAO carDAO = new CarDAO(getApplicationContext());
         if(SessionSingleton.getInstance().currentCar==null)
-            SessionSingleton.getInstance().currentCar = carDAO.findFirst();
+            SessionSingleton.getInstance().currentCar = carDAO.findFirst(SessionSingleton.getInstance().currentUser);
     }
 
     @Override
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
         List<String[]> data = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
         SpentDAO dao = new SpentDAO(this);
-        List<Spent> spents = dao.findAll();
+        List<Spent> spents = dao.findAll(SessionSingleton.getInstance().currentUser);
         for(Spent s:spents)
             data.add(new String[]{
                     Integer.toString(s.getId()),

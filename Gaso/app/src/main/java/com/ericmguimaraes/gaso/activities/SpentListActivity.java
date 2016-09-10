@@ -106,7 +106,7 @@ public class SpentListActivity extends AppCompatActivity {
         monthAndYear = cal.getTime();
 
         SpentDAO dao = new SpentDAO(getApplicationContext());
-        spents = dao.findByMonthAndYear(monthAndYear);
+        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().currentUser);
         adapter = new SpentListAdapter(spents, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -134,7 +134,7 @@ public class SpentListActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         SpentDAO dao = new SpentDAO(getApplicationContext());
-        spents = dao.findByMonthAndYear(monthAndYear);
+        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().currentUser);
         adapter.resetList(spents);
         toolbar.setTitle(monthNames[month]);
     }

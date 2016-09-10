@@ -16,6 +16,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            resValue "bool", "isRelease", "true"
+            resValue "bool", "isDebug", "false"
+        }
+        debug {
+            resValue "bool", "isRelease", "false"
+            resValue "bool", "isDebug", "true"
         }
     }
     packagingOptions {
