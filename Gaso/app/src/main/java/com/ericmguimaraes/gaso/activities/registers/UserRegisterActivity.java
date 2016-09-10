@@ -132,7 +132,7 @@ public class UserRegisterActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(getApplicationContext(), text, duration);
         toast.show();
 
-        SessionSingleton.getInstance().currentUser = user;
+        SessionSingleton.getInstance().setCurrentUser(user);
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);

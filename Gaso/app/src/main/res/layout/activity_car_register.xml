@@ -29,6 +29,14 @@
         android:layout_margin="@dimen/activity_horizontal_margin"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <TextView
+            android:id="@+id/welcome_car"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome_car"
+            android:textColor="@color/colorPrimary"
+            android:textSize="25sp"/>
+
         <!-- Car Label -->
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"

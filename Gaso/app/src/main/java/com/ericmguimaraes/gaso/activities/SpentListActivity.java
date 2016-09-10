@@ -84,7 +84,7 @@ public class SpentListActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().currentUser == null) {
+                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().getCurrentUser(getApplicationContext()) == null) {
                     Context context = getApplicationContext();
                     CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
                     int duration = Toast.LENGTH_LONG;
@@ -106,7 +106,7 @@ public class SpentListActivity extends AppCompatActivity {
         monthAndYear = cal.getTime();
 
         SpentDAO dao = new SpentDAO(getApplicationContext());
-        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().currentUser);
+        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         adapter = new SpentListAdapter(spents, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -134,7 +134,7 @@ public class SpentListActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         SpentDAO dao = new SpentDAO(getApplicationContext());
-        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().currentUser);
+        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         adapter.resetList(spents);
         toolbar.setTitle(monthNames[month]);
     }

@@ -1,6 +1,7 @@
 package com.ericmguimaraes.gaso.activities;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
@@ -127,9 +129,24 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
     }
 
     private void init(){
+        if(SessionSingleton.getInstance().getCurrentUser(getApplicationContext())==null)
+            goToLogin();
         CarDAO carDAO = new CarDAO(getApplicationContext());
+        if(SessionSingleton.getInstance().currentCar==null && SessionSingleton.getInstance().getCurrentUser(getApplicationContext())!=null)
+            SessionSingleton.getInstance().currentCar = carDAO.findFirst(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         if(SessionSingleton.getInstance().currentCar==null)
-            SessionSingleton.getInstance().currentCar = carDAO.findFirst(SessionSingleton.getInstance().currentUser);
+            firstAccess();
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(this,LoginActivity.class);
+        startActivity(intent);
+    }
+
+    private void firstAccess() {
+        Intent intent = new Intent(this, CarRegisterActivity.class);
+        intent.putExtra("first_access",true);
+        startActivity(intent);
     }
 
     @Override
@@ -242,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
         List<String[]> data = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
         SpentDAO dao = new SpentDAO(this);
-        List<Spent> spents = dao.findAll(SessionSingleton.getInstance().currentUser);
+        List<Spent> spents = dao.findAll(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         for(Spent s:spents)
             data.add(new String[]{
                     Integer.toString(s.getId()),

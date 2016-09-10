@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentStart="true"
-        >
+        android:layout_alignParentLeft="true">
 
         <TextView
             android:id="@+id/name"
@@ -18,8 +18,9 @@
             android:layout_marginStart="@dimen/text_margin"
             android:layout_marginTop="@dimen/text_margin"
             android:text="Nome do comando"
-            android:textSize="16sp"
-            android:textColor="@color/textColorPrimary"/>
+            android:textSize="12sp"
+            android:textColor="@color/textColorPrimary"
+            android:layout_marginLeft="@dimen/text_margin" />
 
         <TextView
             android:id="@+id/state"
@@ -28,7 +29,9 @@
             android:layout_marginStart="@dimen/text_margin"
             android:layout_marginBottom="@dimen/text_margin"
             android:text="NOT_SUPPORTED"
-            android:textColor="@color/secondary_text"/>
+            android:textColor="@color/secondary_text"
+            android:layout_marginLeft="@dimen/text_margin"
+            android:textSize="12sp"/>
 
     </LinearLayout>
 
@@ -37,7 +40,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentEnd="true"
-        >
+        android:layout_alignParentRight="true">
 
     <TextView
         android:id="@+id/value"

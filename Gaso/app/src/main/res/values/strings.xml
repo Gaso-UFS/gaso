@@ -112,5 +112,6 @@
     <string name="action_logout">Sair</string>
     <string name="title_activity_login2">Sign in2</string>
     <string name="action_export">Exportar dados para csv</string>
+    <string name="welcome_car">Oi! Novo por aqui? Vamos cadastrar seu primeiro carro.</string>
 
 </resources>

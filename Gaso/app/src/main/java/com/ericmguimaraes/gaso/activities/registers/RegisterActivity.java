@@ -85,6 +85,7 @@ public class RegisterActivity extends AppCompatActivity {
         Car car = new Car();
         car.setDescription(inputCarDescrition.getText().toString());
         car.setModel(inputCar.getText().toString());
+        car.setUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         carDAO.add(car);
 
         UserDAO userDAO = new UserDAO(getApplicationContext());
@@ -94,7 +95,7 @@ public class RegisterActivity extends AppCompatActivity {
         userDAO.add(user);
 
         SessionSingleton.getInstance().currentCar = car;
-        SessionSingleton.getInstance().currentUser = user;
+        SessionSingleton.getInstance().setCurrentUser(user);
 
         CharSequence text = userAndCarRegistered;
         int duration = Toast.LENGTH_SHORT;

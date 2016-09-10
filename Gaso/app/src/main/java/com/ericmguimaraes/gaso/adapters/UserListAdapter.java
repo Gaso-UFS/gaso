@@ -81,9 +81,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             dao.remove(lastRemoved);
 
             if(userList.isEmpty())
-                SessionSingleton.getInstance().currentUser = null;
+                SessionSingleton.getInstance().setCurrentUser(null);
             else
-                SessionSingleton.getInstance().currentUser = userList.get(0);
+                SessionSingleton.getInstance().setCurrentUser(userList.get(0));
 
             notifyDataSetChanged();
         } catch (Exception e){
@@ -116,7 +116,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             User u = userList.get(itemPosition);
             Toast.makeText(context, "Usuario "+u.getName()+" selecionado com sucesso.", Toast.LENGTH_LONG).show();
             SessionSingleton sessionSingleton = SessionSingleton.getInstance();
-            sessionSingleton.currentUser = u;
+            sessionSingleton.setCurrentUser(u);
             Intent intent = new Intent(context, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

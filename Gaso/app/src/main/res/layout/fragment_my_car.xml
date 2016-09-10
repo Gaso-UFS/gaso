@@ -87,7 +87,8 @@
                 android:textSize="20sp"
                 android:elevation="15dp"
                 android:textColor="@color/secondary_text"
-                android:layout_alignParentEnd="false" />
+                android:layout_alignParentEnd="false"
+                android:layout_alignParentRight="false" />
 
             <android.support.v7.widget.CardView
                 android:id="@+id/obd_data_card"

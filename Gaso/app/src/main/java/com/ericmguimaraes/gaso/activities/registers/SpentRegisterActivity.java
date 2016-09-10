@@ -26,6 +26,7 @@ import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
+import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -142,6 +143,8 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
                 inputStation.setText(stationSelected.getName());
             }
         }
+
+        inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
     }
 
     public void setSpinner(){
@@ -235,11 +238,11 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
 
         SpentDAO dao = new SpentDAO(getApplicationContext());
         Spent s = new Spent();
-        s.setUser(SessionSingleton.getInstance().currentUser);
+        s.setUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         s.setCar(SessionSingleton.getInstance().currentCar);
         s.setDate(calendarSelected==null?new Date():calendarSelected.getTime());
         s.setType(typeSelected);
-        s.setTotal(Double.parseDouble(inputTotal.getText().toString()));
+        s.setTotal(Double.parseDouble(Mask.unmask(inputTotal.getText().toString())));
         s.setStation(stationSelected);
         s.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
         dao.add(s);

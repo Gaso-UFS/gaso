@@ -88,18 +88,25 @@ public class MyObdCommandJobRecyclerViewAdapter extends RecyclerView.Adapter<MyO
 
     public void addOrUpdateJob(ObdLog log){
         boolean found = false;
-        if(log.getName()!=null)
-        for(ObdLog l : mValues){
-            if(l.getName().equals(log.getName())){
-                l.setStatus(log.getStatus());
-                l.setData(log.getData());
-                found = true;
-                break;
+        if(log.getId()!=0)
+            for(int i=0;i<mValues.size();i++){
+                ObdLog l = mValues.get(i);
+                if(l.getId()==log.getId()){
+                    mValues.remove(i);
+                    if(isLogNotBroke(log))
+                        mValues.add(i,log);
+                    found = true;
+                    break;
+                }
             }
-        }
-        if(!found)
+        if(!found && isLogNotBroke(log))
             mValues.add(log);
         notifyDataSetChanged();
+    }
+
+    private boolean isLogNotBroke(ObdLog log){
+        return ((log.getStatus()!=null && !log.getStatus().contains("ERROR")) || log.getStatus()==null)  &&
+                ((log.getData()!=null && !log.getData().contains("NO_DATA") || log.getData()==null));
     }
 
 }

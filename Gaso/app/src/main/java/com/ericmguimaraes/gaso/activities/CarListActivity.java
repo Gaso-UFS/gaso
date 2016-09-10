@@ -63,7 +63,7 @@ public class CarListActivity extends AppCompatActivity {
         });
 
         CarDAO dao = new CarDAO(getApplicationContext());
-        List<Car> cars = dao.findAllbyUser(SessionSingleton.getInstance().currentUser);
+        List<Car> cars = dao.findAllbyUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         adapter = new CarListAdapter(cars, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));

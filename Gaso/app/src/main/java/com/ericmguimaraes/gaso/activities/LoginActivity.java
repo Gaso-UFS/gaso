@@ -253,7 +253,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 login(user);
 
             } else if(getResources().getBoolean(R.bool.isDebug)){
-                login(createDebugUser());
+                User user = createDebugUser();
+                UserDAO dao = new UserDAO(getApplicationContext());
+                dao.add(user);
+                saveUserLogged(user.getEmail());
+                login(user);
             } else
                 showConnectionFailSnackBar();
         } else {
@@ -273,7 +277,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void login(User user) {
-        SessionSingleton.getInstance().currentUser = user;
+        SessionSingleton.getInstance().setCurrentUser(user);
 
         saveUserLogged(user.getEmail());
 

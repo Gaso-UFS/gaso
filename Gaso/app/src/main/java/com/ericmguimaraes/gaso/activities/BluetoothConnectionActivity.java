@@ -2,6 +2,7 @@ package com.ericmguimaraes.gaso.activities;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -80,6 +81,10 @@ public class BluetoothConnectionActivity extends AppCompatActivity implements Bl
                     SessionSingleton.getInstance().device = bluetoothDevice;
                     SessionSingleton.getInstance().socket = socket;
                     SessionSingleton.getInstance().isToStartAndBindService = true;
+
+                    Intent intent = new Intent(BluetoothConnectionActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }
             }
         });

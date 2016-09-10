@@ -33,6 +33,7 @@ import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.services.ObdService;
 
 import butterknife.Bind;
@@ -146,7 +147,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     private void updateCarAndUser() {
         SessionSingleton sessionSingleton = SessionSingleton.getInstance();
-        user = sessionSingleton.currentUser;
+        user = sessionSingleton.getCurrentUser(getContext());
         car = sessionSingleton.currentCar;
         if(car == null || user == null){
             nameText.setVisibility(View.GONE);
@@ -190,6 +191,14 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
             obdFragment = ObdLogFragment.newInstance();
             getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
+
+            fabBluetooth.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MyCarFragment.this.getActivity(),BluetoothConnectionActivity.class);
+                    startActivity(intent);
+                }
+            });
 
         }
 

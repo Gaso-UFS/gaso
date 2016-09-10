@@ -86,7 +86,7 @@ public class SpentDAO {
         realm = Realm.getInstance(realmConfig);
         RealmQuery<Spent> query = realm.
                 where(Spent.class)
-                .equalTo("user.email", SessionSingleton.getInstance().currentUser.getEmail())
+                .equalTo("user.email", SessionSingleton.getInstance().getCurrentUser(context).getEmail())
                 .between("date",firstDay.getTime(),lastDay.getTime())
                 .equalTo("user.id",user.getId());
         RealmResults<Spent> result = query.findAll();

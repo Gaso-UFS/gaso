@@ -38,7 +38,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         if(u==null){
             goToLogin(null);
         } else {
-            SessionSingleton.getInstance().currentUser = u;
+            SessionSingleton.getInstance().setCurrentUser(u);
             goToMain();
         }
     }

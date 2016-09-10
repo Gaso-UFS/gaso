@@ -46,7 +46,7 @@ public class GooglePlaces {
 
 		this._latitude = latitude;
 		this._longitude = longitude;
-		this._radius = 100*1000; //m
+		this._radius = 10*1000; //m
 		String types="gas_station";
 
 		try {

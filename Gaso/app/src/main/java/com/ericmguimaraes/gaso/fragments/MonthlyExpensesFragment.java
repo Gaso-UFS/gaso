@@ -96,7 +96,7 @@ public class MonthlyExpensesFragment extends Fragment {
 
     private List<Spent> getSpentList() {
         SpentDAO dao = new SpentDAO(getContext());
-        return dao.findAll(SessionSingleton.getInstance().currentUser);
+        return dao.findAll(SessionSingleton.getInstance().getCurrentUser(getContext()));
     }
 
     @Override
@@ -119,7 +119,7 @@ public class MonthlyExpensesFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().currentUser == null) {
+                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().getCurrentUser(getContext()) == null) {
                     Context context = getContext();
                     CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
                     int duration = Toast.LENGTH_LONG;

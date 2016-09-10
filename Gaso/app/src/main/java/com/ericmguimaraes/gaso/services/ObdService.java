@@ -91,6 +91,7 @@ public class ObdService extends Service {
         if(listeners==null)
             listeners = new ArrayList<>();
         Log.d(TAG, "Creating service..");
+        prefs = getSharedPreferences("prefs",0);
     }
 
     @Nullable
@@ -200,7 +201,7 @@ public class ObdService extends Service {
             retry();
             return;
         }
-        showNotification("title","test",R.drawable.ic_bluetooth,true,true,true);
+        showNotification("Gaso","Conectado ao bluetooth",R.drawable.gaso_transparent_reduced,true,true,true);
         while(socket.isConnected()) {
             executeQueue();
         }
@@ -425,11 +426,13 @@ public class ObdService extends Service {
         final String cmdID = LookUpCommand(cmdName);
 
         ObdLog obdLog = new ObdLog();
+        obdLog.setId(job.getId());
         try {
             obdLog.setPid(job.getCommand().getCommandPID());
         } catch (IndexOutOfBoundsException e){
-            obdLog.setPid(job.getCommand().getName());
+            obdLog.setPid(cmdID);
         }
+        obdLog.setName(cmdID);
         obdLog.setParsed(true);
 
         if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {

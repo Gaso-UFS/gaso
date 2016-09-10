@@ -105,6 +105,11 @@ public class BluetoothHelper {
         activity.registerReceiver(mReceiver, filter);
     }
 
+    public void unRegisteReceiver(){
+        if(activity!=null)
+            activity.unregisterReceiver(mReceiver);
+    }
+
     public HashMap<String, BluetoothDevice> getDevicesFound() {
         return devicesFound;
     }
