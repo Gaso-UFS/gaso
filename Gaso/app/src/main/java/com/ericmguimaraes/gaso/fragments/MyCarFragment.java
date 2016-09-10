@@ -223,6 +223,8 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
+            fabBluetooth.setVisibility(View.GONE);
+            obdDataCardView.setVisibility(View.GONE);
         }
     };
 
