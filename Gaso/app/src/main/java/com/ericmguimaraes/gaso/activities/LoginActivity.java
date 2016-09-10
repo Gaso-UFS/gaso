@@ -64,14 +64,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private static final int RC_SIGN_IN = 99;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
     // UI references.
-  //  private AutoCompleteTextView mEmailView;
-  //  private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private GoogleSignInOptions googleSignInOptions;
@@ -82,9 +75,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Bind(R.id.gaso_title)
     TextView gasoTitle;
-
-   // @Bind(R.id.create_account_button)
-   // TextView createAccountButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,31 +87,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         face = Typeface.createFromAsset(getAssets(), "ailerons.otf");
 
         gasoTitle.setTypeface(face);
-
-        // Set up the login form.
-   //     mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-    //    populateAutoComplete();
-
-     /*   mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        }); */
-
-       // Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-       /* mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        }); */
-
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
@@ -142,14 +107,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
-     /*   createAccountButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, UserRegisterActivity.class);
-                startActivity(intent);
-            }
-        }); */
-
         setGooglePlusButtonText();
     }
 
@@ -159,64 +116,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         User u = getUserLogged();
         if(u!=null)
             login(u);
-    }
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-  /*  private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
-        // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
-
-        // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailregistered(email)) {
-            mEmailView.setError("Email não encontrado.");
-            focusView = mEmailView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
-        }
-    } */
-
-    private boolean isEmailregistered(String email) {
-        UserDAO dao = new UserDAO(getApplicationContext());
-        return dao.findbyEmail(email)!=null;
-    }
-
-    private boolean isEmailValid(String email) {
-        return email.contains("@");
     }
 
     /**
@@ -262,70 +161,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void showConnectionFailSnackBar() {
         Snackbar.make(mLoginFormView,"Não foi possível conectar, por favor tente novamente mais tarde.",Snackbar.LENGTH_LONG).show();
-    }
-
-
-    private void populateAutoComplete() {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        UserDAO dao = new UserDAO(getApplicationContext());
-        List<String> emails = dao.findAllEmails();
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emails);
-
-       // mEmailView.setAdapter(adapter);
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-        private User userCopy;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            UserDAO dao = new UserDAO(getApplicationContext());
-            User user = dao.findbyEmail(mEmail);
-
-            if(user!=null) {
-                // copia usuario pois objetos criados pelo realm só podem
-                // ser acessados na mesma thread
-                userCopy = copyUser(user);
-                return user.getPassword() == null || user.getPassword().isEmpty() || user.getPassword().equals(mPassword);
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-
-                login(userCopy);
-            } else {
-           //     mPasswordView.setError(getString(R.string.error_incorrect_password));
-           //     mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
     }
 
     private User copyUser(@Nullable User user) {
