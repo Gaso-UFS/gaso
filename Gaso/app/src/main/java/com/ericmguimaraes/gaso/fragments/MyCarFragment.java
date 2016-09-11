@@ -23,6 +23,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -31,6 +35,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,11 +56,15 @@ import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
-import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.services.ObdService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.net.URL;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -84,6 +93,11 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     User user;
     Car car;
+
+    @Bind(R.id.profile_image)
+    CircleImageView profileImageView;
+
+    ProfilePicLoaderTask profilePicLoaderTask;
 
     private ObdService mService;
     private boolean mBound;
@@ -114,6 +128,12 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         View view = inflater.inflate(R.layout.fragment_my_car, container, false);
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null){
+            profilePicLoaderTask = new ProfilePicLoaderTask(user.getPhotoUrl());
+            profilePicLoaderTask.execute();
+        }
         return view;
     }
 
@@ -147,6 +167,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
                 startActivity(intent);
                 return true;
             case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
                 forgetLoggedUser();
                 intent = new Intent(getActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
@@ -170,10 +191,12 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         if(car == null || user == null){
             nameText.setVisibility(View.GONE);
             modelText.setVisibility(View.GONE);
+            profileImageView.setVisibility(View.GONE);
             noCarText.setVisibility(View.VISIBLE);
         } else {
             nameText.setVisibility(View.VISIBLE);
             modelText.setVisibility(View.VISIBLE);
+            profileImageView.setVisibility(View.VISIBLE);
             noCarText.setVisibility(View.GONE);
 
             nameText.setText(user.getName());
@@ -263,6 +286,47 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         if(obdLog!=null && obdFragment!=null){
             obdFragment.addOrUpdateJob(obdLog);
         }
+    }
+
+    public Bitmap loadImageFromWebOperations(Uri uri) {
+        try {
+            URL url = new URL(uri.toString());
+            return BitmapFactory.decodeStream(url.openConnection().getInputStream());
+        } catch (Exception e) {
+            Log.e("IMAGE_PROFILE",e.getMessage(),e);
+            return null;
+        }
+    }
+
+    private class ProfilePicLoaderTask extends AsyncTask<Void,Void,Void> {
+
+        Bitmap bitmap;
+
+        Uri uri;
+
+        protected ProfilePicLoaderTask(Uri uri){
+            this.uri =uri;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            bitmap = loadImageFromWebOperations(uri);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(!isCancelled() && bitmap!=null && profileImageView!=null)
+                profileImageView.setImageBitmap(bitmap);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(profilePicLoaderTask!=null)
+            profilePicLoaderTask.cancel(true);
     }
 
 }

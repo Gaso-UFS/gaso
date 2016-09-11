@@ -45,6 +45,7 @@ import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,6 +171,7 @@ public class GasFragment extends Fragment {
                 menu.findItem(R.id.stations_list_menu_item).setVisible(false);
                 return true;
             case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
                 forgetLoggedUser();
                 intent = new Intent(getActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);

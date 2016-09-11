@@ -46,6 +46,7 @@ import com.ericmguimaraes.gaso.model.MonthSpent;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.util.SpentComparator;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -165,6 +166,7 @@ public class MonthlyExpensesFragment extends Fragment {
                 ((MainActivity)getActivity()).createCSVFile();
                 return true;
             case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
                 forgetLoggedUser();
                 intent = new Intent(getActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);

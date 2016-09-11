@@ -61,6 +61,19 @@
                     android:layout_height="wrap_content"
                     android:gravity="center">
 
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        xmlns:app="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/profile_image"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/gaso_transparent"
+                        app:civ_border_width="2px"
+                        app:civ_border_color="#88000000"
+                        android:layout_margin="5dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"/>
+
                     <TextView
                         android:id="@+id/name"
                         android:layout_width="match_parent"

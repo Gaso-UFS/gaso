@@ -33,3 +33,7 @@ captures/
 Gaso/app/google-services.json
 
 Gaso/.idea/
+
+Gaso/signing.properties
+
+Gaso/gaso_keystore.jks
