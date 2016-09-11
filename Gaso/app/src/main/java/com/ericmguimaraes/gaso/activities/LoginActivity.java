@@ -52,6 +52,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -69,7 +71,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.text.Text;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -99,6 +108,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     TextView betaText;
 
     private boolean isToAnimate = true;
+    private FirebaseAuth mAuth;
+    private String TAG = "LOGIN";
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +127,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         mProgressView = findViewById(R.id.login_progress);
 
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 
@@ -136,6 +149,31 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         if(!isBeta())
             betaText.setVisibility(View.GONE);
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+
+                    User localuser = new User();
+                    localuser.setEmail(user.getEmail());
+                    localuser.setName(user.getDisplayName());
+
+                    UserDAO dao = new UserDAO(getApplicationContext());
+                    dao.add(localuser);
+
+                    login(localuser);
+
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
 
     }
 
@@ -259,16 +297,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(LoginActivity.class.getName(), "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            if(acct!=null){
-                User user = new User();
-                user.setEmail(acct.getEmail());
-                user.setName(acct.getDisplayName());
+            GoogleSignInAccount account = result.getSignInAccount();
+            if(account!=null){
 
-                UserDAO dao = new UserDAO(getApplicationContext());
-                dao.add(user);
-
-                login(user);
+                firebaseAuthWithGoogle(account);
 
             } else if(getResources().getBoolean(R.bool.isDebug)){
                 User user = createDebugUser();
@@ -331,6 +363,46 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return;
             }
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            showAuthFailSnackBar();
+                        }
+                        // ...
+                    }
+                });
+    }
+
+    private void showAuthFailSnackBar() {
+        Snackbar.make(mLoginFormView,"Falha na autenticação.",Snackbar.LENGTH_LONG).show();
     }
 
 
