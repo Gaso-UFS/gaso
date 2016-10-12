@@ -1,4 +1,22 @@
-package com.ericmguimaraes.gaso.services;
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.ericmguimaraes.gaso.obd;
 
 import com.github.pires.obd.commands.ObdCommand;
 
@@ -10,9 +28,20 @@ import com.github.pires.obd.commands.ObdCommand;
  */
 public class ObdCommandJob {
 
-    private Long _id;
+    private Long _id = -1L;
     private ObdCommand _command;
     private ObdCommandJobState _state;
+
+    /**
+     * Default ctor.
+     *
+     * @param command the ObCommand to encapsulate.
+     */
+    public ObdCommandJob(Long id, ObdCommand command) {
+        _command = command;
+        _state = ObdCommandJobState.NEW;
+        _id = id;
+    }
 
     /**
      * Default ctor.
@@ -65,4 +94,7 @@ public class ObdCommandJob {
         NOT_SUPPORTED
     }
 
+    public void set_command(ObdCommand _command) {
+        this._command = _command;
+    }
 }

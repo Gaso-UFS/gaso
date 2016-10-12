@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.fragments;
 
 import android.bluetooth.BluetoothDevice;
@@ -12,13 +30,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.adapters.MyBluetoothRecyclerViewAdapter;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +143,7 @@ public class BluetoothFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        BluetoothHelper.getInstance().unRegisteReceiver();
     }
 
     @Override

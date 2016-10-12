@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.activities;
 
 import android.animation.Animator;
@@ -6,6 +24,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -33,6 +52,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +71,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.vision.text.Text;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -63,14 +92,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private static final int RC_SIGN_IN = 99;
 
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
-
     // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
     private GoogleSignInOptions googleSignInOptions;
@@ -79,42 +101,33 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Bind(R.id.sign_in_button)
     SignInButton signInButton;
 
-    @Bind(R.id.create_account_button)
-    Button createAccountButton;
+    @Bind(R.id.gaso_title)
+    TextView gasoTitle;
+
+    @Bind(R.id.beta_text)
+    TextView betaText;
+
+    private boolean isToAnimate = true;
+    private FirebaseAuth mAuth;
+    private String TAG = "LOGIN";
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
+        Typeface face;
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
+        face = Typeface.createFromAsset(getAssets(), "ailerons.otf");
 
+        gasoTitle.setTypeface(face);
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 
@@ -128,18 +141,76 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             public void onClick(View view) {
                 Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                 startActivityForResult(signInIntent, RC_SIGN_IN);
-            }
-        });
-
-        createAccountButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, UserRegisterActivity.class);
-                startActivity(intent);
+                showProgress(true);
             }
         });
 
         setGooglePlusButtonText();
+
+        if(!isBeta())
+            betaText.setVisibility(View.GONE);
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+
+                    User localuser = new User();
+                    localuser.setEmail(user.getEmail());
+                    localuser.setName(user.getDisplayName());
+
+                    UserDAO dao = new UserDAO(getApplicationContext());
+                    dao.add(localuser);
+
+                    login(localuser);
+
+                    // User is signed in
+                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
+
+    }
+
+    public boolean isBeta(){
+        return getResources().getBoolean(R.bool.isBeta) || getResources().getBoolean(R.bool.isDebug);
+    }
+
+
+    private void animateShowView(View view, int time) {
+
+        time=time==0?750:time;
+        int distance = 50;
+
+        // Prepare the View for the animation
+        view.setVisibility(View.VISIBLE);
+        view.setY(-distance);
+        view.setAlpha(0.0f);
+
+        // Start the animation
+        view.animate()
+                .translationYBy(distance)
+                .setDuration(time)
+                .alpha(1.0f);
+    }
+
+    private void animate(){
+        if(isBeta())
+            animateShowView(betaText,300);
+        animateShowView(gasoTitle,500);
+        animateShowView(signInButton,700);
+    }
+
+    private void hide(){
+        if(isBeta())
+            betaText.setVisibility(View.INVISIBLE);
+        gasoTitle.setVisibility(View.INVISIBLE);
+        signInButton.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -148,64 +219,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         User u = getUserLogged();
         if(u!=null)
             login(u);
-    }
-
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
+        if(isToAnimate) {
+            hide();
+            animate();
+            isToAnimate = false;
         }
-
-        // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
-
-        // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
-
-        boolean cancel = false;
-        View focusView = null;
-
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailregistered(email)) {
-            mEmailView.setError("Email não encontrado.");
-            focusView = mEmailView;
-            cancel = true;
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
-        }
-    }
-
-    private boolean isEmailregistered(String email) {
-        UserDAO dao = new UserDAO(getApplicationContext());
-        return dao.findbyEmail(email)!=null;
-    }
-
-    private boolean isEmailValid(String email) {
-        return email.contains("@");
     }
 
     /**
@@ -253,70 +271,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Snackbar.make(mLoginFormView,"Não foi possível conectar, por favor tente novamente mais tarde.",Snackbar.LENGTH_LONG).show();
     }
 
-
-    private void populateAutoComplete() {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        UserDAO dao = new UserDAO(getApplicationContext());
-        List<String> emails = dao.findAllEmails();
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
-                        android.R.layout.simple_dropdown_item_1line, emails);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-        private User userCopy;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            UserDAO dao = new UserDAO(getApplicationContext());
-            User user = dao.findbyEmail(mEmail);
-
-            if(user!=null) {
-                // copia usuario pois objetos criados pelo realm só podem
-                // ser acessados na mesma thread
-                userCopy = copyUser(user);
-                return user.getPassword() == null || user.getPassword().isEmpty() || user.getPassword().equals(mPassword);
-            }
-
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-
-                login(userCopy);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
-
     private User copyUser(@Nullable User user) {
         if(user==null)
             return null;
@@ -343,26 +297,37 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(LoginActivity.class.getName(), "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            if(acct!=null){
-                User user = new User();
-                user.setEmail(acct.getEmail());
-                user.setName(acct.getDisplayName());
+            GoogleSignInAccount account = result.getSignInAccount();
+            if(account!=null){
 
+                firebaseAuthWithGoogle(account);
+
+            } else if(getResources().getBoolean(R.bool.isDebug)){
+                User user = createDebugUser();
                 UserDAO dao = new UserDAO(getApplicationContext());
                 dao.add(user);
-
+                saveUserLogged(user.getEmail());
                 login(user);
-
             } else
                 showConnectionFailSnackBar();
         } else {
-            showConnectionFailSnackBar();
+            if(getResources().getBoolean(R.bool.isDebug)){
+                login(createDebugUser());
+            } else
+                showConnectionFailSnackBar();
         }
+        showProgress(false);
+    }
+
+    private User createDebugUser() {
+        User u = new User();
+        u.setEmail("degub@gaso.com");
+        u.setName("debug");
+        return u;
     }
 
     private void login(User user) {
-        SessionSingleton.getInstance().currentUser = user;
+        SessionSingleton.getInstance().setCurrentUser(user);
 
         saveUserLogged(user.getEmail());
 
@@ -398,6 +363,46 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 return;
             }
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "signInWithCredential", task.getException());
+                            showAuthFailSnackBar();
+                        }
+                        // ...
+                    }
+                });
+    }
+
+    private void showAuthFailSnackBar() {
+        Snackbar.make(mLoginFormView,"Falha na autenticação.",Snackbar.LENGTH_LONG).show();
     }
 
 

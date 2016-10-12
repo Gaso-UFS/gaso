@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.activities.registers;
 
 import android.content.Context;
@@ -26,6 +44,7 @@ import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
+import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -139,9 +158,12 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
             if(intent.hasExtra("station_id")){
                 StationDAO dao = new StationDAO(getApplicationContext());
                 stationSelected = dao.findById(intent.getStringExtra("station_id"));
-                inputStation.setText(stationSelected.getName());
+                if(stationSelected!=null)
+                    inputStation.setText(stationSelected.getName());
             }
         }
+
+        inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
     }
 
     public void setSpinner(){
@@ -235,11 +257,11 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
 
         SpentDAO dao = new SpentDAO(getApplicationContext());
         Spent s = new Spent();
-        s.setUser(SessionSingleton.getInstance().currentUser);
+        s.setUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         s.setCar(SessionSingleton.getInstance().currentCar);
         s.setDate(calendarSelected==null?new Date():calendarSelected.getTime());
         s.setType(typeSelected);
-        s.setTotal(Double.parseDouble(inputTotal.getText().toString()));
+        s.setTotal(Double.parseDouble(Mask.unmask(inputTotal.getText().toString())));
         s.setStation(stationSelected);
         s.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
         dao.add(s);

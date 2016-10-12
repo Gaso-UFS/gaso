@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
@@ -19,15 +37,16 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.model.MonthSpent;
 import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.persistence.SpentDAO;
 import com.ericmguimaraes.gaso.util.SpentComparator;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -96,7 +115,7 @@ public class MonthlyExpensesFragment extends Fragment {
 
     private List<Spent> getSpentList() {
         SpentDAO dao = new SpentDAO(getContext());
-        return dao.findAll();
+        return dao.findAll(SessionSingleton.getInstance().getCurrentUser(getContext()));
     }
 
     @Override
@@ -119,7 +138,7 @@ public class MonthlyExpensesFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().currentUser == null) {
+                if (SessionSingleton.getInstance().currentCar == null || SessionSingleton.getInstance().getCurrentUser(getContext()) == null) {
                     Context context = getContext();
                     CharSequence text = "Porfavor, primeiro cadastre e selecione um carro e um usuario.";
                     int duration = Toast.LENGTH_LONG;
@@ -143,11 +162,11 @@ public class MonthlyExpensesFragment extends Fragment {
         int id = item.getItemId();
         Intent intent;
         switch (id) {
-            case R.id.action_settings:
-                intent = new Intent(getContext(), SettingsActivity.class);
-                startActivity(intent);
+            case R.id.action_export:
+                ((MainActivity)getActivity()).createCSVFile();
                 return true;
             case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
                 forgetLoggedUser();
                 intent = new Intent(getActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
@@ -170,5 +189,7 @@ public class MonthlyExpensesFragment extends Fragment {
         editor.putString(Constants.USER_LOGGED_TAG, "");
         editor.apply();
     }
+
+
 
 }

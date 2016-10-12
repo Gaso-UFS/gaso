@@ -7,17 +7,76 @@ android {
 
     defaultConfig {
         applicationId "com.ericmguimaraes.gaso"
-        minSdkVersion 21
+        minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        release
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //minifyEnabled false
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            resValue "bool", "isRelease", "true"
+            resValue "bool", "isDebug", "false"
+            resValue "bool", "isBeta", "false"
+            debuggable true
+            signingConfig signingConfigs.release
+        }
+        debug {
+            resValue "bool", "isRelease", "false"
+            resValue "bool", "isDebug", "true"
+            resValue "bool", "isBeta", "false"
+            debuggable true
+            signingConfig signingConfigs.release
+        }
+        beta {
+            resValue "bool", "isRelease", "false"
+            resValue "bool", "isDebug", "false"
+            resValue "bool", "isBeta", "true"
+            debuggable true
+            signingConfig signingConfigs.release
         }
     }
+
+    /*
+            Signing Configurations
+
+            To use it you need to create a file called signing.properties
+            under the root of the project with the following format
+
+            STORE_FILE={location_of_your_keystore.jks}
+            STORE_PASSWORD={your_password}
+            KEY_ALIAS={your_key_alias}
+            KEY_PASSWORD={your_password}
+
+     */
+    def Properties props = new Properties()
+    def propFile = new File('./signing.properties')
+    if (propFile.canRead()){
+        props.load(new FileInputStream(propFile))
+
+        if (props!=null && props.containsKey('STORE_FILE') && props.containsKey('STORE_PASSWORD') &&
+                props.containsKey('KEY_ALIAS') && props.containsKey('KEY_PASSWORD')) {
+            android.signingConfigs.release.storeFile = file(props['STORE_FILE'])
+            android.signingConfigs.release.storePassword = props['STORE_PASSWORD']
+            android.signingConfigs.release.keyAlias = props['KEY_ALIAS']
+            android.signingConfigs.release.keyPassword = props['KEY_PASSWORD']
+            println 'signing.properties found'
+        } else {
+            println 'signing.properties found but some entries are missing'
+            android.buildTypes.release.signingConfig = null
+        }
+    }else {
+        println 'signing.properties not found'
+        android.buildTypes.release.signingConfig = null
+    }
+
     packagingOptions {
         exclude 'META-INF/services/javax.annotation.processing.Processor'
     }
@@ -27,17 +86,31 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    /* Testes */
     testCompile 'junit:junit:4.12'
+    /* Android */
     compile 'com.android.support:appcompat-v7:24.0.0'
     compile 'com.android.support:design:24.0.0'
     compile 'com.android.support:support-v4:24.0.0'
-    compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.android.support:cardview-v7:24.0.0'
     compile 'com.android.support:recyclerview-v7:24.0.0'
+    compile 'com.android.support:multidex:1.0.1'
+    /* Terceiros */
+    compile 'com.github.pires:obd-java-api:1.0-RC16'
+    compile 'net.sf.opencsv:opencsv:2.3'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    /* Google */
+    compile 'com.google.android.gms:play-services-auth:9.4.0'
     compile 'com.google.android.gms:play-services:9.4.0'
     compile 'com.google.api-client:google-api-client:1.19.1'
-    compile 'com.github.pires:obd-java-api:1.0-RC16'
+    /* Firebase */
+    compile 'com.google.firebase:firebase-auth:9.4.0'
+    compile 'com.google.firebase:firebase-core:9.4.0'
+    compile 'com.google.firebase:firebase-database:9.4.0'
+    compile 'com.google.firebase:firebase-crash:9.4.0'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

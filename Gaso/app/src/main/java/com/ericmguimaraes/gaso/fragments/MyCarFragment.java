@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.fragments;
 
 import android.content.ComponentName;
@@ -5,13 +23,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,16 +51,20 @@ import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.services.ObdService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.net.URL;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,14 +91,17 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     @Bind(R.id.fab_bluetooth)
     FloatingActionButton fabBluetooth;
 
-    @Bind(R.id.obd_info_test)
-    TextView obdInfoTest;
-
     User user;
     Car car;
 
+    @Bind(R.id.profile_image)
+    CircleImageView profileImageView;
+
+    ProfilePicLoaderTask profilePicLoaderTask;
+
     private ObdService mService;
     private boolean mBound;
+    private ObdLogFragment obdFragment;
 
     public MyCarFragment() {
         // Required empty public constructor
@@ -97,6 +128,12 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         View view = inflater.inflate(R.layout.fragment_my_car, container, false);
         ButterKnife.bind(this, view);
         setHasOptionsMenu(true);
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null){
+            profilePicLoaderTask = new ProfilePicLoaderTask(user.getPhotoUrl());
+            profilePicLoaderTask.execute();
+        }
         return view;
     }
 
@@ -107,6 +144,9 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         obdConnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(SessionSingleton.getInstance().currentCar==null)
+                    Snackbar.make(v,"Por favor, cadastre e/ou selecione um carro antes de conectar o seu OBD2",Snackbar.LENGTH_LONG).show();
+
                 if(BluetoothHelper.getInstance().isBluetoothSupported()){
                     Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
                     startActivity(intent);
@@ -122,15 +162,12 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         int id = item.getItemId();
         Intent intent;
         switch (id) {
-            case R.id.action_settings:
-                intent = new Intent(getContext(), SettingsActivity.class);
-                startActivity(intent);
-                return true;
             case R.id.car_list_menu_item:
                 intent = new Intent(getActivity(), CarListActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
                 forgetLoggedUser();
                 intent = new Intent(getActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
@@ -149,15 +186,17 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     private void updateCarAndUser() {
         SessionSingleton sessionSingleton = SessionSingleton.getInstance();
-        user = sessionSingleton.currentUser;
+        user = sessionSingleton.getCurrentUser(getContext());
         car = sessionSingleton.currentCar;
-        if(car == null){
+        if(car == null || user == null){
             nameText.setVisibility(View.GONE);
             modelText.setVisibility(View.GONE);
+            profileImageView.setVisibility(View.GONE);
             noCarText.setVisibility(View.VISIBLE);
         } else {
             nameText.setVisibility(View.VISIBLE);
             modelText.setVisibility(View.VISIBLE);
+            profileImageView.setVisibility(View.VISIBLE);
             noCarText.setVisibility(View.GONE);
 
             nameText.setText(user.getName());
@@ -190,7 +229,18 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
             fabBluetooth.setVisibility(View.VISIBLE);
             obdDataCardView.setVisibility(View.VISIBLE);
-            //TODO INICIAR EXIBICAO DOS DADOS DO OBD2
+
+            obdFragment = ObdLogFragment.newInstance();
+            getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
+
+            fabBluetooth.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MyCarFragment.this.getActivity(),BluetoothConnectionActivity.class);
+                    startActivity(intent);
+                }
+            });
+
         }
 
     }
@@ -214,6 +264,8 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
+            fabBluetooth.setVisibility(View.GONE);
+            obdDataCardView.setVisibility(View.GONE);
         }
     };
 
@@ -231,8 +283,50 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     }
 
     private void updateObdView(ObdLog obdLog) {
-        if(obdLog!=null)
-            obdInfoTest.setText(obdLog.getData());
+        if(obdLog!=null && obdFragment!=null){
+            obdFragment.addOrUpdateJob(obdLog);
+        }
+    }
+
+    public Bitmap loadImageFromWebOperations(Uri uri) {
+        try {
+            URL url = new URL(uri.toString());
+            return BitmapFactory.decodeStream(url.openConnection().getInputStream());
+        } catch (Exception e) {
+            Log.e("IMAGE_PROFILE",e.getMessage(),e);
+            return null;
+        }
+    }
+
+    private class ProfilePicLoaderTask extends AsyncTask<Void,Void,Void> {
+
+        Bitmap bitmap;
+
+        Uri uri;
+
+        protected ProfilePicLoaderTask(Uri uri){
+            this.uri =uri;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            bitmap = loadImageFromWebOperations(uri);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(!isCancelled() && bitmap!=null && profileImageView!=null)
+                profileImageView.setImageBitmap(bitmap);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(profilePicLoaderTask!=null)
+            profilePicLoaderTask.cancel(true);
     }
 
 }

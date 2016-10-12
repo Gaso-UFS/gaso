@@ -1,4 +1,22 @@
-package com.ericmguimaraes.gaso.obd;
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.ericmguimaraes.gaso.bluetooth;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -11,7 +29,6 @@ import android.content.IntentFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
@@ -104,6 +121,11 @@ public class BluetoothHelper {
 
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         activity.registerReceiver(mReceiver, filter);
+    }
+
+    public void unRegisteReceiver(){
+        if(activity!=null)
+            activity.unregisterReceiver(mReceiver);
     }
 
     public HashMap<String, BluetoothDevice> getDevicesFound() {

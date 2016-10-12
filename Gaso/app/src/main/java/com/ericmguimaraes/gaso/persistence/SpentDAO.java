@@ -1,11 +1,36 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.persistence;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Spent;
+import com.ericmguimaraes.gaso.model.User;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -25,7 +50,7 @@ public class SpentDAO {
 
     public SpentDAO(Context context){
         this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).build();
+        realmConfig = new RealmConfiguration.Builder(context).deleteRealmIfMigrationNeeded().build();
     }
 
     public void add(Spent spent){
@@ -48,9 +73,9 @@ public class SpentDAO {
         realm.commitTransaction();
     }
 
-    public List<Spent> findAll(){
+    public List<Spent> findAll(User user){
         realm = Realm.getInstance(realmConfig);
-        RealmQuery<Spent> query = realm.where(Spent.class);
+        RealmQuery<Spent> query = realm.where(Spent.class).equalTo("user.id",user.getId());
         RealmResults<Spent> result = query.findAll();
         List<Spent> list = new ArrayList<>();
         for(Spent c: result){
@@ -59,9 +84,29 @@ public class SpentDAO {
         return list;
     }
 
-    public List<Spent> findByMonth(int month){
+    public List<Spent> findByMonthAndYear(Date date,User user){
+        Calendar firstDay = Calendar.getInstance();
+        firstDay.setTime(date);
+        firstDay.set(Calendar.DAY_OF_MONTH,firstDay.getActualMinimum(Calendar.DAY_OF_MONTH));
+        firstDay.set(Calendar.HOUR,0);
+        firstDay.set(Calendar.MINUTE,0);
+
+        Calendar lastDay = Calendar.getInstance();
+        lastDay.setTime(date);
+        lastDay.set(Calendar.DAY_OF_MONTH,lastDay.getActualMaximum(Calendar.DAY_OF_MONTH));
+        lastDay.set(Calendar.HOUR,23);
+        lastDay.set(Calendar.MINUTE,59);
+
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
+
+        Log.d("DATE_SPENT",format.format(firstDay.getTime())+" : "+format.format(lastDay.getTime()));
+
         realm = Realm.getInstance(realmConfig);
-        RealmQuery<Spent> query = realm.where(Spent.class).equalTo("month",month);
+        RealmQuery<Spent> query = realm.
+                where(Spent.class)
+                .equalTo("user.email", SessionSingleton.getInstance().getCurrentUser(context).getEmail())
+                .between("date",firstDay.getTime(),lastDay.getTime())
+                .equalTo("user.id",user.getId());
         RealmResults<Spent> result = query.findAll();
         List<Spent> list = new ArrayList<>();
         for(Spent c: result){

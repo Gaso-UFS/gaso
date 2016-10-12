@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.activities.registers;
 
 import android.content.Intent;
@@ -9,10 +27,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
+import com.ericmguimaraes.gaso.activities.MainActivity;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 
@@ -36,6 +57,9 @@ public class CarRegisterActivity extends AppCompatActivity {
 
     @BindString(R.string.car_registered)
     String carRegistered;
+
+    @Bind(R.id.welcome_car)
+    TextView welcomeCarText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +92,9 @@ public class CarRegisterActivity extends AppCompatActivity {
                 }
             }
         });
+
+        if(getIntent().getExtras()==null || !getIntent().getExtras().getBoolean("first_access",false))
+            welcomeCarText.setVisibility(View.GONE);
     }
 
     private void saveOnRealm() {
@@ -76,6 +103,7 @@ public class CarRegisterActivity extends AppCompatActivity {
         Car car = new Car();
         car.setDescription(inputCarDescrition.getText().toString());
         car.setModel(inputCar.getText().toString());
+        car.setUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         carDAO.add(car);
 
         CharSequence text = carRegistered;
@@ -84,9 +112,10 @@ public class CarRegisterActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(getApplicationContext(), text, duration);
         toast.show();
 
-        Intent intent = new Intent(this, CarListActivity.class);
+        SessionSingleton.getInstance().currentCar = car;
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
-
     }
 
 }

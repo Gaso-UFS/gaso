@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.adapters;
 
 import android.content.Context;
@@ -81,9 +99,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             dao.remove(lastRemoved);
 
             if(userList.isEmpty())
-                SessionSingleton.getInstance().currentUser = null;
+                SessionSingleton.getInstance().setCurrentUser(null);
             else
-                SessionSingleton.getInstance().currentUser = userList.get(0);
+                SessionSingleton.getInstance().setCurrentUser(userList.get(0));
 
             notifyDataSetChanged();
         } catch (Exception e){
@@ -116,7 +134,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             User u = userList.get(itemPosition);
             Toast.makeText(context, "Usuario "+u.getName()+" selecionado com sucesso.", Toast.LENGTH_LONG).show();
             SessionSingleton sessionSingleton = SessionSingleton.getInstance();
-            sessionSingleton.currentUser = u;
+            sessionSingleton.setCurrentUser(u);
             Intent intent = new Intent(context, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);

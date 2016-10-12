@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
@@ -11,7 +29,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,12 +40,12 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
 import com.ericmguimaraes.gaso.config.Constants;
-import com.ericmguimaraes.gaso.config.SettingsActivity;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,10 +152,6 @@ public class GasFragment extends Fragment {
 
         FragmentTransaction ft;
         switch (id) {
-            case R.id.action_settings:
-                intent = new Intent(getContext(), SettingsActivity.class);
-                startActivity(intent);
-                return true;
             case R.id.map_menu_item:
                 if(!isSearching && locationHelper!=null && locationHelper.isConnected()) {
                     ft = getChildFragmentManager().beginTransaction();
@@ -158,6 +171,7 @@ public class GasFragment extends Fragment {
                 menu.findItem(R.id.stations_list_menu_item).setVisible(false);
                 return true;
             case R.id.action_logout:
+                FirebaseAuth.getInstance().signOut();
                 forgetLoggedUser();
                 intent = new Intent(getActivity(), LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
@@ -200,9 +214,9 @@ public class GasFragment extends Fragment {
 
     private void showSpentRequestDialog(final Station station) {
         new AlertDialog.Builder(getContext())
-                .setTitle("Ei")
+                .setTitle("Abastecendo?")
                 .setMessage("Você está num posto? Deseja cadastrar um gasto?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(getActivity(), SpentRegisterActivity.class);
                         intent.putExtra("station_id",station.getId());
@@ -210,7 +224,7 @@ public class GasFragment extends Fragment {
                         dialog.dismiss();
                     }
                 })
-                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }

@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.persistence;
 
 import android.content.Context;
@@ -28,7 +46,8 @@ public class CarDAO {
 
     public CarDAO(Context context){
         this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).build();
+        realmConfig = new RealmConfiguration.Builder(context)
+                .deleteRealmIfMigrationNeeded().build();
     }
 
     public void add(Car car){
@@ -62,6 +81,17 @@ public class CarDAO {
         return list;
     }
 
+    public List<Car> findAllbyUser(User user){
+        realm = Realm.getInstance(realmConfig);
+        RealmQuery<Car> query = realm.where(Car.class).equalTo("user.id",user.getId());
+        RealmResults<Car> result = query.findAll();
+        List<Car> list = new ArrayList<>();
+        for(Car c: result){
+            list.add(createNewCar(c));
+        }
+        return list;
+    }
+
     public long setUniqueId() {
         realm = Realm.getInstance(realmConfig);
         Number num = realm.where(Car.class).max("id");
@@ -76,9 +106,9 @@ public class CarDAO {
         return newCar;
     }
 
-    public Car findFirst() {
+    public Car findFirst(User user) {
         realm = Realm.getInstance(realmConfig);
-        return realm.where(Car.class).findFirst();
+        return realm.where(Car.class).equalTo("user.id",user.getId()).findFirst();
     }
 
     public long count(){

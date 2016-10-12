@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.persistence;
 
 import android.content.Context;
@@ -27,7 +45,7 @@ public class CombustiveDAO {
 
     public CombustiveDAO(Context context){
         this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).build();
+        realmConfig = new RealmConfiguration.Builder(context).deleteRealmIfMigrationNeeded().build();
     }
 
     public void add(Combustive combustive){

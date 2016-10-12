@@ -1,34 +1,70 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.activities;
 
+import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
 
 import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.MonthlyExpensesFragment;
+import com.ericmguimaraes.gaso.fragments.ObdLogFragment;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
-import com.ericmguimaraes.gaso.obd.BluetoothHelper;
+import com.ericmguimaraes.gaso.model.CombustiveType;
+import com.ericmguimaraes.gaso.model.ObdLog;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
+import com.ericmguimaraes.gaso.model.Spent;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.util.CSVHelper;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GPSTracker;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ObdLogFragment.OnObdLogListFragmentInteractionListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -111,9 +147,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init(){
+        if(SessionSingleton.getInstance().getCurrentUser(getApplicationContext())==null)
+            goToLogin();
         CarDAO carDAO = new CarDAO(getApplicationContext());
+        if(SessionSingleton.getInstance().currentCar==null && SessionSingleton.getInstance().getCurrentUser(getApplicationContext())!=null)
+            SessionSingleton.getInstance().currentCar = carDAO.findFirst(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         if(SessionSingleton.getInstance().currentCar==null)
-            SessionSingleton.getInstance().currentCar = carDAO.findFirst();
+            firstAccess();
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(this,LoginActivity.class);
+        startActivity(intent);
+    }
+
+    private void firstAccess() {
+        Intent intent = new Intent(this, CarRegisterActivity.class);
+        intent.putExtra("first_access",true);
+        startActivity(intent);
     }
 
     @Override
@@ -205,7 +256,57 @@ public class MainActivity extends AppCompatActivity {
                 LocationHelper.isLocationPermissionAsked = true;
                 return;
             }
+            case Constants.WRITE_ALL_SPENTS: {
+                if (grantResults .length > 1
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED ) {
+                    createCSVFile();
+                } else {
+                    Snackbar.make(viewPager,"Não é possivel exportar os dados sem permissão.",Snackbar.LENGTH_LONG).show();
+                }
+                LocationHelper.isLocationPermissionAsked = true;
+            }
         }
+    }
+
+    @Override
+    public void onObdLogListFragmentInteraction(ObdLog log) {
+        //TODO do something with log
+    }
+
+    public void createCSVFile() {
+        List<String[]> data = new ArrayList<>();
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
+        SpentDAO dao = new SpentDAO(this);
+        List<Spent> spents = dao.findAll(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
+        for(Spent s:spents)
+            data.add(new String[]{
+                    Integer.toString(s.getId()),
+                    s.getCar().getModel(),
+                    CombustiveType.fromInteger(s.getType()).toString(),
+                    s.getStation().getName(),
+                    format.format(s.getDate()),
+                    Double.toString(s.getAmount())+"L",
+                    Double.toString(s.getTotal())});
+
+        String msg = "";
+
+        String fileName = "gaso_gastos.csv";
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.WRITE_ALL_SPENTS);
+            Log.e("writing spents", "NO PERMISSION");
+            return;
+        }
+        try {
+            CSVHelper.createCSV(fileName,data);
+            msg = "Arquivo "+fileName+" foi salvo com sucesso.";
+        } catch (IOException e) {
+            Log.e("SAVING_FILE",e.getMessage(),e);
+            msg = "Desculpe, tivemos um problema exportando o arquivo.";
+        }
+        Snackbar.make(viewPager,msg,Snackbar.LENGTH_LONG).show();
     }
 
 }

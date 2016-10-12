@@ -1,3 +1,21 @@
+/*
+ *     Gaso
+ *
+ *     Copyright (C) 2016  Eric Guimarães
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.ericmguimaraes.gaso.services;
 
 import android.app.Notification;
@@ -19,7 +37,8 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.model.ObdLog;
-import com.ericmguimaraes.gaso.obd.BluetoothConnectThread;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothConnectThread;
+import com.ericmguimaraes.gaso.obd.ObdCommandJob;
 import com.github.pires.obd.commands.control.IgnitionMonitorCommand;
 import com.github.pires.obd.commands.control.ModuleVoltageCommand;
 import com.github.pires.obd.commands.control.PendingTroubleCodesCommand;
@@ -90,6 +109,7 @@ public class ObdService extends Service {
         if(listeners==null)
             listeners = new ArrayList<>();
         Log.d(TAG, "Creating service..");
+        prefs = getSharedPreferences("prefs",0);
     }
 
     @Nullable
@@ -199,7 +219,7 @@ public class ObdService extends Service {
             retry();
             return;
         }
-        showNotification("title","test",R.drawable.ic_bluetooth,true,true,true);
+        showNotification("Gaso","Conectado ao bluetooth",R.drawable.gaso_transparent_reduced,true,true,true);
         while(socket.isConnected()) {
             executeQueue();
         }
@@ -334,30 +354,30 @@ public class ObdService extends Service {
             jobsQueue = new LinkedBlockingQueue<>();
         jobsQueue.clear();
         queueCounter = 0L;
-        queueJob(new ObdCommandJob(new IgnitionMonitorCommand()));
-        queueJob(new ObdCommandJob(new ModuleVoltageCommand()));
-        queueJob(new ObdCommandJob(new PendingTroubleCodesCommand()));
-        queueJob(new ObdCommandJob(new VinCommand()));
-        queueJob(new ObdCommandJob(new AbsoluteLoadCommand()));
-        queueJob(new ObdCommandJob(new LoadCommand()));
-        queueJob(new ObdCommandJob(new MassAirFlowCommand()));
-        queueJob(new ObdCommandJob(new OilTempCommand()));
-        queueJob(new ObdCommandJob(new RPMCommand()));
-        queueJob(new ObdCommandJob(new RuntimeCommand()));
-        queueJob(new ObdCommandJob(new ThrottlePositionCommand()));
-        queueJob(new ObdCommandJob(new AirFuelRatioCommand()));
-        queueJob(new ObdCommandJob(new ConsumptionRateCommand()));
-        queueJob(new ObdCommandJob(new FindFuelTypeCommand()));
-        queueJob(new ObdCommandJob(new FuelLevelCommand()));
-        queueJob(new ObdCommandJob(new FuelTrimCommand()));
-        queueJob(new ObdCommandJob(new WidebandAirFuelRatioCommand()));
-        queueJob(new ObdCommandJob(new BarometricPressureCommand()));
-        queueJob(new ObdCommandJob(new FuelPressureCommand()));
-        queueJob(new ObdCommandJob(new FuelRailPressureCommand()));
-        queueJob(new ObdCommandJob(new IntakeManifoldPressureCommand()));
-        queueJob(new ObdCommandJob(new AirIntakeTemperatureCommand()));
-        queueJob(new ObdCommandJob(new AmbientAirTemperatureCommand()));
-        queueJob(new ObdCommandJob(new EngineCoolantTemperatureCommand()));
+        queueJob(new ObdCommandJob(0L,new IgnitionMonitorCommand()));
+        queueJob(new ObdCommandJob(1L,new ModuleVoltageCommand()));
+        queueJob(new ObdCommandJob(2L,new PendingTroubleCodesCommand()));
+        queueJob(new ObdCommandJob(3L,new VinCommand()));
+        queueJob(new ObdCommandJob(4L,new AbsoluteLoadCommand()));
+        queueJob(new ObdCommandJob(5L,new LoadCommand()));
+        queueJob(new ObdCommandJob(6L,new MassAirFlowCommand()));
+        queueJob(new ObdCommandJob(7L,new OilTempCommand()));
+        queueJob(new ObdCommandJob(8L,new RPMCommand()));
+        queueJob(new ObdCommandJob(9L,new RuntimeCommand()));
+        queueJob(new ObdCommandJob(10L,new ThrottlePositionCommand()));
+        queueJob(new ObdCommandJob(11L,new AirFuelRatioCommand()));
+        queueJob(new ObdCommandJob(12L,new ConsumptionRateCommand()));
+        queueJob(new ObdCommandJob(13L,new FindFuelTypeCommand()));
+        queueJob(new ObdCommandJob(14L,new FuelLevelCommand()));
+        queueJob(new ObdCommandJob(15L,new FuelTrimCommand()));
+        queueJob(new ObdCommandJob(16L,new WidebandAirFuelRatioCommand()));
+        queueJob(new ObdCommandJob(17L,new BarometricPressureCommand()));
+        queueJob(new ObdCommandJob(18L,new FuelPressureCommand()));
+        queueJob(new ObdCommandJob(19L,new FuelRailPressureCommand()));
+        queueJob(new ObdCommandJob(20L,new IntakeManifoldPressureCommand()));
+        queueJob(new ObdCommandJob(21L,new AirIntakeTemperatureCommand()));
+        queueJob(new ObdCommandJob(22L,new AmbientAirTemperatureCommand()));
+        queueJob(new ObdCommandJob(23L,new EngineCoolantTemperatureCommand()));
     }
 
     /**
@@ -424,11 +444,13 @@ public class ObdService extends Service {
         final String cmdID = LookUpCommand(cmdName);
 
         ObdLog obdLog = new ObdLog();
+        obdLog.setId(job.getId());
         try {
             obdLog.setPid(job.getCommand().getCommandPID());
         } catch (IndexOutOfBoundsException e){
-            obdLog.setPid(job.getCommand().getName());
+            obdLog.setPid(cmdID);
         }
+        obdLog.setName(cmdID);
         obdLog.setParsed(true);
 
         if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
