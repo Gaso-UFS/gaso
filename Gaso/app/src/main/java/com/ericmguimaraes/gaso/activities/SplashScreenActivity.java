@@ -19,20 +19,19 @@
 package com.ericmguimaraes.gaso.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.config.Constants;
-import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SplashScreenActivity extends AppCompatActivity {
 
@@ -43,42 +42,17 @@ public class SplashScreenActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setExitTransition(null);
         }
+        try {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        } catch (RuntimeException e) {
+            Log.d("FirebaseDatabase","Already Initialized");
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkUser();
-    }
-
-    private void checkUser() {
-        User u = getUserLogged();
-        if(u==null){
-            goToLogin(null);
-        } else {
-            SessionSingleton.getInstance().setCurrentUser(u);
-            goToMain();
-        }
-    }
-
-    private User getUserLogged(){
-        SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME, 0);
-        String email = settings.getString(Constants.USER_LOGGED_TAG,"");
-        UserDAO dao = new UserDAO(getApplicationContext());
-        User u = dao.findbyEmail(email);
-        u = copyUser(u);
-        return u;
-    }
-
-    private User copyUser(@Nullable User user) {
-        if(user==null)
-            return null;
-        User userCopy = new User();
-        userCopy.setPassword(user.getPassword());
-        userCopy.setEmail(user.getEmail());
-        userCopy.setName(user.getName());
-        userCopy.setId(user.getId());
-        return userCopy;
+        goToLogin(null);
     }
 
     private void goToMain() {

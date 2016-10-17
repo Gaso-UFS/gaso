@@ -27,16 +27,27 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.CarListAdapter;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -53,6 +64,7 @@ public class CarListActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 
     CarListAdapter adapter;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +92,39 @@ public class CarListActivity extends AppCompatActivity {
             }
         });
 
-        CarDAO dao = new CarDAO(getApplicationContext());
-        List<Car> cars = dao.findAllbyUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
-        adapter = new CarListAdapter(cars, recyclerView, getApplicationContext());
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        adapter = new CarListAdapter(null, recyclerView, getApplicationContext());
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null)
+            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Car c = dataSnapshot.getValue(Car.class);
+                    adapter.add(c);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setAdapter(adapter);

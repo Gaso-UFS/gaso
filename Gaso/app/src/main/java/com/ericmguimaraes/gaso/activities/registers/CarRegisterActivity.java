@@ -99,12 +99,13 @@ public class CarRegisterActivity extends AppCompatActivity {
 
     private void saveOnRealm() {
 
-        CarDAO carDAO = new CarDAO(getApplicationContext());
+        CarDAO carDAO = new CarDAO();
         Car car = new Car();
         car.setDescription(inputCarDescrition.getText().toString());
         car.setModel(inputCar.getText().toString());
-        car.setUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
         carDAO.add(car);
+        if(getIntent().getExtras()!=null && getIntent().getExtras().getBoolean("first_access",false))
+            carDAO.setFavoriteCar(car);
 
         CharSequence text = carRegistered;
         int duration = Toast.LENGTH_SHORT;
@@ -113,6 +114,7 @@ public class CarRegisterActivity extends AppCompatActivity {
         toast.show();
 
         SessionSingleton.getInstance().currentCar = car;
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);

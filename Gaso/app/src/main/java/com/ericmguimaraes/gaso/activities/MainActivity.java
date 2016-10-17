@@ -47,12 +47,14 @@ import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.model.CombustiveType;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
-import com.ericmguimaraes.gaso.model.Spent;
-import com.ericmguimaraes.gaso.persistence.CarDAO;
-import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.model.Expense;
+import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.util.CSVHelper;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GPSTracker;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -78,8 +80,8 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
     @BindString(R.string.gas)
     String gas;
 
-    @BindString(R.string.spent)
-    String spent;
+    @BindString(R.string.expense)
+    String expense;
 
     @BindString(R.string.my_car)
     String myCar;
@@ -117,12 +119,6 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
 
         setSupportActionBar(toolbar);
 
-        setupViewPager(viewPager);
-
-        tabLayout.setupWithViewPager(viewPager);
-
-        viewPager.setCurrentItem(1);
-
         init();
 
         servicesHandler = new Handler();
@@ -142,18 +138,27 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(GasFragment.newInstance(), gas);
         adapter.addFragment(MyCarFragment.newInstance(), myCar);
-        adapter.addFragment(MonthlyExpensesFragment.newInstance(), spent);
+        adapter.addFragment(MonthlyExpensesFragment.newInstance(), expense);
         viewPager.setAdapter(adapter);
     }
 
     private void init(){
-        if(SessionSingleton.getInstance().getCurrentUser(getApplicationContext())==null)
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user==null)
             goToLogin();
-        CarDAO carDAO = new CarDAO(getApplicationContext());
-        if(SessionSingleton.getInstance().currentCar==null && SessionSingleton.getInstance().getCurrentUser(getApplicationContext())!=null)
-            SessionSingleton.getInstance().currentCar = carDAO.findFirst(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
+
         if(SessionSingleton.getInstance().currentCar==null)
             firstAccess();
+        else
+            initUI();
+    }
+
+    private void initUI() {
+        setupViewPager(viewPager);
+
+        tabLayout.setupWithViewPager(viewPager);
+
+        viewPager.setCurrentItem(1);
     }
 
     private void goToLogin() {
@@ -165,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
         Intent intent = new Intent(this, CarRegisterActivity.class);
         intent.putExtra("first_access",true);
         startActivity(intent);
+        finish();
     }
 
     @Override
@@ -274,39 +280,49 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
     }
 
     public void createCSVFile() {
-        List<String[]> data = new ArrayList<>();
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
-        SpentDAO dao = new SpentDAO(this);
-        List<Spent> spents = dao.findAll(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
-        for(Spent s:spents)
-            data.add(new String[]{
-                    Integer.toString(s.getId()),
-                    s.getCar().getModel(),
-                    CombustiveType.fromInteger(s.getType()).toString(),
-                    s.getStation().getName(),
-                    format.format(s.getDate()),
-                    Double.toString(s.getAmount())+"L",
-                    Double.toString(s.getTotal())});
+        final List<String[]> data = new ArrayList<>();
+        final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
+        ExpensesDAO dao = new ExpensesDAO();
+        dao.findAll(new ExpensesDAO.OnExpensesReceivedListener() {
+            @Override
+            public void OnExpensesReceived(List<Expense> expenses) {
+                for(Expense s: expenses)
+                    data.add(new String[]{
+                            s.getUid(),
+                            s.getCar().getModel(),
+                            CombustiveType.fromInteger(s.getType()).toString(),
+                            s.getStationName(),
+                            format.format(s.getDate()),
+                            Double.toString(s.getAmount())+"L",
+                            Double.toString(s.getTotal())});
 
-        String msg = "";
+                String msg = "";
 
-        String fileName = "gaso_gastos.csv";
+                String fileName = "gaso_gastos.csv";
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.WRITE_ALL_SPENTS);
-            Log.e("writing spents", "NO PERMISSION");
-            return;
-        }
-        try {
-            CSVHelper.createCSV(fileName,data);
-            msg = "Arquivo "+fileName+" foi salvo com sucesso.";
-        } catch (IOException e) {
-            Log.e("SAVING_FILE",e.getMessage(),e);
-            msg = "Desculpe, tivemos um problema exportando o arquivo.";
-        }
-        Snackbar.make(viewPager,msg,Snackbar.LENGTH_LONG).show();
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.WRITE_ALL_SPENTS);
+                    Log.e("writing expenses", "NO PERMISSION");
+                    return;
+                }
+                try {
+                    CSVHelper.createCSV(fileName, data);
+                    msg = "Arquivo "+fileName+" foi salvo com sucesso.";
+                } catch (IOException e) {
+                    Log.e("SAVING_FILE",e.getMessage(),e);
+                    msg = "Desculpe, tivemos um problema exportando o arquivo.";
+                }
+                Snackbar.make(viewPager,msg,Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Snackbar.make(viewPager,Constants.genericError,Snackbar.LENGTH_LONG).show();
+            }
+        });
+
     }
 
 }

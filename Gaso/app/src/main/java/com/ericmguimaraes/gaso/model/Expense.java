@@ -18,6 +18,8 @@
 
 package com.ericmguimaraes.gaso.model;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -27,16 +29,25 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by ericm on 2/28/2016.
  */
-public class Spent extends RealmObject {
+public class Expense {
 
-    @PrimaryKey
-    private int id=-1;
+    private String uid;
     private double total;
-    private Date date;
-    private Car car;
-    private User user;
     private double amount;
+
+    private long date;
+
+    @Exclude
+    private Car car;
+
+    @Exclude
     private Station station;
+
+    private String stationUid;
+    private String carUid;
+    private String dayMonth;
+    private String stationName;
+
     private int type;
 
     public double getTotal() {
@@ -47,28 +58,12 @@ public class Spent extends RealmObject {
         this.total = total;
     }
 
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(long date) {
         this.date = date;
-    }
-
-    public Car getCar() {
-        return car;
-    }
-
-    public void setCar(Car car) {
-        this.car = car;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public double getAmount() {
@@ -95,11 +90,51 @@ public class Spent extends RealmObject {
         this.type = type;
     }
 
-    public int getId() {
-        return id;
+    public Car getCar() {
+        return car;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getStationUid() {
+        return stationUid;
+    }
+
+    public void setStationUid(String stationUid) {
+        this.stationUid = stationUid;
+    }
+
+    public String getCarUid() {
+        return carUid;
+    }
+
+    public void setCarUid(String carUid) {
+        this.carUid = carUid;
+    }
+
+    public String getDayMonth() {
+        return dayMonth;
+    }
+
+    public void setDayMonth(String dayMonth) {
+        this.dayMonth = dayMonth;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
     }
 }

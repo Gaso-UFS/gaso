@@ -54,7 +54,6 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
-import com.ericmguimaraes.gaso.model.User;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.services.ObdService;
 import com.google.firebase.auth.FirebaseAuth;
@@ -91,7 +90,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     @Bind(R.id.fab_bluetooth)
     FloatingActionButton fabBluetooth;
 
-    User user;
     Car car;
 
     @Bind(R.id.profile_image)
@@ -186,7 +184,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     private void updateCarAndUser() {
         SessionSingleton sessionSingleton = SessionSingleton.getInstance();
-        user = sessionSingleton.getCurrentUser(getContext());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         car = sessionSingleton.currentCar;
         if(car == null || user == null){
             nameText.setVisibility(View.GONE);
@@ -199,7 +197,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
             profileImageView.setVisibility(View.VISIBLE);
             noCarText.setVisibility(View.GONE);
 
-            nameText.setText(user.getName());
+            nameText.setText(user.getDisplayName());
             modelText.setText(car.getModel());
         }
     }

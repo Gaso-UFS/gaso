@@ -38,7 +38,7 @@ import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
-import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
+import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
@@ -218,7 +218,7 @@ public class GasFragment extends Fragment {
                 .setMessage("Você está num posto? Deseja cadastrar um gasto?")
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(getActivity(), SpentRegisterActivity.class);
+                        Intent intent = new Intent(getActivity(), ExpensesRegisterActivity.class);
                         intent.putExtra("station_id",station.getId());
                         startActivity(intent);
                         dialog.dismiss();

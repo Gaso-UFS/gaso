@@ -130,8 +130,8 @@ public class StationDAO {
     public long count(){
         realm = Realm.getInstance(realmConfig);
         realm = Realm.getInstance(realmConfig);
-        RealmQuery<Car> query = realm.where(Car.class);
-        return query.count();
+      //  RealmQuery<Car> query = realm.where(Car.class);
+        return 0;// query.count();
     }
 
 }

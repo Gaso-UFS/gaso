@@ -23,47 +23,24 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.activities.registers.UserRegisterActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -73,17 +50,15 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.gms.vision.text.Text;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseError;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password or google account.
@@ -94,7 +69,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     // UI references.
     private View mProgressView;
-    private View mLoginFormView;
+    private View mloginFormView;
     private GoogleSignInOptions googleSignInOptions;
     private GoogleApiClient mGoogleApiClient;
 
@@ -109,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private boolean isToAnimate = true;
     private FirebaseAuth mAuth;
-    private String TAG = "LOGIN";
+    private String TAG = "login";
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
@@ -123,7 +98,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         face = Typeface.createFromAsset(getAssets(), "ailerons.otf");
 
         gasoTitle.setTypeface(face);
-        mLoginFormView = findViewById(R.id.login_form);
+        mloginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -156,16 +131,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-
-                    User localuser = new User();
-                    localuser.setEmail(user.getEmail());
-                    localuser.setName(user.getDisplayName());
-
-                    UserDAO dao = new UserDAO(getApplicationContext());
-                    dao.add(localuser);
-
-                    login(localuser);
-
+                    loadFavoriteCar();
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
@@ -216,9 +182,9 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onResume() {
         super.onResume();
-        User u = getUserLogged();
+        FirebaseUser u  = FirebaseAuth.getInstance().getCurrentUser();
         if(u!=null)
-            login(u);
+            loadFavoriteCar();
         if(isToAnimate) {
             hide();
             animate();
@@ -237,12 +203,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+            mloginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mloginFormView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    mloginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -258,7 +224,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mloginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -268,18 +234,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void showConnectionFailSnackBar() {
-        Snackbar.make(mLoginFormView,"Não foi possível conectar, por favor tente novamente mais tarde.",Snackbar.LENGTH_LONG).show();
-    }
-
-    private User copyUser(@Nullable User user) {
-        if(user==null)
-            return null;
-        User userCopy = new User();
-        userCopy.setPassword(user.getPassword());
-        userCopy.setEmail(user.getEmail());
-        userCopy.setName(user.getName());
-        userCopy.setId(user.getId());
-        return userCopy;
+        Snackbar.make(mloginFormView,"Não foi possível conectar, por favor tente novamente mais tarde.",Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -299,37 +254,38 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount account = result.getSignInAccount();
             if(account!=null){
-
                 firebaseAuthWithGoogle(account);
-
-            } else if(getResources().getBoolean(R.bool.isDebug)){
-                User user = createDebugUser();
-                UserDAO dao = new UserDAO(getApplicationContext());
-                dao.add(user);
-                saveUserLogged(user.getEmail());
-                login(user);
             } else
                 showConnectionFailSnackBar();
-        } else {
-            if(getResources().getBoolean(R.bool.isDebug)){
-                login(createDebugUser());
-            } else
-                showConnectionFailSnackBar();
-        }
+        } else
+            showConnectionFailSnackBar();
         showProgress(false);
     }
 
-    private User createDebugUser() {
-        User u = new User();
-        u.setEmail("degub@gaso.com");
-        u.setName("debug");
-        return u;
+    private void loadFavoriteCar(){
+        CarDAO dao = new CarDAO();
+        dao.loadFavoriteCar(new CarDAO.OneCarReceivedListener() {
+            @Override
+            public void onCarReceived(Car car) {
+                SessionSingleton.getInstance().currentCar = car;
+                login();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                showError();
+            }
+        });
     }
 
-    private void login(User user) {
-        SessionSingleton.getInstance().setCurrentUser(user);
+    private void showError() {
+        Snackbar.make(mloginFormView,Constants.genericError,Snackbar.LENGTH_SHORT).show();
+    }
 
-        saveUserLogged(user.getEmail());
+    private void login() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null)
+            saveUserLogged(user.getEmail());
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
@@ -341,15 +297,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(Constants.USER_LOGGED_TAG, email);
         editor.apply();
-    }
-
-    private User getUserLogged(){
-        SharedPreferences settings = getSharedPreferences(Constants.PREFS_NAME, 0);
-        String email = settings.getString(Constants.USER_LOGGED_TAG,"");
-        UserDAO dao = new UserDAO(getApplicationContext());
-        User u = dao.findbyEmail(email);
-        u = copyUser(u);
-        return u;
     }
 
     protected void setGooglePlusButtonText() {
@@ -402,7 +349,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void showAuthFailSnackBar() {
-        Snackbar.make(mLoginFormView,"Falha na autenticação.",Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mloginFormView,"Falha na autenticação.",Snackbar.LENGTH_LONG).show();
     }
 
 

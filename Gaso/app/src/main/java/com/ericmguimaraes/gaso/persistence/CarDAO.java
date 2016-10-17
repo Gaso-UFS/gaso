@@ -20,101 +20,103 @@ package com.ericmguimaraes.gaso.persistence;
 
 import android.content.Context;
 
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.model.Car;
-import com.ericmguimaraes.gaso.model.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
-
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmObject;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 
 /**
  * Created by ericm on 2/27/2016.
  */
 public class CarDAO {
 
-    Context context;
+    private DatabaseReference mDatabase;
 
-    RealmConfiguration realmConfig;
-
-    Realm realm;
-
-    public CarDAO(Context context){
-        this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context)
-                .deleteRealmIfMigrationNeeded().build();
+    public CarDAO(){
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
     public void add(Car car){
-        realm = Realm.getInstance(realmConfig);
-        if(car.getId()==-1)
-            car.setId((int) setUniqueId());
-        realm.beginTransaction();
-        realm.copyToRealmOrUpdate(car);
-        realm.commitTransaction();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            String key = mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_CARS).push().getKey();
+            mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_CARS).child(key).setValue(true);
+            car.setid(key);
+            car.setCreationDate(new Date().getTime());
+            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).child(key).setValue(car);
+        }
     }
 
     public void remove(Car car){
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Car> query = realm.where(Car.class);
-        query.equals(car);
-        RealmResults<Car> result = query.findAll();
-        realm.beginTransaction();
-        if(!result.isEmpty())
-            result.deleteLastFromRealm();
-        realm.commitTransaction();
-    }
-
-    public List<Car> findAll(){
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Car> query = realm.where(Car.class);
-        RealmResults<Car> result = query.findAll();
-        List<Car> list = new ArrayList<>();
-        for(Car c: result){
-            list.add(createNewCar(c));
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_CARS).child(car.getid()).removeValue();
+            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).child(car.getid()).removeValue();
         }
-        return list;
     }
 
-    public List<Car> findAllbyUser(User user){
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Car> query = realm.where(Car.class).equalTo("user.id",user.getId());
-        RealmResults<Car> result = query.findAll();
-        List<Car> list = new ArrayList<>();
-        for(Car c: result){
-            list.add(createNewCar(c));
+    public void setFavoriteCar(Car car){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_FAVORITE_CAR).setValue(car.getid());
         }
-        return list;
     }
 
-    public long setUniqueId() {
-        realm = Realm.getInstance(realmConfig);
-        Number num = realm.where(Car.class).max("id");
-        if (num == null) return 1;
-        else return ((long) num + 1);
+    public void loadFavoriteCar(final OneCarReceivedListener listener){
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            DatabaseReference ref = mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_FAVORITE_CAR);
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String carKey = dataSnapshot.getValue(String.class);
+                    if(carKey!=null)
+                        findCarByID(carKey,listener);
+                    else
+                        listener.onCarReceived(null);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    listener.onCancelled(databaseError);
+                }
+            });
+        }
     }
 
-    private Car createNewCar(Car oldCar){
-        Car newCar = new Car();
-        newCar.setModel(oldCar.getModel());
-        newCar.setDescription(oldCar.getDescription());
-        return newCar;
+    public void findCarByID(String carUid, final OneCarReceivedListener listener) {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).child(carUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    listener.onCarReceived(dataSnapshot.getValue(Car.class));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    listener.onCancelled(databaseError);
+                }
+            });
+        }
     }
 
-    public Car findFirst(User user) {
-        realm = Realm.getInstance(realmConfig);
-        return realm.where(Car.class).equalTo("user.id",user.getId()).findFirst();
+    public interface OneCarReceivedListener {
+        void onCarReceived(Car car);
+        void onCancelled(DatabaseError databaseError);
     }
 
-    public long count(){
-        realm = Realm.getInstance(realmConfig);
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Car> query = realm.where(Car.class);
-        return query.count();
+    public interface CarsListReceivedListener {
+        void onCarReceived(List<Car> cars);
+        void onCancelled(DatabaseError databaseError);
     }
+
 }

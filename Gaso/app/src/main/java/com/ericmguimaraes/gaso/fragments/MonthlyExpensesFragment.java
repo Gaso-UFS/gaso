@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,15 +39,16 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.MainActivity;
-import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
+import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.MonthSpent;
-import com.ericmguimaraes.gaso.model.Spent;
-import com.ericmguimaraes.gaso.persistence.SpentDAO;
-import com.ericmguimaraes.gaso.util.SpentComparator;
+import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
+import com.ericmguimaraes.gaso.util.ExpenseComparator;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseError;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -87,35 +89,45 @@ public class MonthlyExpensesFragment extends Fragment {
     }
 
     private void populateMonthList() {
-        List<Spent> spents = getSpentList();
-        monthSpentList = new ArrayList<>();
-        Calendar month=null;
-        double value=-1;
-        Collections.sort(spents,new SpentComparator());
-        MonthSpent monthSpentToSave=null;
-        for(Spent s: spents){
-            Calendar spentDate = Calendar.getInstance();
-            spentDate.setTime(s.getDate());
-            if(month==null || month.get(Calendar.MONTH)!=spentDate.get(Calendar.MONTH) || month.get(Calendar.YEAR)!=spentDate.get(Calendar.YEAR)){
+        ExpensesDAO dao = new ExpensesDAO();
+        dao.findAll(new ExpensesDAO.OnExpensesReceivedListener() {
+            @Override
+            public void OnExpensesReceived(List<Expense> expenses) {
+                monthSpentList = new ArrayList<>();
+                Calendar month=null;
+                double value=-1;
+                Collections.sort(expenses,new ExpenseComparator());
+                MonthSpent monthSpentToSave=null;
+                for(Expense s: expenses){
+                    Calendar expenseDate = Calendar.getInstance();
+                    expenseDate.setTimeInMillis(s.getDate());
+                    if(month==null || month.get(Calendar.MONTH)!=expenseDate.get(Calendar.MONTH) || month.get(Calendar.YEAR)!=expenseDate.get(Calendar.YEAR)){
+                        if(monthSpentToSave!=null)
+                            monthSpentList.add(monthSpentToSave);
+                        monthSpentToSave = new MonthSpent();
+                        month = expenseDate;
+                        value = s.getTotal();
+                        monthSpentToSave.setMonth(month.getTime());
+                        monthSpentToSave.setValue(value);
+                    } else {
+                        value += s.getTotal();
+                        monthSpentToSave.setValue(value);
+                    }
+                }
                 if(monthSpentToSave!=null)
                     monthSpentList.add(monthSpentToSave);
-                monthSpentToSave = new MonthSpent();
-                month = spentDate;
-                value = s.getTotal();
-                monthSpentToSave.setMonth(month.getTime());
-                monthSpentToSave.setValue(value);
-            } else {
-                value += s.getTotal();
-                monthSpentToSave.setValue(value);
+                adapter.resetList(monthSpentList);
             }
-        }
-        if(monthSpentToSave!=null)
-            monthSpentList.add(monthSpentToSave);
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                showGenericError();
+            }
+        });
     }
 
-    private List<Spent> getSpentList() {
-        SpentDAO dao = new SpentDAO(getContext());
-        return dao.findAll(SessionSingleton.getInstance().getCurrentUser(getContext()));
+    private void showGenericError() {
+        Snackbar.make(recyclerView,Constants.genericError,Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -145,7 +157,7 @@ public class MonthlyExpensesFragment extends Fragment {
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 } else {
-                    Intent intent = new Intent(getContext(), SpentRegisterActivity.class);
+                    Intent intent = new Intent(getContext(), ExpensesRegisterActivity.class);
                     startActivity(intent);
                 }
             }

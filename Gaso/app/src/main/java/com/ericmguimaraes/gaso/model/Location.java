@@ -25,18 +25,17 @@ import io.realm.RealmObject;
  */
 public class Location extends RealmObject {
 
-    public Location(){
+    private double lng;
 
+    private double lat;
+
+    public Location(){
     }
 
     public Location(double lat, double lng){
         this.lat = lat;
         this.lng = lng;
     }
-
-    private double lng;
-
-    private double lat;
 
     public double getLat() {
         return lat;

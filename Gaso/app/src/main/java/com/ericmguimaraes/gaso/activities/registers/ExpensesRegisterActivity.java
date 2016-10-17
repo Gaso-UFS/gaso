@@ -39,9 +39,9 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.model.Spent;
+import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
-import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
 import com.ericmguimaraes.gaso.util.Mask;
@@ -59,7 +59,7 @@ import java.util.Date;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class SpentRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
+public class ExpensesRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -123,7 +123,7 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 } else {
-                    saveOnRealm();
+                    saveOnDatabase();
                 }
             }
         });
@@ -245,7 +245,7 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
 
     private void callPlacePicker(){
         try {
-            startActivityForResult(builder.build(SpentRegisterActivity.this), PLACE_PICKER_REQUEST);
+            startActivityForResult(builder.build(ExpensesRegisterActivity.this), PLACE_PICKER_REQUEST);
         } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
             Log.e("PLACE PICKER", e.getMessage(), e);
             Toast t = Toast.makeText(getApplicationContext(),"Ops, tivemos um problema.", Toast.LENGTH_LONG);
@@ -253,18 +253,21 @@ public class SpentRegisterActivity extends AppCompatActivity implements DatePick
         }
     }
 
-    private void saveOnRealm() {
+    private void saveOnDatabase() {
 
-        SpentDAO dao = new SpentDAO(getApplicationContext());
-        Spent s = new Spent();
-        s.setUser(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
-        s.setCar(SessionSingleton.getInstance().currentCar);
-        s.setDate(calendarSelected==null?new Date():calendarSelected.getTime());
-        s.setType(typeSelected);
-        s.setTotal(Double.parseDouble(Mask.unmask(inputTotal.getText().toString())));
-        s.setStation(stationSelected);
-        s.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
-        dao.add(s);
+        ExpensesDAO dao = new ExpensesDAO();
+        Expense e = new Expense();
+        e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
+        e.setType(typeSelected);
+        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(".","").replace(",",".");
+        e.setTotal(Double.parseDouble(parsableDouble));
+        e.setStationUid(stationSelected.getId());
+        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
+        e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
+        e.setStationName(stationSelected.getName());
+        e.setStation(stationSelected);
+        e.setCar(SessionSingleton.getInstance().currentCar);
+        dao.add(e);
 
         CharSequence text = "Gasto adicionado com sucesso.";
         int duration = Toast.LENGTH_SHORT;

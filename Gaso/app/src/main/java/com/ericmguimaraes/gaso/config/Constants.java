@@ -18,6 +18,8 @@
 
 package com.ericmguimaraes.gaso.config;
 
+import com.ericmguimaraes.gaso.util.StringUtils;
+
 /**
  * Created by ericm on 17-Aug-16.
  */
@@ -49,6 +51,14 @@ public class Constants {
     public static final int WRITE_ALL_SPENTS = 2;
     public static final int WRITE_MONTH_SPENT = 3;
 
+    public static String genericError = "Desculpe, tivemos um problema.";
+
     public static final String PREFS_NAME = "config";
     public static final String USER_LOGGED_TAG = "user_logged";
+
+    public static final String FIREBASE_USERS = "users";
+    public static final String FIREBASE_CARS = "cars";
+    public static final String FIREBASE_FAVORITE_CAR = "favorite_car";
+    public static final String FIREBASE_EXPENSES = "expenses";
+    public static final String FIREBASE_EXPENSES_MONTH = "monthYear";
 }

@@ -18,19 +18,15 @@
 
 package com.ericmguimaraes.gaso.model;
 
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Created by ericm on 2/27/2016.
  */
-public class Car extends RealmObject {
+public class Car {
 
-    @PrimaryKey
-    private int id = -1;
+    private String uid;
     private String model;
     private String description;
-    private User user;
+    private long creationDate;
 
     public String getModel() {
         return model;
@@ -40,12 +36,12 @@ public class Car extends RealmObject {
         this.model = model;
     }
 
-    public int getId() {
-        return id;
+    public String getid() {
+        return uid;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setid(String id) {
+        this.uid = id;
     }
 
     public String getDescription() {
@@ -56,11 +52,11 @@ public class Car extends RealmObject {
         this.description = description;
     }
 
-    public User getUser() {
-        return user;
+    public long getCreationDate() {
+        return creationDate;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setCreationDate(long creationDate) {
+        this.creationDate = creationDate;
     }
 }

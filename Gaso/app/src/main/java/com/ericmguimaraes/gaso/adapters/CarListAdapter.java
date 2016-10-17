@@ -35,6 +35,7 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -51,6 +52,8 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
     RecyclerView recyclerView;
 
     public CarListAdapter(List<Car> carList, RecyclerView view, Context context) {
+        if(carList==null)
+            carList = new ArrayList<>();
         this.carList = carList;
         this.context = context;
         recyclerView = view;
@@ -85,7 +88,7 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
                     .setAction("Desfazer", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            CarDAO dao = new CarDAO(context);
+                            CarDAO dao = new CarDAO();
                             dao.add(lastRemoved);
                             carList.add(posistion, lastRemoved);
                             notifyItemInserted(posistion);
@@ -95,7 +98,7 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
 
             carList.remove(lastRemoved);
 
-            CarDAO dao = new CarDAO(context);
+            CarDAO dao = new CarDAO();
             dao.remove(lastRemoved);
 
             if(carList.isEmpty())
@@ -110,6 +113,11 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
             snackbar.show();
             Log.e("remove",e.getMessage(),e);
         }
+    }
+
+    public void add(Car c) {
+        carList.add(c);
+        notifyDataSetChanged();
     }
 
     public class ViewHolder  extends RecyclerView.ViewHolder  implements View.OnClickListener {
@@ -132,6 +140,10 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
         public void onClick(View v) {
             int itemPosition = recyclerView.getChildAdapterPosition(v);
             Car c = carList.get(itemPosition);
+
+            CarDAO dao = new CarDAO();
+            dao.setFavoriteCar(c);
+
             Toast.makeText(context, "Carro "+c.getModel()+" selecionado com sucesso.", Toast.LENGTH_LONG).show();
             SessionSingleton sessionSingleton = SessionSingleton.getInstance();
             sessionSingleton.currentCar = c;

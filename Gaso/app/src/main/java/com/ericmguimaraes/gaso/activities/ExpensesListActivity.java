@@ -22,7 +22,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -40,15 +39,16 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.adapters.SpentListAdapter;
+import com.ericmguimaraes.gaso.adapters.ExpensesListAdapter;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.model.CombustiveType;
-import com.ericmguimaraes.gaso.model.Spent;
-import com.ericmguimaraes.gaso.persistence.SpentDAO;
-import com.ericmguimaraes.gaso.activities.registers.SpentRegisterActivity;
+import com.ericmguimaraes.gaso.model.Expense;
+import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
+import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.util.CSVHelper;
+import com.google.firebase.database.DatabaseError;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -57,12 +57,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.SimpleFormatter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class SpentListActivity extends AppCompatActivity {
+public class ExpensesListActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -73,18 +72,18 @@ public class SpentListActivity extends AppCompatActivity {
     @Bind(R.id.spent_recycler_view)
     RecyclerView recyclerView;
 
-    SpentListAdapter adapter;
+    ExpensesListAdapter adapter;
 
     Date monthAndYear;
 
     String[] monthNames = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
-    private List<Spent> spents;
+    private List<Expense> expenses;
     private int month;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_spent_list);
+        setContentView(R.layout.activity_expenses_list);
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
@@ -109,7 +108,7 @@ public class SpentListActivity extends AppCompatActivity {
                     Toast toast = Toast.makeText(context, text, duration);
                     toast.show();
                 } else {
-                    Intent intent = new Intent(getApplicationContext(), SpentRegisterActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), ExpensesRegisterActivity.class);
                     startActivity(intent);
                 }
             }
@@ -123,9 +122,7 @@ public class SpentListActivity extends AppCompatActivity {
         cal.set(Calendar.YEAR,year);
         monthAndYear = cal.getTime();
 
-        SpentDAO dao = new SpentDAO(getApplicationContext());
-        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
-        adapter = new SpentListAdapter(spents, recyclerView, getApplicationContext());
+        adapter = new ExpensesListAdapter(expenses, recyclerView, getApplicationContext());
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setAdapter(adapter);
@@ -145,16 +142,28 @@ public class SpentListActivity extends AppCompatActivity {
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+    }
 
+    private void showGenericError() {
+        Snackbar.make(recyclerView,Constants.genericError,Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        SpentDAO dao = new SpentDAO(getApplicationContext());
-        spents = dao.findByMonthAndYear(monthAndYear,SessionSingleton.getInstance().getCurrentUser(getApplicationContext()));
-        adapter.resetList(spents);
         toolbar.setTitle(monthNames[month]);
+        ExpensesDAO dao = new ExpensesDAO();
+        dao.findByMonthAndYear(monthAndYear, new ExpensesDAO.OnExpensesReceivedListener(){
+            @Override
+            public void OnExpensesReceived(List<Expense> expenses) {
+                adapter.resetList(expenses);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                //showGenericError();
+            }
+        });
     }
 
     @Override
@@ -179,12 +188,12 @@ public class SpentListActivity extends AppCompatActivity {
     private void createCSVFile() {
         List<String[]> data = new ArrayList<>();
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
-        for(Spent s:spents)
+        for(Expense s: expenses)
             data.add(new String[]{
-                    Integer.toString(s.getId()),
-                    s.getCar().getModel(),
+                    s.getUid(),
+                    s.getCarUid(),
                     CombustiveType.fromInteger(s.getType()).toString(),
-                    s.getStation().getName(),
+                    s.getStationName(),
                     format.format(s.getDate()),
                     Double.toString(s.getAmount())+"L",
                     Double.toString(s.getTotal())});
@@ -199,7 +208,7 @@ public class SpentListActivity extends AppCompatActivity {
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, Constants.WRITE_MONTH_SPENT);
-            Log.e("writing spents", "NO PERMISSION");
+            Log.e("writing expenses", "NO PERMISSION");
             return;
         }
         try {

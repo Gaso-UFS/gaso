@@ -19,7 +19,6 @@
 package com.ericmguimaraes.gaso.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -31,11 +30,13 @@ import android.widget.TextView;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.CombustiveType;
-import com.ericmguimaraes.gaso.model.Spent;
-import com.ericmguimaraes.gaso.model.User;
-import com.ericmguimaraes.gaso.persistence.SpentDAO;
+import com.ericmguimaraes.gaso.model.Expense;
+import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -44,15 +45,17 @@ import butterknife.ButterKnife;
 /**
  * Created by ericm on 2/28/2016.
  */
-public class SpentListAdapter extends RecyclerView.Adapter<SpentListAdapter.ViewHolder> {
+public class ExpensesListAdapter extends RecyclerView.Adapter<ExpensesListAdapter.ViewHolder> {
 
-    List<Spent> spentList;
-    private Spent lastRemoved;
+    List<Expense> expenseList;
+    private Expense lastRemoved;
     private Context context;
     RecyclerView recyclerView;
 
-    public SpentListAdapter(List<Spent> spentList, RecyclerView view, Context context) {
-        this.spentList = spentList;
+    public ExpensesListAdapter(List<Expense> expenseList, RecyclerView view, Context context) {
+        this.expenseList = expenseList;
+        if(this.expenseList==null)
+            this.expenseList = new ArrayList<>();
         this.context = context;
         recyclerView = view;
     }
@@ -67,44 +70,44 @@ public class SpentListAdapter extends RecyclerView.Adapter<SpentListAdapter.View
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Spent spent = spentList.get(position);
-        holder.amountText.setText(Double.toString(spent.getAmount())+"L");
-        Car car = spent.getCar();
-        holder.carText.setText(car==null?"Esse carro foi excluido.":car.getModel());
+        Expense expense = expenseList.get(position);
+        holder.amountText.setText(Double.toString(expense.getAmount())+"L");
+        Car car = expense.getCar();
+        holder.carText.setText(car==null?"Carro não encontrado.":car.getModel());
         SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yy hh:mm");
-        holder.dateText.setText(formater.format(spent.getDate()));
-        holder.typeText.setText(CombustiveType.fromInteger(spent.getType()).toString());
-        User user = spent.getUser();
-        holder.userText.setText(user==null?"Esse usuario foi excluido.":user.getName());
-        holder.valueText.setText("R$"+Double.toString(spent.getTotal()));
-        holder.stationText.setText(spent.getStation().getName());
+        holder.dateText.setText(formater.format(expense.getDate()));
+        holder.typeText.setText(CombustiveType.fromInteger(expense.getType()).toString());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        holder.userText.setText(user==null?"Usuário não encontrado.":user.getDisplayName());
+        holder.valueText.setText("R$"+Double.toString(expense.getTotal()));
+        holder.stationText.setText(expense.getStationName());
     }
 
     @Override
     public int getItemCount() {
-        return spentList.size();
+        return expenseList.size();
     }
 
     public void remove(final int posistion){
         try {
-            lastRemoved = spentList.get(posistion);
+            lastRemoved = expenseList.get(posistion);
 
             Snackbar snackbar = Snackbar
                     .make(recyclerView, "Gasto removido com sucesso.", Snackbar.LENGTH_LONG)
                     .setAction("Desfazer", new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            SpentDAO dao = new SpentDAO(context);
+                            ExpensesDAO dao = new ExpensesDAO();
                             dao.add(lastRemoved);
-                            spentList.add(posistion, lastRemoved);
+                            expenseList.add(posistion, lastRemoved);
                             notifyItemInserted(posistion);
                         }
                     });
             snackbar.show();
 
-            spentList.remove(lastRemoved);
+            expenseList.remove(lastRemoved);
 
-            SpentDAO dao = new SpentDAO(context);
+            ExpensesDAO dao = new ExpensesDAO();
             dao.remove(lastRemoved);
 
             notifyDataSetChanged();
@@ -116,8 +119,10 @@ public class SpentListAdapter extends RecyclerView.Adapter<SpentListAdapter.View
         }
     }
 
-    public void resetList(List<Spent> spents) {
-        this.spentList = spents;
+    public void resetList(List<Expense> expenses) {
+        this.expenseList = expenses;
+        if(this.expenseList==null)
+            this.expenseList = new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -150,7 +155,7 @@ public class SpentListAdapter extends RecyclerView.Adapter<SpentListAdapter.View
         @Override
         public void onClick(View v) {
             /*int itemPosition = recyclerView.getChildAdapterPosition(v);
-            Spent c = spentList.get(itemPosition);
+            Expense c = expenseList.get(itemPosition);
             Intent intent = new Intent(context, SpentDetails.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);*/

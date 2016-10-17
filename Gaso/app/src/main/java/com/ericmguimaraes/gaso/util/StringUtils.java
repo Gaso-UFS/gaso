@@ -18,30 +18,10 @@
 
 package com.ericmguimaraes.gaso.util;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.net.Uri;
-import android.os.Build;
-
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.Normalizer;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Random;
-import java.util.regex.Pattern;
 
 public class StringUtils {
 
@@ -59,4 +39,7 @@ public class StringUtils {
         return formatter.format(result);
     }
 
+    public static String formatMoney(double value) {
+        return formatMoney(Double.toString(value));
+    }
 }

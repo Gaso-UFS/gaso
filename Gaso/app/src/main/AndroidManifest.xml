@@ -24,27 +24,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activities.registers.RegisterActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:label="@string/title_activity_register"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
-        <activity
             android:name=".activities.registers.CarRegisterActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_car_register"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".activities.registers.UserRegisterActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:label="@string/title_activity_user_register"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".activities.UserListActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:label="@string/title_activity_user_list"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
@@ -59,11 +41,11 @@
             android:value="@string/gaso_googlemaps_key" />
 
         <activity
-            android:name=".activities.SpentListActivity"
+            android:name=".activities.ExpensesListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".activities.registers.SpentRegisterActivity" />
+        <activity android:name=".activities.registers.ExpensesRegisterActivity" />
         <activity
             android:name=".activities.StationDetailsActivity"
             android:label="@string/title_activity_station_details"

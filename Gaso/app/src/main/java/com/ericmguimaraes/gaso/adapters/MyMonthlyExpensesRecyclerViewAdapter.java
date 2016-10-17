@@ -27,9 +27,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.activities.SpentListActivity;
+import com.ericmguimaraes.gaso.activities.ExpensesListActivity;
 import com.ericmguimaraes.gaso.model.MonthSpent;
+import com.ericmguimaraes.gaso.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -38,7 +40,7 @@ import butterknife.ButterKnife;
 
 public class MyMonthlyExpensesRecyclerViewAdapter extends RecyclerView.Adapter<MyMonthlyExpensesRecyclerViewAdapter.ViewHolder> {
 
-    private List<MonthSpent> monthSpentList;
+    private List<MonthSpent> monthExpensesList;
 
     Activity activity;
     RecyclerView recyclerView;
@@ -46,7 +48,9 @@ public class MyMonthlyExpensesRecyclerViewAdapter extends RecyclerView.Adapter<M
     String[] monthNames = {"Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"};
 
     public MyMonthlyExpensesRecyclerViewAdapter(List<MonthSpent> items, Activity activity, RecyclerView recyclerView) {
-        monthSpentList = items;
+        monthExpensesList = items;
+        if(items==null)
+            monthExpensesList = new ArrayList<>();
         this.activity = activity;
         this.recyclerView = recyclerView;
     }
@@ -60,20 +64,22 @@ public class MyMonthlyExpensesRecyclerViewAdapter extends RecyclerView.Adapter<M
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = monthSpentList.get(position);
+        holder.mItem = monthExpensesList.get(position);
         Calendar cal = Calendar.getInstance();
-        cal.setTime(monthSpentList.get(position).getMonth());
+        cal.setTime(monthExpensesList.get(position).getMonth());
         holder.monthText.setText(monthNames[cal.get(Calendar.MONTH)].subSequence(0,3));
-        holder.valueText.setText(Double.toString(monthSpentList.get(position).getValue()));
+        holder.valueText.setText(StringUtils.formatMoney(monthExpensesList.get(position).getValue()));
     }
 
     @Override
     public int getItemCount() {
-        return monthSpentList.size();
+        return monthExpensesList.size();
     }
 
-    public void resetList(List<MonthSpent> monthSpentList) {
-        this.monthSpentList = monthSpentList;
+    public void resetList(List<MonthSpent> monthExpensesList) {
+        this.monthExpensesList = monthExpensesList;
+        if(monthExpensesList==null)
+            this.monthExpensesList = new ArrayList<>();
         notifyDataSetChanged();
     }
 
@@ -99,9 +105,9 @@ public class MyMonthlyExpensesRecyclerViewAdapter extends RecyclerView.Adapter<M
         @Override
         public void onClick(View v) {
                 int itemPosition = recyclerView.getChildAdapterPosition(v);
-                Intent intent = new Intent(activity, SpentListActivity.class);
+                Intent intent = new Intent(activity, ExpensesListActivity.class);
                 Calendar car = Calendar.getInstance();
-                car.setTime(monthSpentList.get(itemPosition).getMonth());
+                car.setTime(monthExpensesList.get(itemPosition).getMonth());
                 intent.putExtra("month", car.get(Calendar.MONTH));
                 intent.putExtra("year", car.get(Calendar.YEAR));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
