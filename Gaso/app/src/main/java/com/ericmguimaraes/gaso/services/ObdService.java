@@ -38,7 +38,9 @@ import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothConnectThread;
+import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.obd.ObdCommandJob;
+import com.ericmguimaraes.gaso.persistence.ObdLogGroupDAO;
 import com.github.pires.obd.commands.control.IgnitionMonitorCommand;
 import com.github.pires.obd.commands.control.ModuleVoltageCommand;
 import com.github.pires.obd.commands.control.PendingTroubleCodesCommand;
@@ -65,9 +67,12 @@ import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
 import com.github.pires.obd.exceptions.UnsupportedCommandException;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -102,6 +107,9 @@ public class ObdService extends Service {
 
     private boolean isServiceBound = true;
 
+    private ObdLogGroup obdLogGroup;
+
+    private boolean isToSendOBDGroup = true;
 
     @Override
     public void onCreate() {
@@ -110,6 +118,17 @@ public class ObdService extends Service {
             listeners = new ArrayList<>();
         Log.d(TAG, "Creating service..");
         prefs = getSharedPreferences("prefs",0);
+        FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
+        HashMap<String, Object> def = new HashMap<String, Object>();
+        def.put("send_obd_logs",true);
+        remoteConfig.setDefaults(def);
+        remoteConfig.fetch().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
+                isToSendOBDGroup = remoteConfig.getBoolean("send_obd_logs");
+            }
+        });
     }
 
     @Nullable
@@ -262,8 +281,10 @@ public class ObdService extends Service {
         this.socket = socket;
     }
 
-    private void saveObdData(ObdLog data) {
-        //TODO salvar os dados no realm
+    private void saveObdlog(ObdLog data) {
+        if(obdLogGroup==null)
+            obdLogGroup = new ObdLogGroup();
+        obdLogGroup.addLog(data);
     }
 
     /**
@@ -343,13 +364,19 @@ public class ObdService extends Service {
                 stateUpdate(job2);
             }
 
-            if(queueEmpty())
+
+
+            if(queueEmpty()) {
+                if(isToSendOBDGroup)
+                    saveAndResetObdGroup();
                 resetQueue();
+            }
         }
 
     }
 
     private void resetQueue(){
+
         if(jobsQueue==null)
             jobsQueue = new LinkedBlockingQueue<>();
         jobsQueue.clear();
@@ -378,6 +405,13 @@ public class ObdService extends Service {
         queueJob(new ObdCommandJob(21L,new AirIntakeTemperatureCommand()));
         queueJob(new ObdCommandJob(22L,new AmbientAirTemperatureCommand()));
         queueJob(new ObdCommandJob(23L,new EngineCoolantTemperatureCommand()));
+    }
+
+    private void saveAndResetObdGroup() {
+        ObdLogGroupDAO dao = new ObdLogGroupDAO();
+        if(obdLogGroup!=null)
+            dao.add(obdLogGroup);
+        obdLogGroup = null;
     }
 
     /**
@@ -470,7 +504,7 @@ public class ObdService extends Service {
         for(OnDataReceivedListener l:listeners){
             l.onDataReceived(obdLog);
         }
-        saveObdData(obdLog);
+        saveObdlog(obdLog);
 
     }
 

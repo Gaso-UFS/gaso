@@ -61,4 +61,6 @@ public class Constants {
     public static final String FIREBASE_FAVORITE_CAR = "favorite_car";
     public static final String FIREBASE_EXPENSES = "expenses";
     public static final String FIREBASE_EXPENSES_MONTH = "monthYear";
+    public static final String FIREBASE_OBD_LOG = "obd_logs";
+    public static final String FIREBASE_UNTRACEABLE_OBD_LOG = "untraceable_obd_logs";
 }

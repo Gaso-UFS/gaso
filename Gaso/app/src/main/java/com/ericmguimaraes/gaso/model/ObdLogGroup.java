@@ -18,6 +18,7 @@
 
 package com.ericmguimaraes.gaso.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +26,39 @@ import java.util.List;
  */
 public class ObdLogGroup {
 
-    long groupId;
+    private String uid;
 
-    List<ObdLog> logs;
+    private List<ObdLog> logs;
+
+    private long timestamp;
+
+    public List<ObdLog> getLogs() {
+        return logs;
+    }
+
+    public void setLogs(List<ObdLog> logs) {
+        this.logs = logs;
+    }
+
+    public void addLog(ObdLog log){
+        if(logs==null)
+            logs = new ArrayList<>();
+        logs.add(log);
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 }
