@@ -132,12 +132,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
             profilePicLoaderTask = new ProfilePicLoaderTask(user.getPhotoUrl());
             profilePicLoaderTask.execute();
         }
-        return view;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_my_car, menu);
 
         obdConnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,6 +147,13 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
                 }
             }
         });
+
+        return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_my_car, menu);
     }
 
     @Override

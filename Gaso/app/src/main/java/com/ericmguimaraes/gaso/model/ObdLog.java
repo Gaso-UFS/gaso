@@ -37,7 +37,7 @@ public class ObdLog extends RealmObject {
 
     private String presence;
 
-    private long carId;
+    private String carId;
 
     private String data;
 
@@ -83,11 +83,11 @@ public class ObdLog extends RealmObject {
         this.presence = presence;
     }
 
-    public long getCarId() {
+    public String getCarId() {
         return carId;
     }
 
-    public void setCarId(long carId) {
+    public void setCarId(String carId) {
         this.carId = carId;
     }
 
@@ -113,5 +113,12 @@ public class ObdLog extends RealmObject {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isValidLog(){
+        return ((getStatus()!=null && !getStatus().contains("ERROR")
+                && !getStatus().contains("NOT_SUPPORTED")
+                && !getStatus().contains("BROKEN"))  || getStatus()==null)
+                && ((getData()!=null && !getData().contains("NO_DATA") || getData()==null));
     }
 }

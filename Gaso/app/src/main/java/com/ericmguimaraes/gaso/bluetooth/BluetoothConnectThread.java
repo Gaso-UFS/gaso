@@ -62,7 +62,7 @@ public class BluetoothConnectThread extends Thread {
         mmSocket = tmp;
         try {
             mmSocket.connect();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e("BLUE_CONN",e.getMessage(),e);
             try {
                 mmSocket.close();

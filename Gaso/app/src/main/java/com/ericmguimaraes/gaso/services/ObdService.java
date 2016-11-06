@@ -36,11 +36,14 @@ import android.util.Log;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.config.Constants;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothConnectThread;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.obd.ObdCommandJob;
 import com.ericmguimaraes.gaso.persistence.ObdLogGroupDAO;
+import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.control.IgnitionMonitorCommand;
 import com.github.pires.obd.commands.control.ModuleVoltageCommand;
 import com.github.pires.obd.commands.control.PendingTroubleCodesCommand;
@@ -62,6 +65,7 @@ import com.github.pires.obd.commands.pressure.BarometricPressureCommand;
 import com.github.pires.obd.commands.pressure.FuelPressureCommand;
 import com.github.pires.obd.commands.pressure.FuelRailPressureCommand;
 import com.github.pires.obd.commands.pressure.IntakeManifoldPressureCommand;
+import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.commands.temperature.AirIntakeTemperatureCommand;
 import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
@@ -72,6 +76,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -84,6 +89,8 @@ public class ObdService extends Service {
 
     private static final int RETRY_LIMIT = 10;
     private static final int ONGOING_NOTIFICATION_ID = 999;
+    private static final long RECORD_TIME_LAPSE = 30 * 1000;
+    private static final int TIMEOUT = 500;
     private BluetoothSocket socket;
 
     private BluetoothDevice device;
@@ -110,6 +117,7 @@ public class ObdService extends Service {
     private ObdLogGroup obdLogGroup;
 
     private boolean isToSendOBDGroup = true;
+    private long recordTime = 0;
 
     @Override
     public void onCreate() {
@@ -216,7 +224,7 @@ public class ObdService extends Service {
                 if(socket==null) {
                     try {
                         wait(1000);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         Log.d("ERROR_WAITING",e.getMessage(),e);
                     }
                     retry();
@@ -282,9 +290,20 @@ public class ObdService extends Service {
     }
 
     private void saveObdlog(ObdLog data) {
-        if(obdLogGroup==null)
-            obdLogGroup = new ObdLogGroup();
-        obdLogGroup.addLog(data);
+        if(data.isValidLog()) {
+            if (obdLogGroup == null)
+                obdLogGroup = new ObdLogGroup();
+            obdLogGroup.addLog(data);
+        }
+    }
+
+    private boolean isPastRecordTime() {
+        long now = new Date().getTime();
+        if(now>recordTime){
+            recordTime = now+RECORD_TIME_LAPSE;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -322,16 +341,20 @@ public class ObdService extends Service {
                 job = jobsQueue.take();
 
                 // log job
-                Log.d(TAG, "Taking job[" + job.getId() + "] from queue..");
+                Log.d(TAG, "Taking job[" + job.getId()+ "] ["+job.getCommand().getName()+"] from queue..");
 
                 if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NEW)) {
                     Log.d(TAG, "Job state is NEW. Run it..");
                     job.setState(ObdCommandJob.ObdCommandJobState.RUNNING);
                     if (socket.isConnected()) {
+                        job.getCommand().setResponseTimeDelay((long) TIMEOUT);
                         job.getCommand().run(socket.getInputStream(), socket.getOutputStream());
+                        Log.d(TAG, job.getCommand().getName()+" = "+ job.getCommand().getCalculatedResult()+ " = " + job.getCommand().getFormattedResult());
+                        Log.d(TAG, "Raw result: "+job.getCommand().getResult());
                     } else {
                         job.setState(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR);
                         Log.e(TAG, "Can't run command on a closed socket.");
+                        retry();
                     }
                 } else
                     // log not new job
@@ -364,10 +387,12 @@ public class ObdService extends Service {
                 stateUpdate(job2);
             }
 
-
+            try {
+                Thread.sleep(TIMEOUT);
+            } catch (Exception ignored){}
 
             if(queueEmpty()) {
-                if(isToSendOBDGroup)
+                if(isToSendOBDGroup && isPastRecordTime())
                     saveAndResetObdGroup();
                 resetQueue();
             }
@@ -381,7 +406,9 @@ public class ObdService extends Service {
             jobsQueue = new LinkedBlockingQueue<>();
         jobsQueue.clear();
         queueCounter = 0L;
-        queueJob(new ObdCommandJob(0L,new IgnitionMonitorCommand()));
+
+        queueJob(new ObdCommandJob(0L,new TimeoutCommand(TIMEOUT)));
+        queueJob(new ObdCommandJob(24L,new IgnitionMonitorCommand()));
         queueJob(new ObdCommandJob(1L,new ModuleVoltageCommand()));
         queueJob(new ObdCommandJob(2L,new PendingTroubleCodesCommand()));
         queueJob(new ObdCommandJob(3L,new VinCommand()));
@@ -405,6 +432,7 @@ public class ObdService extends Service {
         queueJob(new ObdCommandJob(21L,new AirIntakeTemperatureCommand()));
         queueJob(new ObdCommandJob(22L,new AmbientAirTemperatureCommand()));
         queueJob(new ObdCommandJob(23L,new EngineCoolantTemperatureCommand()));
+        queueJob(new ObdCommandJob(25L,new SpeedCommand()));
     }
 
     private void saveAndResetObdGroup() {
@@ -479,6 +507,9 @@ public class ObdService extends Service {
 
         ObdLog obdLog = new ObdLog();
         obdLog.setId(job.getId());
+        Car c = SessionSingleton.getInstance().currentCar;
+        if(c!=null)
+        obdLog.setCarId(c.getid());
         try {
             obdLog.setPid(job.getCommand().getCommandPID());
         } catch (IndexOutOfBoundsException e){
@@ -504,6 +535,7 @@ public class ObdService extends Service {
         for(OnDataReceivedListener l:listeners){
             l.onDataReceived(obdLog);
         }
+
         saveObdlog(obdLog);
 
     }
