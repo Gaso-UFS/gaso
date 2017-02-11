@@ -30,6 +30,13 @@ proguard/
 
 # Android Studio captures folder
 captures/
+
+# Keystore files
+*.jks
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+
 Gaso/app/google-services.json
 
 Gaso/.idea/
@@ -37,3 +44,39 @@ Gaso/.idea/
 Gaso/signing.properties
 
 Gaso/gaso_keystore.jks
+
+#Freeline
+freeline.py
+freeline/
+freeline_project_description.json
+
+### Android Patch ###
+gen-external-apklibs
+
+### macOS ###
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
