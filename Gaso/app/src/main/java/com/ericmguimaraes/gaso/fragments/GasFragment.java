@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,8 +53,8 @@ import java.util.List;
 
 public class GasFragment extends Fragment {
 
-    private static int LOCATION_REFRESH_TIME = 2*60*1000; //millis
-    private static int STATIONS_REFRESH_DISTANCE = 1000; //m
+    private static int LOCATION_REFRESH_TIME = 1000; //millis
+    private static int STATIONS_REFRESH_DISTANCE = 10000; //m
     private int REQUEST_PLACE_REFRESH_DISTANCE = 500;
 
     Menu menu;
@@ -189,11 +190,16 @@ public class GasFragment extends Fragment {
         @Override
         public void run() {
             location = locationHelper.getLastKnownLocation();
+            if(location!=null)
+                logging("location="+location.getLat()+":"+location.getLng());
+            else
+                logging("location=null");
             if(location!=null) {
                 double distance = -1;
                 boolean firstTime = lastLocation==null;
                 if(!firstTime)
                     distance = LocationHelper.distance(location,lastLocation);
+                logging("distance="+distance);
                 if(firstTime || distance>STATIONS_REFRESH_DISTANCE){
                     lastLocation=location;
                     StationSearch task = new StationSearch();
@@ -296,7 +302,7 @@ public class GasFragment extends Fragment {
         public void run() {
             if(location!=null && googlePlaces.getParser().hasNextToken()) {
                 new NextSearchPage().execute(location.getLat(), location.getLng());
-                nextPageHandler.postDelayed(this, 4000);
+                nextPageHandler.postDelayed(this, 500);
             } else if(!googlePlaces.getParser().hasNextToken()){
                 //isSearching = false;
             }
@@ -309,4 +315,9 @@ public class GasFragment extends Fragment {
         editor.putString(Constants.USER_LOGGED_TAG, "");
         editor.apply();
     }
+
+    private void logging(String msg){
+        Log.i("GAS_DEBUG",msg);
+    }
+
 }

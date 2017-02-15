@@ -65,11 +65,16 @@ import com.github.pires.obd.commands.pressure.BarometricPressureCommand;
 import com.github.pires.obd.commands.pressure.FuelPressureCommand;
 import com.github.pires.obd.commands.pressure.FuelRailPressureCommand;
 import com.github.pires.obd.commands.pressure.IntakeManifoldPressureCommand;
+import com.github.pires.obd.commands.protocol.EchoOffCommand;
+import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.ObdRawCommand;
+import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.commands.temperature.AirIntakeTemperatureCommand;
 import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
+import com.github.pires.obd.enums.ObdProtocols;
 import com.github.pires.obd.exceptions.UnsupportedCommandException;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -407,6 +412,15 @@ public class ObdService extends Service {
         jobsQueue.clear();
         queueCounter = 0L;
 
+
+        queueJob(new ObdCommandJob(28L,new EchoOffCommand()));
+        queueJob(new ObdCommandJob(29L,new LineFeedOffCommand()));
+        queueJob(new ObdCommandJob(30L,new SelectProtocolCommand(ObdProtocols.AUTO)));
+
+        // Set Defaults and Reset all
+        queueJob(new ObdCommandJob(26L,new ObdRawCommand("AT D")));
+        queueJob(new ObdCommandJob(27L,new ObdRawCommand("AT Z")));
+
         queueJob(new ObdCommandJob(0L,new TimeoutCommand(TIMEOUT)));
         queueJob(new ObdCommandJob(24L,new IgnitionMonitorCommand()));
         queueJob(new ObdCommandJob(1L,new ModuleVoltageCommand()));
@@ -527,7 +541,7 @@ public class ObdService extends Service {
         } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NOT_SUPPORTED)) {
             cmdResult = "Não suportado";
         } else {
-            cmdResult = job.getCommand().getFormattedResult();
+            cmdResult = job.getCommand().getCalculatedResult();
         }
 
         obdLog.setData(cmdResult);
