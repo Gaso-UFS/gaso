@@ -52,7 +52,7 @@ public class PlacesHelper implements GoogleApiClient.ConnectionCallbacks, Google
 
     private Activity activity;
 
-    private float LIKELIHOOD_ACCEPTABLE = 65/100;
+    private float LIKELIHOOD_ACCEPTABLE = 85/100;
 
     public PlacesHelper(Activity activity) {
         this.context = activity.getApplicationContext();
