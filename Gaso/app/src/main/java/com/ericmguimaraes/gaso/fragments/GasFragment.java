@@ -20,13 +20,13 @@ package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v4.app.FragmentTransaction;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -46,6 +46,7 @@ import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
+import com.ericmguimaraes.gaso.util.GsonManager;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -224,9 +225,12 @@ public class GasFragment extends Fragment {
                 .setMessage("Você está num posto? Deseja cadastrar um gasto?")
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        String gsonStation = GsonManager.getGsonInstance().toJson(station);
+                        Log.e("station_gson", gsonStation);
                         Intent intent = new Intent(getActivity(), ExpensesRegisterActivity.class);
                         intent.putExtra("station_id",station.getId());
                         intent.putExtra("station_name", station.getName());
+                        intent.putExtra("station_gson", gsonStation);
                         startActivity(intent);
                         dialog.dismiss();
                     }

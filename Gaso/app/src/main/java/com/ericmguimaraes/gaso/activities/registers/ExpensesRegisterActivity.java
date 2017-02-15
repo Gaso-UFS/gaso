@@ -42,8 +42,8 @@ import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
-import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
+import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
@@ -155,12 +155,8 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         Intent intent = getIntent();
         if(intent!=null){
-            if(intent.hasExtra("station_name")) {
-                inputStation.setText(intent.getStringExtra("station_name"));
-            }
-            if(intent.hasExtra("station_id")){
-                StationDAO dao = new StationDAO(getApplicationContext());
-                stationSelected = dao.findById(intent.getStringExtra("station_id"));
+            if(intent.hasExtra("station_gson")){
+                stationSelected = GsonManager.getGsonInstance().fromJson(intent.getStringExtra("station_gson"), Station.class);
                 if(stationSelected!=null) {
                     inputStation.setText(stationSelected.getName());
                 }
@@ -263,7 +259,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         Expense e = new Expense();
         e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(".","").replace(",",".");
+        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(".","").replace(",",".").replace("$","");
         e.setTotal(Double.parseDouble(parsableDouble));
         e.setStationUid(stationSelected.getId());
         e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
