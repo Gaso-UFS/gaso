@@ -155,11 +155,15 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         Intent intent = getIntent();
         if(intent!=null){
+            if(intent.hasExtra("station_name")) {
+                inputStation.setText(intent.getStringExtra("station_name"));
+            }
             if(intent.hasExtra("station_id")){
                 StationDAO dao = new StationDAO(getApplicationContext());
                 stationSelected = dao.findById(intent.getStringExtra("station_id"));
-                if(stationSelected!=null)
+                if(stationSelected!=null) {
                     inputStation.setText(stationSelected.getName());
+                }
             }
         }
 

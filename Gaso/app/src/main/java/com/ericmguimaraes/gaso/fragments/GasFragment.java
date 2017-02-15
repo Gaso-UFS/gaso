@@ -226,6 +226,7 @@ public class GasFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(getActivity(), ExpensesRegisterActivity.class);
                         intent.putExtra("station_id",station.getId());
+                        intent.putExtra("station_name", station.getName());
                         startActivity(intent);
                         dialog.dismiss();
                     }
