@@ -135,6 +135,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     // User is signed in
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
+                    showProgress(false);
                     // User is signed out
                     Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
@@ -255,11 +256,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             GoogleSignInAccount account = result.getSignInAccount();
             if(account!=null){
                 firebaseAuthWithGoogle(account);
-            } else
+            } else {
+                showProgress(false);
                 showConnectionFailSnackBar();
-        } else
+            }
+        } else {
+            showProgress(false);
             showConnectionFailSnackBar();
-        showProgress(false);
+        }
     }
 
     private void loadFavoriteCar(){
@@ -273,6 +277,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                showProgress(false);
                 showError();
             }
         });
@@ -289,6 +294,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
+        showProgress(false);
         startActivity(intent);
     }
 
@@ -335,12 +341,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
+                            showProgress(false);
                             showAuthFailSnackBar();
                         }
                         // ...
