@@ -311,7 +311,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         if(calendarSelected==null)
             calendarSelected = Calendar.getInstance();
-        calendarSelected.set(Calendar.HOUR,hourOfDay);
+        calendarSelected.set(Calendar.HOUR_OF_DAY,hourOfDay);
         calendarSelected.set(Calendar.MINUTE,minute);
         inputHour.setText(houtFormat.format(calendarSelected.getTime()));
     }
