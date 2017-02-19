@@ -127,7 +127,9 @@ public class MonthlyExpensesFragment extends Fragment {
     }
 
     private void showGenericError() {
-        Snackbar.make(recyclerView,Constants.genericError,Snackbar.LENGTH_SHORT).show();
+        if (isAdded()) {
+            Snackbar.make(recyclerView,Constants.genericError,Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     @Override
