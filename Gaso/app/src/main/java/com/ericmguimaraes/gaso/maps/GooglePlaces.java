@@ -49,7 +49,6 @@ public class GooglePlaces {
 
 	private double _latitude;
 	private double _longitude;
-	private double _radius;
 
 	private GooglePlacesParser parser;
 
@@ -64,7 +63,6 @@ public class GooglePlaces {
 
 		this._latitude = latitude;
 		this._longitude = longitude;
-		this._radius = 10*1000; //m
 		String types="gas_station";
 
 		try {
@@ -76,7 +74,6 @@ public class GooglePlaces {
 			request.getUrl().put("rankby", "distance");
 			request.getUrl().put("location", _latitude + "," + _longitude);
 			request.getUrl().put("sensor", "false");
-//			request.getUrl().put("radius", _radius); // in meters
 			request.getUrl().put("key", API_KEY);
 
 			Log.e("url usado", String.valueOf(request.getUrl()));
