@@ -43,28 +43,26 @@ public class GooglePlaces {
 	private static final String API_KEY = "AIzaSyD75hEMtsbrsokY3ypMLgbrauQT0T7uZ_g";
 
 	// Google Places serach url's
-	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
+	private static final String PLACES_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
 	private static final String PLACES_TEXT_SEARCH_URL = "https://maps.googleapis.com/maps/api/place/search/json?";
 	private static final String PLACES_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json?";
 
 	private double _latitude;
 	private double _longitude;
-	private double _radius;
 
-    private GooglePlacesParser parser;
+	private GooglePlacesParser parser;
 
-    public GooglePlaces(){
-        parser = new GooglePlacesParser();
-    }
+	public GooglePlaces(){
+		parser = new GooglePlacesParser();
+	}
 
 	public List<Station> getStationsList(Location location, String nextPageToken) {
 
-        double latitude = location.getLat();
-        double longitude = location.getLng();
+		double latitude = location.getLat();
+		double longitude = location.getLng();
 
 		this._latitude = latitude;
 		this._longitude = longitude;
-		this._radius = 10*1000; //m
 		String types="gas_station";
 
 		try {
@@ -72,14 +70,16 @@ public class GooglePlaces {
 			HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
 			HttpRequest request = httpRequestFactory
 					.buildGetRequest(new GenericUrl(PLACES_SEARCH_URL));
-			request.getUrl().put("key", API_KEY);
-			request.getUrl().put("location", _latitude + "," + _longitude);
-			request.getUrl().put("radius", _radius); // in meters
-			request.getUrl().put("sensor", "false");
 			request.getUrl().put("types", types);
+			request.getUrl().put("rankby", "distance");
+			request.getUrl().put("location", _latitude + "," + _longitude);
+			request.getUrl().put("sensor", "false");
+			request.getUrl().put("key", API_KEY);
 
-            if(nextPageToken!=null && !nextPageToken.isEmpty())
-                request.getUrl().put("pagetoken",nextPageToken);
+			Log.e("url usado", String.valueOf(request.getUrl()));
+
+			if(nextPageToken!=null && !nextPageToken.isEmpty())
+				request.getUrl().put("pagetoken",nextPageToken);
 
 			HttpResponse response = request.execute();
 			String str = response.parseAsString();
@@ -97,7 +97,7 @@ public class GooglePlaces {
 
 			HttpRequestFactory httpRequestFactory = createRequestFactory(HTTP_TRANSPORT);
 			HttpRequest request = httpRequestFactory
-                    .buildGetRequest(new GenericUrl(PLACES_DETAILS_URL));
+					.buildGetRequest(new GenericUrl(PLACES_DETAILS_URL));
 			request.getUrl().put("key", API_KEY);
 			request.getUrl().put("reference", station.getReference());
 			request.getUrl().put("sensor", "false");
@@ -128,7 +128,7 @@ public class GooglePlaces {
 		});
 	}
 
-    public GooglePlacesParser getParser() {
-        return parser;
-    }
+	public GooglePlacesParser getParser() {
+		return parser;
+	}
 }
