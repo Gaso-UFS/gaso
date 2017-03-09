@@ -267,7 +267,7 @@ public class GasFragment extends Fragment {
             l.setLat(lat);
             l.setLng(lgn);
             stationsList.addAll(googlePlaces.getStationsList(l, null));
-            nextPageHandler.postDelayed(new NextPageGetter(l), 4000);
+//            nextPageHandler.postDelayed(new NextPageGetter(l), 4000);
             return null;
         }
 
