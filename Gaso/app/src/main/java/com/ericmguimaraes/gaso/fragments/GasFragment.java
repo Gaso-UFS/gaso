@@ -74,8 +74,6 @@ public class GasFragment extends Fragment {
 
     private boolean isSearching = true;
 
-    private Handler nextPageHandler;
-
     private Handler locationHandler;
 
     MapGasoFragment mapGasoFragment;
@@ -103,7 +101,6 @@ public class GasFragment extends Fragment {
 
         placesHelper = new PlacesHelper(getActivity());
 
-        nextPageHandler = new Handler();
         locationHandler = new Handler();
 
         locationHandler = new Handler();
@@ -270,7 +267,6 @@ public class GasFragment extends Fragment {
             l.setLat(lat);
             l.setLng(lgn);
             stationsList.addAll(googlePlaces.getStationsList(l, null));
-            nextPageHandler.postDelayed(new NextPageGetter(l), 4000);
             return null;
         }
 
@@ -281,40 +277,6 @@ public class GasFragment extends Fragment {
             isSearching = false;
         }
 
-    }
-
-    public class NextSearchPage extends AsyncTask<Double,Void,Void> {
-
-        @Override
-        protected Void doInBackground(Double... params) {
-            double lat = params[0];
-            double lgn = params[1];
-            Location l = new Location();
-            l.setLat(lat);
-            l.setLng(lgn);
-            stationsList.addAll(googlePlaces.getStationsList(l, googlePlaces.getParser().getNextPageToken()));
-            updateData();
-            return null;
-        }
-    }
-
-    private class NextPageGetter implements Runnable {
-
-        Location location;
-
-        public NextPageGetter(Location location){
-            this.location = location;
-        }
-
-        @Override
-        public void run() {
-            if(location!=null && googlePlaces.getParser().hasNextToken()) {
-                new NextSearchPage().execute(location.getLat(), location.getLng());
-                nextPageHandler.postDelayed(this, 500);
-            } else if(!googlePlaces.getParser().hasNextToken()){
-                //isSearching = false;
-            }
-        }
     }
 
     private void forgetLoggedUser() {
