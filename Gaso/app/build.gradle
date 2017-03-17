@@ -112,6 +112,7 @@ dependencies {
     compile 'com.google.firebase:firebase-database:9.4.0'
     compile 'com.google.firebase:firebase-crash:9.4.0'
 
+    compile project(':jFuzzyLogic')
 }
 
 apply plugin: 'com.google.gms.google-services'
