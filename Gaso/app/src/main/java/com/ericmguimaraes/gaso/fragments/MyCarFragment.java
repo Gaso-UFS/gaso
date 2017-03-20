@@ -52,6 +52,7 @@ import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
+import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -131,7 +132,7 @@ public class MyCarFragment extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if(!isFirstRead[0]){
                             if(dataSnapshot.getValue()!=null)
-                                updateObdView(dataSnapshot.getValue(ObdLog.class));
+                                updateObdView(dataSnapshot.getValue(ObdLogGroup.class));
                         }
                         isFirstRead[0] =false;
                     }
@@ -250,10 +251,13 @@ public class MyCarFragment extends Fragment {
     Handler handler;
 
     // TODO: 19/03/17 use it
-    private void updateObdView(ObdLog obdLog) {
+    private void updateObdView(ObdLogGroup obdLog) {
         showObdCard();
         if(obdLog!=null && obdFragment!=null){
-            obdFragment.addOrUpdateJob(obdLog);
+            for (ObdLog l :
+                    obdLog.getLogs()) {
+                obdFragment.addOrUpdateJob(l);
+            }
         }
     }
 
