@@ -104,7 +104,10 @@ public class GasFragment extends Fragment {
 
         locationHandler = new Handler();
 
-        locationChecker.run();
+        locationHandler = new Handler();
+        if (locationHelper.isConnected()) {
+            locationChecker.run();
+        }
     }
 
     @Override
