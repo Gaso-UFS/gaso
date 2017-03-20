@@ -18,6 +18,7 @@ import android.util.Log;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.MainActivity;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothConnection;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;

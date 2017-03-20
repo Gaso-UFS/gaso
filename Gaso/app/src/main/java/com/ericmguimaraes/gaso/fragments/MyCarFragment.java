@@ -18,11 +18,8 @@
 
 package com.ericmguimaraes.gaso.fragments;
 
-import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,7 +27,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -56,9 +52,12 @@ import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
-import com.ericmguimaraes.gaso.services.ObdService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.net.URL;
 
@@ -71,7 +70,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Use the {@link MyCarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MyCarFragment extends Fragment implements ObdService.OnDataReceivedListener {
+public class MyCarFragment extends Fragment {
 
     @Bind(R.id.no_car_text)
     TextView noCarText;
@@ -98,8 +97,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     ProfilePicLoaderTask profilePicLoaderTask;
 
-    private ObdService mService;
-    private boolean mBound;
     private ObdLogFragment obdFragment;
 
     OnMyCarFragmentInteractionListener mListener;
@@ -121,6 +118,31 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         if (getArguments() != null) {
         }
         handler = new Handler();
+        addListenerToObdGroupListener();
+    }
+
+    private void addListenerToObdGroupListener() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            if (SessionSingleton.getInstance().currentCar != null) {
+                final boolean[] isFirstRead = {true};
+                FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_OBD_LOG).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(!isFirstRead[0]){
+                            if(dataSnapshot.getValue()!=null)
+                                updateObdView(dataSnapshot.getValue(ObdLog.class));
+                        }
+                        isFirstRead[0] =false;
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -216,10 +238,6 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     @Override
     public void onDetach() {
         super.onDetach();
-        if (mBound) {
-            getActivity().unbindService(mConnection);
-            mBound = false;
-        }
         mListener = null;
     }
 
@@ -227,70 +245,32 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     public void onResume() {
         super.onResume();
         updateCarAndUser();
-
-        if(SessionSingleton.getInstance().isToStartAndBindService) {
-            Intent intent = new Intent(getContext(), ObdService.class);
-            getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-
-            fabBluetooth.setVisibility(View.VISIBLE);
-            obdDataCardView.setVisibility(View.VISIBLE);
-
-            obdFragment = ObdLogFragment.newInstance();
-            getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
-
-            fabBluetooth.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(MyCarFragment.this.getActivity(),BluetoothConnectionActivity.class);
-                    startActivity(intent);
-                }
-            });
-
-        }
-
     }
-
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            ObdService.ObdServiceBinder binder = (ObdService.ObdServiceBinder) service;
-            mService = binder.getService();
-            mService.setDevice(SessionSingleton.getInstance().device);
-            mService.setSocket(SessionSingleton.getInstance().socket);
-            mService.setContext(getContext());
-            mService.addOnDataReceivedListener(MyCarFragment.this);
-            mService.startReadingThread();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-            fabBluetooth.setVisibility(View.GONE);
-            obdDataCardView.setVisibility(View.GONE);
-        }
-    };
 
     Handler handler;
 
-    @Override
-    public void onDataReceived(final ObdLog obdLog) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                updateObdView(obdLog);
-            }
-        },50);
-
-    }
-
+    // TODO: 19/03/17 use it
     private void updateObdView(ObdLog obdLog) {
+        showObdCard();
         if(obdLog!=null && obdFragment!=null){
             obdFragment.addOrUpdateJob(obdLog);
         }
+    }
+
+    private void showObdCard(){
+        fabBluetooth.setVisibility(View.VISIBLE);
+        obdDataCardView.setVisibility(View.VISIBLE);
+
+        obdFragment = ObdLogFragment.newInstance();
+        getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
+
+        fabBluetooth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MyCarFragment.this.getActivity(),BluetoothConnectionActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public Bitmap loadImageFromWebOperations(Uri uri) {

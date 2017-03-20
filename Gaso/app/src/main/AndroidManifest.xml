@@ -53,8 +53,6 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".activities.BluetoothConnectionActivity" />
 
-        <service android:name=".services.ObdService" />
-
         <service android:name=".services.LoggingService" />
 
         <activity

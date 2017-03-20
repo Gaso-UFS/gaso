@@ -1,4 +1,4 @@
-package com.ericmguimaraes.gaso.services;
+package com.ericmguimaraes.gaso.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
