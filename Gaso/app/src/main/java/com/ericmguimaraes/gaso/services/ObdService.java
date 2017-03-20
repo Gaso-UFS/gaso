@@ -295,11 +295,9 @@ public class ObdService extends Service {
     }
 
     private void saveObdlog(ObdLog data) {
-        if(data.isValidLog()) {
             if (obdLogGroup == null)
                 obdLogGroup = new ObdLogGroup();
             obdLogGroup.addLog(data);
-        }
     }
 
     private boolean isPastRecordTime() {
@@ -520,7 +518,6 @@ public class ObdService extends Service {
         final String cmdID = LookUpCommand(cmdName);
 
         ObdLog obdLog = new ObdLog();
-        obdLog.setId(job.getId());
         Car c = SessionSingleton.getInstance().currentCar;
         if(c!=null)
         obdLog.setCarId(c.getid());
@@ -534,7 +531,6 @@ public class ObdService extends Service {
 
         if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
             cmdResult = job.getCommand().getResult();
-            obdLog.setStatus(job.getState().toString());
         } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.BROKEN_PIPE)) {
             if (isServiceBound)
                 stopService();

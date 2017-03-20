@@ -18,6 +18,7 @@
 
 package com.ericmguimaraes.gaso.fragments;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -101,6 +102,8 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     private boolean mBound;
     private ObdLogFragment obdFragment;
 
+    OnMyCarFragmentInteractionListener mListener;
+
     public MyCarFragment() {
         // Required empty public constructor
     }
@@ -140,8 +143,10 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
                     Snackbar.make(v,"Por favor, cadastre e/ou selecione um carro antes de conectar o seu OBD2",Snackbar.LENGTH_LONG).show();
 
                 if(BluetoothHelper.getInstance().isBluetoothSupported()){
-                    Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
-                    startActivity(intent);
+                    // old way
+                    //Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
+                    //startActivity(intent);
+                    mListener.onStartTripIsPressed();
                 } else {
                     Toast.makeText(getContext(),"Não foi possivel conectar ao bluetooth e não há suporte a conexão wifi.",Toast.LENGTH_LONG).show();
                 }
@@ -215,6 +220,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
             getActivity().unbindService(mConnection);
             mBound = false;
         }
+        mListener = null;
     }
 
     @Override
@@ -326,6 +332,32 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         super.onStop();
         if(profilePicLoaderTask!=null)
             profilePicLoaderTask.cancel(true);
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnMyCarFragmentInteractionListener) {
+            mListener = (OnMyCarFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnMyCarFragmentInteractionListener");
+        }
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnMyCarFragmentInteractionListener {
+        void onStartTripIsPressed();
     }
 
 }

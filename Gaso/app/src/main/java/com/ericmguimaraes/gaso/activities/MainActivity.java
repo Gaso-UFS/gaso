@@ -19,19 +19,27 @@
 package com.ericmguimaraes.gaso.activities;
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
@@ -49,9 +57,11 @@ import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
+import com.ericmguimaraes.gaso.services.LoggingService;
 import com.ericmguimaraes.gaso.util.CSVHelper;
 import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GPSTracker;
+import com.ericmguimaraes.gaso.util.SharedPreferencesManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
@@ -66,7 +76,9 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements ObdLogFragment.OnObdLogListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements ObdLogFragment.OnObdLogListFragmentInteractionListener, MyCarFragment.OnMyCarFragmentInteractionListener {
+
+    private static final String TAG = "MAIN_ACT";
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -94,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
 
     @Bind(R.id.blue_out)
     RelativeLayout blueRecyclerView;
+
+    private BluetoothAdapter mBtAdapter;
 
     private final int refreshTime = 10000;
 
@@ -131,6 +145,66 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
             }
         };
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+            if (bluetoothManager != null) {
+                mBtAdapter = bluetoothManager.getAdapter();
+            }
+        } else {
+            mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        }
+    }
+
+    @Override
+    public void onStartTripIsPressed(){
+        if (mBtAdapter == null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), getString(R.string.bluetooth_not_found_error), Toast.LENGTH_LONG).show();
+                }
+            });
+
+            return;
+        }
+
+        if (requestLocationPermissions()) {
+            return;
+        }
+
+        if (!LoggingService.isRunning()) {
+            if (!mBtAdapter.isEnabled()) {
+                Intent btIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(btIntent, BluetoothConnectionActivity.REQUEST_ENABLE_BT);
+            } else {
+                String bluetoothDeviceAddress = SharedPreferencesManager.getInstance(getApplicationContext()).getDeviceKey();
+
+                if (bluetoothDeviceAddress.isEmpty()) {
+                    Intent intent = new Intent(MainActivity.this, BluetoothConnectionActivity.class);
+                    startActivityForResult(intent, BluetoothConnectionActivity.REQUEST_CONNECT_DEVICE);
+                } else {
+                    Log.d(TAG, "Start tracking trip");
+
+                    startBluetoothService(bluetoothDeviceAddress);
+                }
+            }
+        }
+    }
+
+
+    private boolean requestLocationPermissions() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1
+                && ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+            }, Constants.PERMISSION_REQUEST_LOCATION);
+
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -279,6 +353,15 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
         //TODO do something with log
     }
 
+    private void startBluetoothService(String bluetoothDeviceAddress) {
+        BluetoothDevice bluetoothDevice = mBtAdapter.getRemoteDevice(bluetoothDeviceAddress);
+        Intent intent = new Intent(MainActivity.this, LoggingService.class);
+        intent.setAction(LoggingService.SERVICE_START);
+        intent.putExtra("bluetoothDevice", bluetoothDevice);
+
+        startService(intent);
+    }
+
     public void createCSVFile() {
         final List<String[]> data = new ArrayList<>();
         final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
@@ -323,6 +406,33 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
             }
         });
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult");
+
+        switch (requestCode) {
+            case BluetoothConnectionActivity.REQUEST_CONNECT_DEVICE: {
+                if(resultCode==RESULT_OK) {
+                    String address = data.getStringExtra(BluetoothConnectionActivity.BLUETOOTH_DEVICE_ADDRESS);
+
+                    Log.d(TAG, "Device address -> " + address);
+
+                    startBluetoothService(address);
+
+                }
+                break;
+            }
+            case BluetoothConnectionActivity.REQUEST_ENABLE_BT: {
+                Log.d(TAG, "Bluetooth enabled");
+
+                Toast.makeText(this, R.string.bluetooth_enabled_message, Toast.LENGTH_SHORT).show();
+
+                break;
+            }
+        }
     }
 
 }

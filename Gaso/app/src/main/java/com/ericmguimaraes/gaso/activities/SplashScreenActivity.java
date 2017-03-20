@@ -62,11 +62,7 @@ public class SplashScreenActivity extends AppCompatActivity {
             public void run() {
                 Intent intent = new Intent(SplashScreenActivity.this, MainActivity.class);
                 startActivity(intent);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    finishAfterTransition();
-                } else {
-                    finish();
-                }
+                finish();
             }
 
         },300);
@@ -83,20 +79,13 @@ public class SplashScreenActivity extends AppCompatActivity {
                     intent.putExtra("message",msg);
                 ActivityOptionsCompat options = ActivityOptionsCompat.
                         makeSceneTransitionAnimation(SplashScreenActivity.this, logo, "gaso_icon");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    startActivity(intent, options.toBundle());
-                }else {
-                    startActivity(intent);
-                }
+                startActivity(intent);
             }
         },300);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    finishAfterTransition();
-                } else
-                    finish();
+                finish();
             }
         },1000);
     }

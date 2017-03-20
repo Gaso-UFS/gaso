@@ -20,6 +20,7 @@ package com.ericmguimaraes.gaso.fragments;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -30,6 +31,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.MyBluetoothRecyclerViewAdapter;
@@ -129,6 +131,18 @@ public class BluetoothFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(true);
+            }
+        },250);
+
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnBluetoothDeviceListFragmentInteractionListener) {
@@ -144,18 +158,6 @@ public class BluetoothFragment extends Fragment {
         super.onDetach();
         mListener = null;
         BluetoothHelper.getInstance().unRegisteReceiver();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                swipeRefreshLayout.setRefreshing(true);
-            }
-        },250);
-
     }
 
     /**

@@ -46,6 +46,7 @@ import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
+import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -188,16 +189,11 @@ public class GasFragment extends Fragment {
         @Override
         public void run() {
             location = locationHelper.getLastKnownLocation();
-            if(location!=null)
-                logging("location="+location.getLat()+":"+location.getLng());
-            else
-                logging("location=null");
             if(location!=null) {
                 double distance = -1;
                 boolean firstTime = lastLocation==null;
                 if(!firstTime)
                     distance = LocationHelper.distance(location,lastLocation);
-                logging("distance="+distance);
                 if(firstTime || distance>STATIONS_REFRESH_DISTANCE){
                     lastLocation=location;
                     StationSearch task = new StationSearch();
@@ -263,7 +259,8 @@ public class GasFragment extends Fragment {
             Location l = new Location();
             l.setLat(lat);
             l.setLng(lgn);
-            stationsList.addAll(googlePlaces.getStationsList(l, null));
+            if(getContext()!=null && new ConnectionDetector(getContext()).isConnectingToInternet())
+                stationsList.addAll(googlePlaces.getStationsList(l, null));
             return null;
         }
 
@@ -281,10 +278,6 @@ public class GasFragment extends Fragment {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(Constants.USER_LOGGED_TAG, "");
         editor.apply();
-    }
-
-    private void logging(String msg){
-        Log.i("GAS_DEBUG",msg);
     }
 
 }

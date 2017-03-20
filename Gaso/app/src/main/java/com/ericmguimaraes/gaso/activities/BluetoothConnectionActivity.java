@@ -29,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
@@ -40,6 +41,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class BluetoothConnectionActivity extends AppCompatActivity implements BluetoothFragment.OnBluetoothDeviceListFragmentInteractionListener {
+
+    public static final int REQUEST_ENABLE_BT = 0;
+    public static final int REQUEST_CONNECT_DEVICE = 1;
+
+    public static String BLUETOOTH_DEVICE_ADDRESS = "device_address";
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -81,6 +87,16 @@ public class BluetoothConnectionActivity extends AppCompatActivity implements Bl
 
     @Override
     public void onBluetoothDeviceListFragmentInteraction(final BluetoothDevice bluetoothDevice) {
+
+        BluetoothHelper.getInstance().stopAdapterIfListening();
+
+        Intent intent = new Intent();
+        intent.putExtra(BLUETOOTH_DEVICE_ADDRESS, bluetoothDevice.getAddress());
+
+        setResult(RESULT_OK, intent);
+        finish();
+
+        /* old way
         Snackbar snackbar = Snackbar
                 .make(coordinator, "Conectando a "+bluetoothDevice.getName(), Snackbar.LENGTH_LONG);
         snackbar.show();
@@ -108,6 +124,8 @@ public class BluetoothConnectionActivity extends AppCompatActivity implements Bl
         });
 
         thread.start();
+
+        */
     }
 
 
