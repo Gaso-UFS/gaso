@@ -58,9 +58,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -127,12 +130,17 @@ public class MyCarFragment extends Fragment {
         if(user!=null) {
             if (SessionSingleton.getInstance().currentCar != null) {
                 final boolean[] isFirstRead = {true};
-                FirebaseDatabase.getInstance().getReference().child(Constants.FIREBASE_OBD_LOG).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).addValueEventListener(new ValueEventListener() {
+                FirebaseDatabase.getInstance().getReference().
+                        child(Constants.FIREBASE_OBD_LOG).
+                        child(user.getUid()).
+                        child(SessionSingleton.getInstance().currentCar.getid()).
+                        addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if(!isFirstRead[0]){
+                            GenericTypeIndicator<HashMap<Long,ObdLogGroup>> t = new GenericTypeIndicator<HashMap<Long,ObdLogGroup>>() {};
                             if(dataSnapshot.getValue()!=null)
-                                updateObdView(dataSnapshot.getValue(ObdLogGroup.class));
+                                updateObdView(dataSnapshot.getValue(t));
                         }
                         isFirstRead[0] =false;
                     }
@@ -251,14 +259,16 @@ public class MyCarFragment extends Fragment {
     Handler handler;
 
     // TODO: 19/03/17 use it
-    private void updateObdView(ObdLogGroup obdLog) {
+    private void updateObdView(HashMap<Long, ObdLogGroup> obdLogList) {
         showObdCard();
-        if(obdLog!=null && obdFragment!=null){
-            for (ObdLog l :
-                    obdLog.getLogs()) {
-                obdFragment.addOrUpdateJob(l);
+       /* for (ObdLogGroup obdLog: obdLogList) {
+            if (obdLog != null && obdFragment != null) {
+                for (ObdLog l :
+                        obdLog.getLogs()) {
+                    obdFragment.addOrUpdateJob(l);
+                }
             }
-        }
+        } */
     }
 
     private void showObdCard(){

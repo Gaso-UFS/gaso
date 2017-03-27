@@ -77,6 +77,7 @@ public class LoggingThread implements Runnable,
                 for(ObdLog o : obdValues)
                     Log.d("OBD_VALUES",o.getData());
 
+                if(obdValues.size()>1)
                 sendInformationBroadcast(obdValues.get(0).getData(), obdValues.get(1).getData());
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error", e);
