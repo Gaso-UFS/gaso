@@ -43,27 +43,24 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
+import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
-import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -76,6 +73,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 public class MyCarFragment extends Fragment {
 
+    private static final String OBD_FRAGMENT_TAG = "obd_fragment";
     @Bind(R.id.no_car_text)
     TextView noCarText;
 
@@ -100,8 +98,6 @@ public class MyCarFragment extends Fragment {
     CircleImageView profileImageView;
 
     ProfilePicLoaderTask profilePicLoaderTask;
-
-    private ObdLogFragment obdFragment;
 
     OnMyCarFragmentInteractionListener mListener;
 
@@ -130,26 +126,43 @@ public class MyCarFragment extends Fragment {
         if(user!=null) {
             if (SessionSingleton.getInstance().currentCar != null) {
                 final boolean[] isFirstRead = {true};
+
                 FirebaseDatabase.getInstance().getReference().
                         child(Constants.FIREBASE_OBD_LOG).
                         child(user.getUid()).
                         child(SessionSingleton.getInstance().currentCar.getid()).
-                        addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(!isFirstRead[0]){
-                            GenericTypeIndicator<HashMap<Long,ObdLogGroup>> t = new GenericTypeIndicator<HashMap<Long,ObdLogGroup>>() {};
-                            if(dataSnapshot.getValue()!=null)
-                                updateObdView(dataSnapshot.getValue(t));
-                        }
-                        isFirstRead[0] =false;
-                    }
+                        addChildEventListener(new ChildEventListener() {
+                            @Override
+                            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                ObdLogGroup group = dataSnapshot.getValue(ObdLogGroup.class);
+                                if(isFirstRead[0]) {
+                                    showObdCard();
+                                    isFirstRead[0] = false;
+                                }
+                                updateObdView(group);
+                            }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                            @Override
+                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                    }
-                });
+                            }
+
+                            @Override
+                            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
             }
         }
     }
@@ -259,24 +272,23 @@ public class MyCarFragment extends Fragment {
     Handler handler;
 
     // TODO: 19/03/17 use it
-    private void updateObdView(HashMap<Long, ObdLogGroup> obdLogList) {
-        showObdCard();
-       /* for (ObdLogGroup obdLog: obdLogList) {
-            if (obdLog != null && obdFragment != null) {
-                for (ObdLog l :
-                        obdLog.getLogs()) {
-                    obdFragment.addOrUpdateJob(l);
+    private void updateObdView(ObdLogGroup group) {
+
+        ObdLogFragment obdFragment = (ObdLogFragment) getChildFragmentManager().findFragmentByTag(OBD_FRAGMENT_TAG);
+        if (group != null && obdFragment != null) {
+            for (ObdLog obdLog : group.getLogs()) {
+                if (obdLog != null) {
+                    obdFragment.addOrUpdateJob(obdLog);
                 }
             }
-        } */
+        }
     }
 
     private void showObdCard(){
         fabBluetooth.setVisibility(View.VISIBLE);
         obdDataCardView.setVisibility(View.VISIBLE);
 
-        obdFragment = ObdLogFragment.newInstance();
-        getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
+        getChildFragmentManager().beginTransaction().replace(R.id.obd_content,ObdLogFragment.newInstance(),OBD_FRAGMENT_TAG).commit();
 
         fabBluetooth.setOnClickListener(new View.OnClickListener() {
             @Override
