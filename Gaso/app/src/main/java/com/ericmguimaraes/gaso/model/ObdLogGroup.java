@@ -18,13 +18,14 @@
 
 package com.ericmguimaraes.gaso.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ericm on 22-Aug-16.
  */
-public class ObdLogGroup {
+public class ObdLogGroup implements Serializable {
 
     private String uid;
 

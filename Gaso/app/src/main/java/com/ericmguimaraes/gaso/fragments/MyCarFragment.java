@@ -18,8 +18,10 @@
 
 package com.ericmguimaraes.gaso.fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,6 +33,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,12 +50,15 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.activities.PlainTextActivity;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothConnection;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
+import com.ericmguimaraes.gaso.services.LoggingService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -74,6 +80,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MyCarFragment extends Fragment {
 
     private static final String OBD_FRAGMENT_TAG = "obd_fragment";
+    private static final String TAG = "MY_CAR";
     @Bind(R.id.no_car_text)
     TextView noCarText;
 
@@ -118,53 +125,6 @@ public class MyCarFragment extends Fragment {
         if (getArguments() != null) {
         }
         handler = new Handler();
-        addListenerToObdGroupListener();
-    }
-
-    private void addListenerToObdGroupListener() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user!=null) {
-            if (SessionSingleton.getInstance().currentCar != null) {
-                final boolean[] isFirstRead = {true};
-
-                FirebaseDatabase.getInstance().getReference().
-                        child(Constants.FIREBASE_OBD_LOG).
-                        child(user.getUid()).
-                        child(SessionSingleton.getInstance().currentCar.getid()).
-                        addChildEventListener(new ChildEventListener() {
-                            @Override
-                            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                ObdLogGroup group = dataSnapshot.getValue(ObdLogGroup.class);
-                                if(isFirstRead[0]) {
-                                    showObdCard();
-                                    isFirstRead[0] = false;
-                                }
-                                updateObdView(group);
-                            }
-
-                            @Override
-                            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                            }
-
-                            @Override
-                            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                            }
-
-                            @Override
-                            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
-            }
-        }
     }
 
     @Override
@@ -213,6 +173,18 @@ public class MyCarFragment extends Fragment {
             case R.id.car_list_menu_item:
                 intent = new Intent(getActivity(), CarListActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.action_help:
+                Intent intentHelp = new Intent(getActivity(), PlainTextActivity.class);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.help_title);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.help_text);
+                startActivity(intentHelp);
+                return true;
+            case R.id.action_disclaimer:
+                Intent intentDisclaimer = new Intent(getActivity(), PlainTextActivity.class);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.disclaimer_title);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.disclaimer_text);
+                startActivity(intentDisclaimer);
                 return true;
             case R.id.action_logout:
                 FirebaseAuth.getInstance().signOut();
@@ -267,6 +239,20 @@ public class MyCarFragment extends Fragment {
     public void onResume() {
         super.onResume();
         updateCarAndUser();
+        if(getActivity()!=null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(LoggingService.SERVICE_BROADCAST_MESSAGE);
+            filter.addAction(LoggingService.SERVICE_DATA_OBDGROUP);
+            LocalBroadcastManager.getInstance(getContext())
+                    .registerReceiver(mBroadcastReceiver, filter);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getContext())
+                .unregisterReceiver(mBroadcastReceiver);
     }
 
     Handler handler;
@@ -365,6 +351,56 @@ public class MyCarFragment extends Fragment {
      */
     public interface OnMyCarFragmentInteractionListener {
         void onStartTripIsPressed();
+    }
+
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Received broadcast from Service");
+
+            if (intent.getAction().equals(LoggingService.SERVICE_BROADCAST_MESSAGE)) {
+                switch (intent.getStringExtra(LoggingService.SERVICE_MESSAGE)) {
+                    case LoggingService.SERVICE_BLUETOOTH_CONNECTING: {
+                        Log.d(TAG, "Service connecting");
+                        showMessage("Conectando...");
+                        break;
+                    }
+                    case LoggingService.SERVICE_BLUETOOTH_CONNECTED: {
+                        Log.d(TAG, "Service connected");
+
+                        final String name = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_NAME);
+                        final String address = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_ADDRESS);
+
+                        showMessage(String.format(getString(R.string.bluetooth_connected_starting_logging),
+                                                name, address));
+                        showObdCard();
+
+                        break;
+                    }
+                    case LoggingService.SERVICE_BLUETOOTH_ERROR: {
+                        Log.d(TAG, "Service bluetooth error");
+
+                        // TODO: Should open BluetoothActivity to possibly select new device
+                        final String name = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_NAME);
+                        final String address = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_ADDRESS);
+
+                        showMessage(String.format(getString(R.string.bluetooth_connecting_errror),
+                                                name, address));
+                        break;
+                    }
+                    case LoggingService.SERVICE_NEW_DATA: {
+                        ObdLogGroup group = (ObdLogGroup) intent.getSerializableExtra(LoggingService.SERVICE_DATA_OBDGROUP);
+                        if(group!=null)
+                            updateObdView(group);
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    private void showMessage(String message) {
+        Snackbar.make(nameText,message,Snackbar.LENGTH_LONG).show();
     }
 
 }

@@ -14,7 +14,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.ericmguimaraes.gaso.model.ObdLog;
+import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.obd.ObdReader;
+import com.ericmguimaraes.gaso.persistence.ObdLogGroupDAO;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -78,7 +80,7 @@ public class LoggingThread implements Runnable,
                     Log.d("OBD_VALUES",o.getData());
 
                 if(obdValues.size()>1)
-                sendInformationBroadcast(obdValues.get(0).getData(), obdValues.get(1).getData());
+                sendInformationBroadcast(obdValues);
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error", e);
                 e.printStackTrace();
@@ -90,7 +92,10 @@ public class LoggingThread implements Runnable,
         Log.d(TAG, "Finished logging");
     }
 
-    private void sendInformationBroadcast(String speedValue, String rpmValue) {
+    private void sendInformationBroadcast(List<ObdLog> obdValues) {
+        ObdLogGroup obdLogGroup = new ObdLogGroup();
+        obdLogGroup.setLogs(obdValues);
+
         LoggingService service = mLoggingServiceReference.get();
 
         if (service == null) return;
@@ -99,8 +104,7 @@ public class LoggingThread implements Runnable,
         intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_NEW_DATA);
         intent.putExtra(LoggingService.SERVICE_LOCATION_LATLNG, mLastLocation);
         intent.putExtra(LoggingService.SERVICE_ACCELEROMETER, mAcc);
-        intent.putExtra(LoggingService.SERVICE_DATA_SPEED, speedValue);
-        intent.putExtra(LoggingService.SERVICE_DATA_RPM, rpmValue);
+        intent.putExtra(LoggingService.SERVICE_DATA_OBDGROUP, obdLogGroup);
 
         service.mBroadcastManager.sendBroadcast(intent);
     }

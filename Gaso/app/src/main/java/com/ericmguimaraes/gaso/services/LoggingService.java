@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -48,14 +49,8 @@ public class LoggingService extends Service {
             "io.github.malvadeza.floatingcar.logging_service.location_latlng";
     public static final String SERVICE_ACCELEROMETER =
             "io.github.malvadeza.floatingcar.logging_service.accelerometer";
-    public static final String SERVICE_DATA_SPEED =
-            "io.github.malvadeza.floatingcar.logging_service.data_speed";
-    public static final String SERVICE_DATA_THROTTLE =
-            "io.github.malvadeza.floatingcar.logging_service.data_throttle";
-    public static final String SERVICE_DATA_RPM =
-            "io.github.malvadeza.floatingcar.logging_service.data_rpm";
-    public static final String SERVICE_DATA_TEMPERATURE =
-            "io.github.malvadeza.floatingcar.logging_service.data_temperature";
+    public static final String SERVICE_DATA_OBDGROUP =
+            "io.github.malvadeza.floatingcar.logging_service.data_obdgroup";
     public static final String SERVICE_LOCATION_ERROR =
             "io.github.malvadeza.floatingcar.logging_service.location_latlng";
     public static final String SERVICE_BLUETOOTH_CONNECTING =
@@ -66,6 +61,8 @@ public class LoggingService extends Service {
             "io.github.malvadeza.floatingcar.logging_service.service_bluetooth_error";
     public static final String SERVICE_MESSAGE =
             "io.github.malvadeza.floatingcar.logging_service.message";
+
+    private final IBinder mBinder = new ObdServiceBinder();
 
     protected LocalBroadcastManager mBroadcastManager;
 
@@ -242,6 +239,7 @@ public class LoggingService extends Service {
                     break;
                 }
                 case BluetoothConnection.BLUETOOTH_CONNECTION_ERROR: {
+                    LoggingService.RUNNING = false;
                     Intent intent = new Intent(LoggingService.SERVICE_BROADCAST_MESSAGE);
                     intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_BLUETOOTH_ERROR);
 
@@ -254,6 +252,12 @@ public class LoggingService extends Service {
                 }
             }
 
+        }
+    }
+
+    public class ObdServiceBinder extends Binder {
+        public LoggingService getService() {
+            return LoggingService.this;
         }
     }
 

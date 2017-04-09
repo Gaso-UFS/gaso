@@ -18,12 +18,12 @@
 
 package com.ericmguimaraes.gaso.model;
 
-import io.realm.RealmObject;
+import java.io.Serializable;
 
 /**
  * Created by ericm on 22-Aug-16.
  */
-public class ObdLog extends RealmObject {
+public class ObdLog implements Serializable {
 
     private String name;
 
