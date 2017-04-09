@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.IntentCompat;
+import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,7 +59,7 @@ public class GasFragment extends Fragment {
 
     private static int LOCATION_REFRESH_TIME = 1000; //millis
     private static int STATIONS_REFRESH_DISTANCE = 10000; //m
-    private int REQUEST_PLACE_REFRESH_DISTANCE = 500;
+    private int REQUEST_PLACE_REFRESH_DISTANCE = 1000;
 
     Menu menu;
 
@@ -106,9 +107,8 @@ public class GasFragment extends Fragment {
         locationHandler = new Handler();
 
         locationHandler = new Handler();
-        if (locationHelper.isConnected()) {
-            locationChecker.run();
-        }
+
+        locationChecker.run();
     }
 
     @Override
@@ -204,24 +204,26 @@ public class GasFragment extends Fragment {
     Runnable locationChecker = new Runnable() {
         @Override
         public void run() {
-            location = locationHelper.getLastKnownLocation();
-            if(location!=null) {
-                double distance = -1;
-                boolean firstTime = lastLocation==null;
-                if(!firstTime)
-                    distance = LocationHelper.distance(location,lastLocation);
-                if(firstTime || distance>STATIONS_REFRESH_DISTANCE){
-                    lastLocation=location;
-                    StationSearch task = new StationSearch();
-                    task.execute(location.getLat(), location.getLng());
-                }
-                if(firstTime || distance>REQUEST_PLACE_REFRESH_DISTANCE){
-                    placesHelper.isAtGasStationAsync(new PlacesHelper.CurrentPlaceListener() {
-                        @Override
-                        public void OnIsAtGasStationResult(Station station) {
-                            showSpentRequestDialog(station);
-                        }
-                    });
+            if (locationHelper.isConnected()) {
+                location = locationHelper.getLastKnownLocation();
+                if (location != null) {
+                    double distance = -1;
+                    boolean firstTime = lastLocation == null;
+                    if (!firstTime)
+                        distance = LocationHelper.distance(location, lastLocation);
+                    if (firstTime || distance > STATIONS_REFRESH_DISTANCE) {
+                        lastLocation = location;
+                        StationSearch task = new StationSearch(location.getLat(), location.getLng());
+                        AsyncTaskCompat.executeParallel( task );
+                    }
+                    if (firstTime || distance > REQUEST_PLACE_REFRESH_DISTANCE) {
+                        placesHelper.isAtGasStationAsync(new PlacesHelper.CurrentPlaceListener() {
+                            @Override
+                            public void OnIsAtGasStationResult(Station station) {
+                                showSpentRequestDialog(station);
+                            }
+                        });
+                    }
                 }
             }
             locationHandler.postDelayed(locationChecker, LOCATION_REFRESH_TIME);
@@ -259,7 +261,15 @@ public class GasFragment extends Fragment {
         mapGasoFragment.setStationList(stationsList);
     }
 
-    public class StationSearch extends AsyncTask<Double,Void,Void> {
+    public class StationSearch extends AsyncTask<Void,Void,Void> {
+
+        double lat;
+        double lgn;
+
+        public StationSearch(double lat, double lgn) {
+            this.lat = lat;
+            this.lgn = lgn;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -269,9 +279,7 @@ public class GasFragment extends Fragment {
         }
 
         @Override
-        protected Void doInBackground(Double... params) {
-            double lat = params[0];
-            double lgn = params[1];
+        protected Void doInBackground(Void... params) {
             Location l = new Location();
             l.setLat(lat);
             l.setLng(lgn);
