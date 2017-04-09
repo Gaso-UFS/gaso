@@ -39,6 +39,7 @@ import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.activities.PlainTextActivity;
 import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
@@ -164,6 +165,18 @@ public class GasFragment extends Fragment {
                     menu.findItem(R.id.stations_list_menu_item).setVisible(true);
                     isMapAttached = true;
                 }
+                return true;
+            case R.id.action_help:
+                Intent intentHelp = new Intent(getActivity(), PlainTextActivity.class);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.help_title);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.help_text);
+                startActivity(intentHelp);
+                return true;
+            case R.id.action_disclaimer:
+                Intent intentDisclaimer = new Intent(getActivity(), PlainTextActivity.class);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.disclaimer_title);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.disclaimer_text);
+                startActivity(intentDisclaimer);
                 return true;
             case R.id.stations_list_menu_item:
                 isMapAttached = false;

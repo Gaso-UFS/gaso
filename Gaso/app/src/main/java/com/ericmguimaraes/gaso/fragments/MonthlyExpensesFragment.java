@@ -39,6 +39,7 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.MainActivity;
+import com.ericmguimaraes.gaso.activities.PlainTextActivity;
 import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.MyMonthlyExpensesRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.config.Constants;
@@ -178,6 +179,18 @@ public class MonthlyExpensesFragment extends Fragment {
         switch (id) {
             case R.id.action_export:
                 ((MainActivity)getActivity()).createCSVFile();
+                return true;
+            case R.id.action_help:
+                Intent intentHelp = new Intent(getActivity(), PlainTextActivity.class);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.help_title);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.help_text);
+                startActivity(intentHelp);
+                return true;
+            case R.id.action_disclaimer:
+                Intent intentDisclaimer = new Intent(getActivity(), PlainTextActivity.class);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.disclaimer_title);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.disclaimer_text);
+                startActivity(intentDisclaimer);
                 return true;
             case R.id.action_logout:
                 FirebaseAuth.getInstance().signOut();
