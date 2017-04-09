@@ -273,9 +273,8 @@ public class MyCarFragment extends Fragment {
 
     // TODO: 19/03/17 use it
     private void updateObdView(ObdLogGroup group) {
-
         ObdLogFragment obdFragment = (ObdLogFragment) getChildFragmentManager().findFragmentByTag(OBD_FRAGMENT_TAG);
-        if (group != null && obdFragment != null) {
+        if (group != null && obdFragment != null && group.getLogs()!=null) {
             for (ObdLog obdLog : group.getLogs()) {
                 if (obdLog != null) {
                     obdFragment.addOrUpdateJob(obdLog);
@@ -285,18 +284,20 @@ public class MyCarFragment extends Fragment {
     }
 
     private void showObdCard(){
-        fabBluetooth.setVisibility(View.VISIBLE);
-        obdDataCardView.setVisibility(View.VISIBLE);
+        if(fabBluetooth!=null && isAdded()) {
+            fabBluetooth.setVisibility(View.VISIBLE);
+            obdDataCardView.setVisibility(View.VISIBLE);
 
-        getChildFragmentManager().beginTransaction().replace(R.id.obd_content,ObdLogFragment.newInstance(),OBD_FRAGMENT_TAG).commit();
+            getChildFragmentManager().beginTransaction().replace(R.id.obd_content, ObdLogFragment.newInstance(), OBD_FRAGMENT_TAG).commit();
 
-        fabBluetooth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MyCarFragment.this.getActivity(),BluetoothConnectionActivity.class);
-                startActivity(intent);
-            }
-        });
+            fabBluetooth.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MyCarFragment.this.getActivity(), BluetoothConnectionActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 
     public Bitmap loadImageFromWebOperations(Uri uri) {

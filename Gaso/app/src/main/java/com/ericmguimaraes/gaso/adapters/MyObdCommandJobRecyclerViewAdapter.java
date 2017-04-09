@@ -107,7 +107,7 @@ public class MyObdCommandJobRecyclerViewAdapter extends RecyclerView.Adapter<MyO
         boolean found = false;
             for(int i=0;i<mValues.size();i++){
                 ObdLog l = mValues.get(i);
-                if(l.getPid()==log.getPid()){
+                if(l.getPid().equals(log.getPid())){
                     mValues.remove(i);
                     if(isLogNotBroke(log))
                         mValues.add(i,log);
