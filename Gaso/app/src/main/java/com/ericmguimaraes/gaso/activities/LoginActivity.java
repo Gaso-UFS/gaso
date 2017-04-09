@@ -41,6 +41,7 @@ import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
+import com.ericmguimaraes.gaso.util.SharedPreferencesManager;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -141,6 +142,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 }
             }
         };
+
+        if(!SharedPreferencesManager.getInstance(getApplicationContext()).disclamerHasBeenShowed()) {
+            SharedPreferencesManager.getInstance(getApplicationContext()).setDisclamerShowed();
+            Intent intent = new Intent(this, PlainTextActivity.class);
+            intent.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.disclaimer_title);
+            intent.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.disclaimer_text);
+            startActivity(intent);
+        }
 
     }
 

@@ -15,6 +15,8 @@ public class SharedPreferencesManager {
 
     private static final String bluetooth_device_key = "bluetooth_device_key";
 
+    private static final String show_disclaimer_key = "show_disclaimer_key";
+
     private static SharedPreferences settings;
 
     private static SharedPreferences.Editor editor;
@@ -39,5 +41,14 @@ public class SharedPreferencesManager {
 
     public String getDeviceKey() {
         return settings.getString(bluetooth_device_key,"");
+    }
+
+    public void setDisclamerShowed() {
+        editor.putBoolean(show_disclaimer_key,true);
+        editor.apply();
+    }
+
+    public Boolean disclamerHasBeenShowed() {
+        return settings.getBoolean(show_disclaimer_key,false);
     }
 }
