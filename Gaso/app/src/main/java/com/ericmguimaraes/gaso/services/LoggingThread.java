@@ -63,7 +63,6 @@ public class LoggingThread implements Runnable,
 
     @Override
     public void run() {
-        mObdReader.setupObd();
 
         while (mShouldBeLogging) {
             try {
