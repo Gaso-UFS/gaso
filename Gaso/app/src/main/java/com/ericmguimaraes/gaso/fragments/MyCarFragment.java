@@ -286,6 +286,14 @@ public class MyCarFragment extends Fragment {
         }
     }
 
+    private void hideObdCard(){
+        if(fabBluetooth!=null && isAdded()) {
+            fabBluetooth.setVisibility(View.GONE);
+            obdDataCardView.setVisibility(View.GONE);
+            obdConnectButton.setVisibility(View.VISIBLE);
+        }
+    }
+
     public Bitmap loadImageFromWebOperations(Uri uri) {
         try {
             URL url = new URL(uri.toString());
@@ -392,6 +400,16 @@ public class MyCarFragment extends Fragment {
                         ObdLogGroup group = (ObdLogGroup) intent.getSerializableExtra(LoggingService.SERVICE_DATA_OBDGROUP);
                         if(group!=null)
                             updateObdView(group);
+                        break;
+                    }
+                    case LoggingService.SERVICE_BROKEN_PIPE: {
+                        if (isAdded() && getActivity()!=null) {
+                            showMessage("Tivemos algum problema, vamos encerrar a viagem.");
+                            intent = new Intent(getActivity(), LoggingService.class);
+                            intent.setAction(LoggingService.SERVICE_STOP_LOGGING);
+                            getActivity().startService(intent);
+                            hideObdCard();
+                        }
                         break;
                     }
                 }

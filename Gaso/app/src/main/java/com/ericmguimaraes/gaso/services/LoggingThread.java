@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings({"MissingPermission"})
@@ -70,10 +71,18 @@ public class LoggingThread implements Runnable,
 
                 final long starTime = System.currentTimeMillis();
 
-                List<ObdLog> obdValues = mObdReader.readValues();
+                List<ObdLog> obdValues = null;
+                try {
+                    obdValues = mObdReader.readValues();
+                } catch (ObdReader.BrokenPipeException e) {
+                    sendBrokenPipeBroadcast();
+                }
 
                 final long deltaTime = System.currentTimeMillis() - starTime;
                 Log.d(TAG, "Comm delay -> " + deltaTime);
+
+                if(obdValues==null)
+                    obdValues = new ArrayList<>();
 
                 for(ObdLog o : obdValues)
                     Log.d("OBD_VALUES",o.getData());
@@ -89,6 +98,17 @@ public class LoggingThread implements Runnable,
         mObdReader.disconnect();
 
         Log.d(TAG, "Finished logging");
+    }
+
+    private void sendBrokenPipeBroadcast() {
+        LoggingService service = mLoggingServiceReference.get();
+
+        if (service == null) return;
+
+        Intent intent = new Intent(LoggingService.SERVICE_BROADCAST_MESSAGE);
+        intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_BROKEN_PIPE);
+
+        service.mBroadcastManager.sendBroadcast(intent);
     }
 
     private void sendInformationBroadcast(List<ObdLog> obdValues) {

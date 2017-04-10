@@ -28,39 +28,44 @@ import java.util.List;
 
 public class ObdReader {
     private static final String TAG = ObdReader.class.getSimpleName();
+    private static final int MAX_COUNT_TO_TRY_AGAIN = 15;
     private final BluetoothSocket mBtSocket;
     private List<ObdCommand> mObdCommands = new ArrayList<>();
-    private List<ObdCommand> mObdCommandsFirstTime = new ArrayList<>();
+    private List<ObdCommand> setupObdCommands = new ArrayList<>();
+    private List<ObdCommand> trySomeTimesObdCommands = new ArrayList<>();
     private List<ObdCommand> toDeleteCommands = new ArrayList<>();
+    private List<ObdCommand> toSucessfullCommands = new ArrayList<>();
     private boolean isFirstTime = true;
+    private int counter = 0;
 
     public ObdReader(BluetoothSocket btSocket) {
         mBtSocket = btSocket;
 
         // TODO: 19/03/17 stop running config commands after OK return
-        mObdCommandsFirstTime.add(new EchoOffCommand());
-        mObdCommandsFirstTime.add(new LineFeedOffCommand());
-        mObdCommandsFirstTime.add(new TimeoutCommand(125));
-        mObdCommandsFirstTime.add(new SelectProtocolCommand(ObdProtocols.AUTO));
+        setupObdCommands.add(new EchoOffCommand());
+        setupObdCommands.add(new LineFeedOffCommand());
+        setupObdCommands.add(new TimeoutCommand(125));
+        setupObdCommands.add(new SelectProtocolCommand(ObdProtocols.AUTO));
 
         mObdCommands.add(new AmbientAirTemperatureCommand());
         mObdCommands.add(new SpeedCommand());
         mObdCommands.add(new RPMCommand());
-        mObdCommands.add(new AbsoluteLoadCommand());
         mObdCommands.add(new ThrottlePositionCommand());
         mObdCommands.add(new AirFuelRatioCommand());
+        mObdCommands.add(new AbsoluteLoadCommand());
     }
 
     private boolean isLogOkay(ObdLog log){
         return ((log.getData()!=null && !log.getData().contains("NO_DATA") || log.getData()==null));
     }
 
-    public List<ObdLog> readValues() {
+    public List<ObdLog> readValues() throws BrokenPipeException {
         Log.d(TAG, "Reading values");
 
+        //setup
         List<ObdLog> obdValues = new ArrayList<>();
         if(isFirstTime)
-            for (ObdCommand command: mObdCommandsFirstTime) {
+            for (ObdCommand command: setupObdCommands) {
                 boolean gotSetUpError = false;
                 try {
                     command.run(mBtSocket.getInputStream(), mBtSocket.getOutputStream());
@@ -74,6 +79,8 @@ public class ObdReader {
                 if(!gotSetUpError)
                     isFirstTime = false;
             }
+
+        //run commands
         boolean gotSucessfullCall = false;
         for (ObdCommand command: mObdCommands) {
             try {
@@ -82,17 +89,53 @@ public class ObdReader {
                 obdValues.add(obdLog);
                 if(!gotSucessfullCall)
                     gotSucessfullCall = isLogOkay(obdLog);
+            }  catch (IOException e) {
+                e.printStackTrace();
+                if(e.getMessage().contains("Broken"))
+                    throw new BrokenPipeException(e);
             } catch (Exception e) {
                 e.printStackTrace();
                 toDeleteCommands.add(command);
             }
         }
+
+        //try commands that failed before
+        if(isTimeToTryAgain())
+            for (ObdCommand command: trySomeTimesObdCommands) {
+                try {
+                    command.run(mBtSocket.getInputStream(), mBtSocket.getOutputStream());
+                    ObdLog obdLog = getLog(command);
+                    if(!gotSucessfullCall)
+                        gotSucessfullCall = isLogOkay(obdLog);
+                    if(isLogOkay(obdLog))
+                        toSucessfullCommands.add(command);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
         if(gotSucessfullCall)
-            for (ObdCommand command: toDeleteCommands)
+            for (ObdCommand command: toDeleteCommands) {
                 mObdCommands.remove(command);
+                trySomeTimesObdCommands.add(command);
+            }
+        for (ObdCommand command: toSucessfullCommands) {
+            trySomeTimesObdCommands.remove(command);
+            mObdCommands.add(command);
+        }
         toDeleteCommands.clear();
+        toSucessfullCommands.clear();
         saveObdlog(obdValues);
         return obdValues;
+    }
+
+    private boolean isTimeToTryAgain() {
+        counter++;
+        if(counter>MAX_COUNT_TO_TRY_AGAIN){
+            counter = 0;
+            return true;
+        }
+        return false;
     }
 
     private void saveObdlog(List<ObdLog> logs) {
@@ -136,5 +179,13 @@ public class ObdReader {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public class BrokenPipeException extends IOException {
+
+        public BrokenPipeException(IOException e) {
+            super(e);
+        }
+
     }
 }

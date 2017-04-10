@@ -121,7 +121,7 @@
 
     <string name="bluetooth_not_found_error">Couldn\'t find a Bluetooth Adapter</string>
     <string name="bluetooth_not_enabled">Bluetooth not enabled.</string>
-    <string name="notification_content_title">Logging your trip</string>
+    <string name="notification_content_title">Analisando sua viagem</string>
     <string name="bluetooth_connected_starting_logging">Conectado a %1$s - %2$s. Começando a leitura dos dados.</string>
     <string name="bluetooth_connecting_errror">Erro conectando a %1$s - %2$s.</string>
     <string name="bluetooth_enabled_message">Bluetooth enabled. Click to start logging.</string>
@@ -144,7 +144,7 @@
     <string name="title_activity_maps">Map</string>
     <string name="action_help">Ajuda</string>
     <string name="action_disclaimer">Aviso Legal</string>
-    <string name="title_activity_plain_text">PlainTextActivity</string>
+    <string name="title_activity_plain_text">Gaso</string>
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum nec rutrum lacus. Pellentesque dignissim maximus augue, eu maximus purus porta eget. Mauris gravida ac diam sit amet mattis. In hac habitasse platea dictumst. Donec id lectus interdum, sagittis orci vel, malesuada velit. Vivamus eu mollis odio. Cras rhoncus neque quam, vitae ultrices leo pellentesque id. Aenean ut ipsum metus. Morbi est orci, pharetra eu lorem nec, ultricies auctor dolor. Nunc aliquam nisl dolor, eu gravida quam porttitor a. Curabitur non massa mauris. Pellentesque ac nisl sit amet ante sollicitudin aliquet nec sed nulla. In consequat semper euismod.  Nullam tortor leo, vulputate id sapien at, sodales dignissim urna. Aliquam rutrum efficitur magna, sed varius tellus sagittis eget. Fusce aliquet non quam at porta. Quisque nec ultrices nulla, vitae pharetra arcu. Sed molestie vel orci consectetur ultricies. Aenean sit amet mollis dolor. Praesent condimentum neque in sapien pulvinar hendrerit et ac massa.  Duis id scelerisque purus. Aliquam pretium elit neque. Integer in erat consequat, sagittis massa in, molestie nisi. Praesent eu lorem ac odio lobortis vulputate ac in massa. Aenean eget dui sed ipsum lobortis porttitor. Phasellus consectetur sed est et dapibus. Morbi bibendum velit neque, in efficitur tellus sagittis non. Proin et tellus nec lectus sollicitudin euismod id a arcu. Praesent non luctus purus. Mauris sapien lorem, varius a dui nec, tempus gravida ipsum. Vestibulum vel vehicula enim. Quisque tristique condimentum quam nec fermentum. Ut nec dictum lorem. Phasellus eget tincidunt ex. In tempor congue neque, sed vehicula lectus luctus vitae. Sed odio magna, aliquet sed ultricies in, iaculis quis risus.</string>
     <string name="disclaimer_title">Aviso Legal</string>
     <string name="disclaimer_text"><![CDATA[Preparar essa string com muito cuidado para exibir deopis blablablabla balbla blabla blabl balbalbalblablablablab lbalbalbalbalb alblablabla bb alba lba lblablabl abl ablablbalb <b>labalb lab lbab</b> labla]]></string>

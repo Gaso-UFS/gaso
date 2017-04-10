@@ -28,11 +28,12 @@ import java.lang.ref.WeakReference;
 
 public class LoggingService extends Service {
     private static final String TAG = LoggingService.class.getSimpleName();
-
     private static boolean RUNNING = false;
 
     public static final String SERVICE_START =
             "io.github.malvadeza.floatingcar.logging_service.service_start";
+    public static final String SERVICE_BROKEN_PIPE =
+            "io.github.malvadeza.floatingcar.logging_service.service_broken_pipe";
     public static final String SERVICE_START_LOGGING =
             "io.github.malvadeza.floatingcar.logging_service.service_start_logging";
     public static final String SERVICE_STOP_LOGGING =
@@ -61,8 +62,6 @@ public class LoggingService extends Service {
             "io.github.malvadeza.floatingcar.logging_service.service_bluetooth_error";
     public static final String SERVICE_MESSAGE =
             "io.github.malvadeza.floatingcar.logging_service.message";
-
-    private final IBinder mBinder = new ObdServiceBinder();
 
     protected LocalBroadcastManager mBroadcastManager;
 
@@ -147,11 +146,10 @@ public class LoggingService extends Service {
 
             Notification notification = new NotificationCompat.Builder(this)
                     .setContentTitle(getString(R.string.notification_content_title))
-                    .setTicker("Ticker text")
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setOngoing(true)
                     .setContentIntent(pStartDetailsIntent)
-                    .addAction(android.R.drawable.ic_dialog_alert, "Stop Logging", pStopIntent)
+                    .addAction(android.R.drawable.ic_dialog_alert, "Finalize a viagem", pStopIntent)
                     .build();
 
             startForeground(10, notification);
@@ -252,12 +250,6 @@ public class LoggingService extends Service {
                 }
             }
 
-        }
-    }
-
-    public class ObdServiceBinder extends Binder {
-        public LoggingService getService() {
-            return LoggingService.this;
         }
     }
 
