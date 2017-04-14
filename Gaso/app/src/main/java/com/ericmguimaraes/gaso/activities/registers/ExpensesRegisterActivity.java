@@ -39,7 +39,6 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.model.CombustiveType;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
@@ -65,8 +64,8 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
-//    @Bind(R.id.typeSpinner)
-//    Spinner typeSpinner;
+    @Bind(R.id.typeSpinner)
+    Spinner typeSpinner;
 
     @Bind(R.id.input_total)
     TextInputEditText inputTotal;
@@ -118,7 +117,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputStation.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
+                if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputStation.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
@@ -168,11 +167,11 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     public void setSpinner(){
-//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-//                R.array.combustives_array, android.R.layout.simple_spinner_item);
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        typeSpinner.setAdapter(adapter);
-//        typeSpinner.setOnItemSelectedListener(this);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.combustives_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        typeSpinner.setAdapter(adapter);
+        typeSpinner.setOnItemSelectedListener(this);
     }
 
     View.OnClickListener inputStationOnClickListener = new View.OnClickListener() {
@@ -259,8 +258,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
         e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
-        //// TODO: 09/04/17 permitir outros tipos de combustivel
-        typeSelected = CombustiveType.COMMON_GAS.getValue();
         e.setType(typeSelected);
         String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(".","").replace(",",".").replace("$","");
         e.setTotal(Double.parseDouble(parsableDouble));
