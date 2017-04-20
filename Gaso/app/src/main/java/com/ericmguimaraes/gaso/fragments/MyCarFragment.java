@@ -51,6 +51,7 @@ import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.PlainTextActivity;
+import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothConnection;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
@@ -409,6 +410,16 @@ public class MyCarFragment extends Fragment {
                             intent.setAction(LoggingService.SERVICE_STOP_LOGGING);
                             getActivity().startService(intent);
                             hideObdCard();
+                        }
+                        break;
+                    }
+                    case LoggingService.SERVICE_COMBUSTIVE_REFIL: {
+                        if (isAdded() && getActivity()!=null) {
+                            Toast.makeText(getContext(), "Parece que você abasteceu, vamos registrar?", Toast.LENGTH_LONG).show();
+                            Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
+                            if(intent.hasExtra(LoggingService.SERVICE_REFIL_DIFERENCE))
+                                intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, intent.getExtras().getFloat(LoggingService.SERVICE_REFIL_DIFERENCE));
+                            startActivity(intentExp);
                         }
                         break;
                     }

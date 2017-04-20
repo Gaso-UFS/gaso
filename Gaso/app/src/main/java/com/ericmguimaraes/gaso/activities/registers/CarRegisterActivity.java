@@ -31,7 +31,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.model.Car;
@@ -103,7 +102,7 @@ public class CarRegisterActivity extends AppCompatActivity {
         Car car = new Car();
         car.setDescription(inputCarDescrition.getText().toString());
         car.setModel(inputCar.getText().toString());
-        carDAO.add(car);
+        carDAO.addOrUpdate(car);
         if(getIntent().getExtras()!=null && getIntent().getExtras().getBoolean("first_access",false))
             carDAO.setFavoriteCar(car);
 

@@ -29,9 +29,10 @@ import java.lang.ref.WeakReference;
 public class LoggingService extends Service {
     private static final String TAG = LoggingService.class.getSimpleName();
     private static boolean RUNNING = false;
-
     public static final String SERVICE_START =
             "io.github.malvadeza.floatingcar.logging_service.service_start";
+    public static final String SERVICE_REFIL_DIFERENCE = "refil_diference";
+    public static final String SERVICE_COMBUSTIVE_REFIL = "combustive_refil";
     public static final String SERVICE_BROKEN_PIPE =
             "io.github.malvadeza.floatingcar.logging_service.service_broken_pipe";
     public static final String SERVICE_START_LOGGING =
@@ -157,7 +158,8 @@ public class LoggingService extends Service {
             new Thread(mLoggingThread).start();
         } else if (intent.getAction().equals(SERVICE_STOP_LOGGING)) {
             stopForeground(true);
-            mLoggingThread.stopLogging();
+            if(mLoggingThread!=null)
+                mLoggingThread.stopLogging();
             stopSelf();
         }
 
