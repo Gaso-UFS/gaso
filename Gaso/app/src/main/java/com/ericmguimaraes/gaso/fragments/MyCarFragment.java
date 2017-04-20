@@ -280,8 +280,8 @@ public class MyCarFragment extends Fragment {
             fabBluetooth.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(MyCarFragment.this.getActivity(), BluetoothConnectionActivity.class);
-                    startActivity(intent);
+                    showMessage("Em desenvolvimento - encerra viagem");
+                    //// TODO: 19/04/17  encerrar viagem
                 }
             });
         }
