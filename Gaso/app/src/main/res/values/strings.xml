@@ -151,5 +151,6 @@
     <string name="help_text"><![CDATA[Preparar essa string com muito cuidado para exibir deopis blablablabla balbla blabla blabl balbalbalblablablablab lbalbalbalbalb alblablabla bb alba lba lblablabl abl ablablbalb <b>labalb lab lbab</b> labla]]></string>
     <string name="help_title">Ajuda</string>
     <string name="evaluation">Avaliações</string>
+    <string name="title_activity_evaluation">Avaliações</string>
 
 </resources>

@@ -49,6 +49,7 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
+import com.ericmguimaraes.gaso.activities.EvaluationActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
 import com.ericmguimaraes.gaso.activities.PlainTextActivity;
 import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
@@ -173,6 +174,10 @@ public class MyCarFragment extends Fragment {
         switch (id) {
             case R.id.car_list_menu_item:
                 intent = new Intent(getActivity(), CarListActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.evaluation_menu:
+                intent = new Intent(getActivity(), EvaluationActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.action_help:

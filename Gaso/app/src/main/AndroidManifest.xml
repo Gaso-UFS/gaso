@@ -50,9 +50,8 @@
         <activity
             android:name=".activities.StationDetailsActivity"
             android:label="@string/title_activity_station_details"
-            android:theme="@style/AppTheme"
             android:screenOrientation="portrait"
-            />
+            android:theme="@style/AppTheme" />
         <activity android:name=".activities.BluetoothConnectionActivity" />
 
         <service android:name=".services.LoggingService" />
@@ -75,9 +74,12 @@
         <activity
             android:name=".activities.PlainTextActivity"
             android:label="@string/title_activity_plain_text"
-            android:theme="@style/AppTheme"
             android:screenOrientation="portrait"
-            />
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".activities.EvaluationActivity"
+            android:label="@string/title_activity_evaluation"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>
