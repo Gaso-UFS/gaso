@@ -50,6 +50,7 @@ public class Constants {
     public static final int LOCATION_PERMISSION_REQUEST = 1;
     public static final int WRITE_ALL_SPENTS = 2;
     public static final int WRITE_MONTH_SPENT = 3;
+    public static final int PERMISSION_REQUEST_LOCATION = 2;
 
     public static String genericError = "Desculpe, tivemos um problema.";
 
@@ -63,4 +64,5 @@ public class Constants {
     public static final String FIREBASE_EXPENSES_MONTH = "monthYear";
     public static final String FIREBASE_OBD_LOG = "obd_logs";
     public static final String FIREBASE_UNTRACEABLE_OBD_LOG = "untraceable_obd_logs";
+    public static final String FIREBASE_MILESTONES = "milestones";
 }

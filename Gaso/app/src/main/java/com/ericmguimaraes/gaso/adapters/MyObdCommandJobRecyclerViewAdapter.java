@@ -62,7 +62,6 @@ public class MyObdCommandJobRecyclerViewAdapter extends RecyclerView.Adapter<MyO
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.log = mValues.get(position);
         holder.name.setText(mValues.get(position).getName());
-        holder.state.setText(mValues.get(position).getStatus());
         holder.value.setText(mValues.get(position).getData());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -106,10 +105,9 @@ public class MyObdCommandJobRecyclerViewAdapter extends RecyclerView.Adapter<MyO
 
     public void addOrUpdateJob(ObdLog log){
         boolean found = false;
-        if(log.getId()!=0)
             for(int i=0;i<mValues.size();i++){
                 ObdLog l = mValues.get(i);
-                if(l.getId()==log.getId()){
+                if(l.getPid().equals(log.getPid())){
                     mValues.remove(i);
                     if(isLogNotBroke(log))
                         mValues.add(i,log);
@@ -123,8 +121,7 @@ public class MyObdCommandJobRecyclerViewAdapter extends RecyclerView.Adapter<MyO
     }
 
     private boolean isLogNotBroke(ObdLog log){
-        return ((log.getStatus()!=null && !log.getStatus().contains("ERROR")) || log.getStatus()==null)  &&
-                ((log.getData()!=null && !log.getData().contains("NO_DATA") || log.getData()==null));
+        return ((log.getData()!=null && !log.getData().contains("NO_DATA") || log.getData()==null));
     }
 
 }

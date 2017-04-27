@@ -18,22 +18,18 @@
 
 package com.ericmguimaraes.gaso.model;
 
-import io.realm.RealmObject;
+import java.io.Serializable;
 
 /**
  * Created by ericm on 22-Aug-16.
  */
-public class ObdLog extends RealmObject {
-
-    private long id;
+public class ObdLog implements Serializable {
 
     private String name;
 
     private String pid;
 
     private String mode;
-
-    private String status;
 
     private String presence;
 
@@ -42,14 +38,6 @@ public class ObdLog extends RealmObject {
     private String data;
 
     private Boolean parsed;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getPid() {
         return pid;
@@ -65,14 +53,6 @@ public class ObdLog extends RealmObject {
 
     public void setMode(String mode) {
         this.mode = mode;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public String getPresence() {
@@ -115,10 +95,4 @@ public class ObdLog extends RealmObject {
         this.name = name;
     }
 
-    public boolean isValidLog(){
-        return ((getStatus()!=null && !getStatus().contains("ERROR")
-                && !getStatus().contains("NOT_SUPPORTED")
-                && !getStatus().contains("BROKEN"))  || getStatus()==null)
-                && ((getData()!=null && !getData().contains("NO_DATA") || getData()==null));
-    }
 }

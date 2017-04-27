@@ -18,10 +18,9 @@
 
 package com.ericmguimaraes.gaso.persistence;
 
-import android.content.Context;
-
 import com.ericmguimaraes.gaso.config.Constants;
-import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,62 +29,72 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 /**
  * Created by ericm on 2/27/2016.
  */
-public class CarDAO {
+public class MilestoneDAO {
 
     private DatabaseReference mDatabase;
 
-    public CarDAO(){
+    public MilestoneDAO(){
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
-    public void addOrUpdate(Car car){
+    public void addOrUpdate(Milestone milestone){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
             String key;
-            if(car.getid()==null)
-                key = mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_CARS).push().getKey();
-            else
-                key = car.getid();
-            mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_CARS).child(key).setValue(true);
-            car.setid(key);
-            car.setCreationDate(new Date().getTime());
-            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).child(key).setValue(car);
+            if(milestone.getUid()==null || milestone.getUid().isEmpty()) {
+                key = mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).push().getKey();
+                milestone.setUid(key);
+            }
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).setValue(milestone);
         }
     }
 
-    public void remove(Car car){
+    public void remove(Milestone milestone){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_CARS).child(car.getid()).removeValue();
-            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).child(car.getid()).removeValue();
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).removeValue();
         }
     }
 
-    public void setFavoriteCar(Car car){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_FAVORITE_CAR).setValue(car.getid());
-        }
-    }
-
-    public void loadFavoriteCar(final OneCarReceivedListener listener){
+    public void findMilestoneByID(String milestoneUid, final OneMilestoneReceivedListener listener) {
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            DatabaseReference ref = mDatabase.child(Constants.FIREBASE_USERS).child(user.getUid()).child(Constants.FIREBASE_FAVORITE_CAR);
-            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).child(milestoneUid).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    String carKey = dataSnapshot.getValue(String.class);
-                    if(carKey!=null)
-                        findCarByID(carKey,listener);
+                    listener.onMilestoneReceived(dataSnapshot.getValue(Milestone.class));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    listener.onCancelled(databaseError);
+                }
+            });
+        }
+    }
+
+    public void findLastMilestone(final OneMilestoneReceivedListener listener){
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<Milestone> list = new ArrayList<Milestone>();
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        list.add((Milestone) postSnapshot.getValue(Milestone.class));
+                    }
+                    // TODO: 16/04/17 melhorar captura do ultimo milestone
+                    if(list.size()>0)
+                        listener.onMilestoneReceived(list.get(list.size()-1));
                     else
-                        listener.onCarReceived(null);
+                        listener.onMilestoneReceived(new Milestone());
                 }
 
                 @Override
@@ -96,30 +105,13 @@ public class CarDAO {
         }
     }
 
-    public void findCarByID(String carUid, final OneCarReceivedListener listener) {
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_CARS).child(user.getUid()).child(carUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    listener.onCarReceived(dataSnapshot.getValue(Car.class));
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    listener.onCancelled(databaseError);
-                }
-            });
-        }
-    }
-
-    public interface OneCarReceivedListener {
-        void onCarReceived(Car car);
+    public interface OneMilestoneReceivedListener {
+        void onMilestoneReceived(Milestone milestone);
         void onCancelled(DatabaseError databaseError);
     }
 
-    public interface CarsListReceivedListener {
-        void onCarReceived(List<Car> cars);
+    public interface MilestonesListReceivedListener {
+        void onMilestoneReceived(List<Milestone> milestones);
         void onCancelled(DatabaseError databaseError);
     }
 

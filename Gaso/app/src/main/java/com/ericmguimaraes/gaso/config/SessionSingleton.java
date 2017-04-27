@@ -35,9 +35,6 @@ public class SessionSingleton {
     private static SessionSingleton instance;
     
     public Car currentCar;
-    public BluetoothDevice device;
-    public BluetoothSocket socket;
-    public boolean isToStartAndBindService = false;
 
     private SessionSingleton(){
     }

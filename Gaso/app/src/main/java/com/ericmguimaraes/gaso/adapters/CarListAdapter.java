@@ -89,7 +89,7 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
                         @Override
                         public void onClick(View view) {
                             CarDAO dao = new CarDAO();
-                            dao.add(lastRemoved);
+                            dao.addOrUpdate(lastRemoved);
                             carList.add(posistion, lastRemoved);
                             notifyItemInserted(posistion);
                         }

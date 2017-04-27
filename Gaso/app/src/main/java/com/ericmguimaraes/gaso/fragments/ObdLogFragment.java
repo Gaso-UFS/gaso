@@ -41,6 +41,7 @@ public class ObdLogFragment extends Fragment {
 
     private OnObdLogListFragmentInteractionListener mListener;
     private MyObdCommandJobRecyclerViewAdapter adapter;
+    private RecyclerView recyclerView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -73,7 +74,7 @@ public class ObdLogFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
             adapter = new MyObdCommandJobRecyclerViewAdapter(null, mListener);
             recyclerView.setAdapter(adapter);
@@ -114,6 +115,9 @@ public class ObdLogFragment extends Fragment {
     }
 
     public void addOrUpdateJob(ObdLog log){
-        adapter.addOrUpdateJob(log);
+        if(recyclerView!=null)
+            if(adapter!=null)
+                adapter.addOrUpdateJob(log);
+
     }
 }

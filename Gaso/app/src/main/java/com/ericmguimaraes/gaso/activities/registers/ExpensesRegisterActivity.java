@@ -39,9 +39,11 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
+import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
@@ -61,6 +63,7 @@ import butterknife.ButterKnife;
 
 public class ExpensesRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
 
+    public static final String REFIL_EXTRA = "refil";
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
@@ -164,6 +167,9 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         }
 
         inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
+
+        if(getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA))
+            inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA))+"L");
     }
 
     public void setSpinner(){
@@ -255,11 +261,14 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     private void saveOnDatabase() {
 
+        // TODO: 16/04/17 criar novo milestone, disparar avaliaçao e
+        createNewMilestone();
+
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
         e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(".","").replace(",",".").replace("$","");
+        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(",","").replace("$","");
         e.setTotal(Double.parseDouble(parsableDouble));
         e.setStationUid(stationSelected.getId());
         e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
@@ -276,6 +285,14 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         toast.show();
 
         onBackPressed();
+    }
+
+    private void createNewMilestone() {
+        MilestoneDAO dao = new MilestoneDAO();
+        Milestone milestone = new Milestone();
+        milestone.setCreationDate(new Date().getTime());
+        //milestone.
+        // TODO: 17/04/17 create milestone
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

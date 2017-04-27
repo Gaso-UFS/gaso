@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -134,6 +135,11 @@ public class BluetoothHelper {
 
     public interface OnNewDeviceFoundListener {
         void onNewDeviceFoundListener(BluetoothDevice bluetoothDevice);
+    }
+
+    public void stopAdapterIfListening(){
+        if (mBluetoothAdapter.isDiscovering())
+            mBluetoothAdapter.cancelDiscovery();
     }
 
 }

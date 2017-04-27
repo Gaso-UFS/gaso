@@ -27,6 +27,7 @@ public class Car {
     private String model;
     private String description;
     private long creationDate;
+    private float lastFuelLevel;
 
     public String getModel() {
         return model;
@@ -58,5 +59,13 @@ public class Car {
 
     public void setCreationDate(long creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public float getLastFuelLevel() {
+        return lastFuelLevel;
+    }
+
+    public void setLastFuelLevel(float lastFuelLevel) {
+        this.lastFuelLevel = lastFuelLevel;
     }
 }

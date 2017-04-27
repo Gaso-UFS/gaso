@@ -18,10 +18,10 @@
 
 package com.ericmguimaraes.gaso.fragments;
 
-import android.content.ComponentName;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,11 +29,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.IntentCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,18 +46,27 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
+import com.ericmguimaraes.gaso.activities.CarListActivity;
+import com.ericmguimaraes.gaso.activities.EvaluationActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.activities.PlainTextActivity;
+import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothConnection;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
-import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
-import com.ericmguimaraes.gaso.services.ObdService;
+import com.ericmguimaraes.gaso.model.ObdLogGroup;
+import com.ericmguimaraes.gaso.services.LoggingService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.net.URL;
 
@@ -70,8 +79,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Use the {@link MyCarFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MyCarFragment extends Fragment implements ObdService.OnDataReceivedListener {
+public class MyCarFragment extends Fragment {
 
+    private static final String OBD_FRAGMENT_TAG = "obd_fragment";
+    private static final String TAG = "MY_CAR";
     @Bind(R.id.no_car_text)
     TextView noCarText;
 
@@ -97,9 +108,7 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
 
     ProfilePicLoaderTask profilePicLoaderTask;
 
-    private ObdService mService;
-    private boolean mBound;
-    private ObdLogFragment obdFragment;
+    OnMyCarFragmentInteractionListener mListener;
 
     public MyCarFragment() {
         // Required empty public constructor
@@ -140,8 +149,10 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
                     Snackbar.make(v,"Por favor, cadastre e/ou selecione um carro antes de conectar o seu OBD2",Snackbar.LENGTH_LONG).show();
 
                 if(BluetoothHelper.getInstance().isBluetoothSupported()){
-                    Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
-                    startActivity(intent);
+                    // old way
+                    //Intent intent = new Intent(getContext(), BluetoothConnectionActivity.class);
+                    //startActivity(intent);
+                    mListener.onStartTripIsPressed();
                 } else {
                     Toast.makeText(getContext(),"Não foi possivel conectar ao bluetooth e não há suporte a conexão wifi.",Toast.LENGTH_LONG).show();
                 }
@@ -164,6 +175,22 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
             case R.id.car_list_menu_item:
                 intent = new Intent(getActivity(), CarListActivity.class);
                 startActivity(intent);
+                return true;
+            case R.id.evaluation_menu:
+                intent = new Intent(getActivity(), EvaluationActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.action_help:
+                Intent intentHelp = new Intent(getActivity(), PlainTextActivity.class);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.help_title);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.help_text);
+                startActivity(intentHelp);
+                return true;
+            case R.id.action_disclaimer:
+                Intent intentDisclaimer = new Intent(getActivity(), PlainTextActivity.class);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.disclaimer_title);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.disclaimer_text);
+                startActivity(intentDisclaimer);
                 return true;
             case R.id.action_logout:
                 FirebaseAuth.getInstance().signOut();
@@ -211,79 +238,65 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
     @Override
     public void onDetach() {
         super.onDetach();
-        if (mBound) {
-            getActivity().unbindService(mConnection);
-            mBound = false;
-        }
+        mListener = null;
     }
 
     @Override
     public void onResume() {
         super.onResume();
         updateCarAndUser();
+        if(getActivity()!=null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(LoggingService.SERVICE_BROADCAST_MESSAGE);
+            filter.addAction(LoggingService.SERVICE_DATA_OBDGROUP);
+            LocalBroadcastManager.getInstance(getContext())
+                    .registerReceiver(mBroadcastReceiver, filter);
+        }
+    }
 
-        if(SessionSingleton.getInstance().isToStartAndBindService) {
-            Intent intent = new Intent(getContext(), ObdService.class);
-            getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getContext())
+                .unregisterReceiver(mBroadcastReceiver);
+    }
 
+    Handler handler;
+
+    // TODO: 19/03/17 use it
+    private void updateObdView(ObdLogGroup group) {
+        ObdLogFragment obdFragment = (ObdLogFragment) getChildFragmentManager().findFragmentByTag(OBD_FRAGMENT_TAG);
+        if (group != null && obdFragment != null && group.getLogs()!=null) {
+            for (ObdLog obdLog : group.getLogs()) {
+                if (obdLog != null) {
+                    obdFragment.addOrUpdateJob(obdLog);
+                }
+            }
+        }
+    }
+
+    private void showObdCard(){
+        if(fabBluetooth!=null && isAdded()) {
             fabBluetooth.setVisibility(View.VISIBLE);
             obdDataCardView.setVisibility(View.VISIBLE);
 
-            obdFragment = ObdLogFragment.newInstance();
-            getChildFragmentManager().beginTransaction().replace(R.id.obd_content,obdFragment).commit();
+            getChildFragmentManager().beginTransaction().replace(R.id.obd_content, ObdLogFragment.newInstance(), OBD_FRAGMENT_TAG).commit();
 
             fabBluetooth.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(MyCarFragment.this.getActivity(),BluetoothConnectionActivity.class);
-                    startActivity(intent);
+                    showMessage("Em desenvolvimento - encerra viagem");
+                    //// TODO: 19/04/17  encerrar viagem
                 }
             });
-
         }
-
     }
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            ObdService.ObdServiceBinder binder = (ObdService.ObdServiceBinder) service;
-            mService = binder.getService();
-            mService.setDevice(SessionSingleton.getInstance().device);
-            mService.setSocket(SessionSingleton.getInstance().socket);
-            mService.setContext(getContext());
-            mService.addOnDataReceivedListener(MyCarFragment.this);
-            mService.startReadingThread();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
+    private void hideObdCard(){
+        if(fabBluetooth!=null && isAdded()) {
             fabBluetooth.setVisibility(View.GONE);
             obdDataCardView.setVisibility(View.GONE);
-        }
-    };
-
-    Handler handler;
-
-    @Override
-    public void onDataReceived(final ObdLog obdLog) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                updateObdView(obdLog);
-            }
-        },50);
-
-    }
-
-    private void updateObdView(ObdLog obdLog) {
-        if(obdLog!=null && obdFragment!=null){
-            obdFragment.addOrUpdateJob(obdLog);
+            obdConnectButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -326,6 +339,102 @@ public class MyCarFragment extends Fragment implements ObdService.OnDataReceived
         super.onStop();
         if(profilePicLoaderTask!=null)
             profilePicLoaderTask.cancel(true);
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnMyCarFragmentInteractionListener) {
+            mListener = (OnMyCarFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnMyCarFragmentInteractionListener");
+        }
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnMyCarFragmentInteractionListener {
+        void onStartTripIsPressed();
+    }
+
+    BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Received broadcast from Service");
+
+            if (intent.getAction().equals(LoggingService.SERVICE_BROADCAST_MESSAGE)) {
+                switch (intent.getStringExtra(LoggingService.SERVICE_MESSAGE)) {
+                    case LoggingService.SERVICE_BLUETOOTH_CONNECTING: {
+                        Log.d(TAG, "Service connecting");
+                        showMessage("Conectando...");
+                        break;
+                    }
+                    case LoggingService.SERVICE_BLUETOOTH_CONNECTED: {
+                        Log.d(TAG, "Service connected");
+
+                        final String name = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_NAME);
+                        final String address = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_ADDRESS);
+
+                        showMessage(String.format(getString(R.string.bluetooth_connected_starting_logging),
+                                                name, address));
+                        showObdCard();
+
+                        break;
+                    }
+                    case LoggingService.SERVICE_BLUETOOTH_ERROR: {
+                        Log.d(TAG, "Service bluetooth error");
+
+                        // TODO: Should open BluetoothActivity to possibly select new device
+                        final String name = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_NAME);
+                        final String address = intent.getStringExtra(BluetoothConnection.BLUETOOTH_TARGET_DEVICE_ADDRESS);
+
+                        showMessage(String.format(getString(R.string.bluetooth_connecting_errror),
+                                                name, address));
+                        break;
+                    }
+                    case LoggingService.SERVICE_NEW_DATA: {
+                        ObdLogGroup group = (ObdLogGroup) intent.getSerializableExtra(LoggingService.SERVICE_DATA_OBDGROUP);
+                        if(group!=null)
+                            updateObdView(group);
+                        break;
+                    }
+                    case LoggingService.SERVICE_BROKEN_PIPE: {
+                        if (isAdded() && getActivity()!=null) {
+                            showMessage("Tivemos algum problema, vamos encerrar a viagem.");
+                            intent = new Intent(getActivity(), LoggingService.class);
+                            intent.setAction(LoggingService.SERVICE_STOP_LOGGING);
+                            getActivity().startService(intent);
+                            hideObdCard();
+                        }
+                        break;
+                    }
+                    case LoggingService.SERVICE_COMBUSTIVE_REFIL: {
+                        if (isAdded() && getActivity()!=null) {
+                            Toast.makeText(getContext(), "Parece que você abasteceu, vamos registrar?", Toast.LENGTH_LONG).show();
+                            Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
+                            if(intent.hasExtra(LoggingService.SERVICE_REFIL_DIFERENCE))
+                                intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, intent.getExtras().getFloat(LoggingService.SERVICE_REFIL_DIFERENCE));
+                            startActivity(intentExp);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    private void showMessage(String message) {
+        Snackbar.make(nameText,message,Snackbar.LENGTH_LONG).show();
     }
 
 }

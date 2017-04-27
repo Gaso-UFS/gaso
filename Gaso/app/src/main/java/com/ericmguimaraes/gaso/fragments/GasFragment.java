@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.IntentCompat;
+import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,6 +40,7 @@ import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.activities.PlainTextActivity;
 import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.maps.GooglePlaces;
@@ -46,6 +48,7 @@ import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Location;
 import com.ericmguimaraes.gaso.model.Station;
+import com.ericmguimaraes.gaso.util.ConnectionDetector;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -56,7 +59,7 @@ public class GasFragment extends Fragment {
 
     private static int LOCATION_REFRESH_TIME = 1000; //millis
     private static int STATIONS_REFRESH_DISTANCE = 10000; //m
-    private int REQUEST_PLACE_REFRESH_DISTANCE = 500;
+    private int REQUEST_PLACE_REFRESH_DISTANCE = 1000;
 
     Menu menu;
 
@@ -104,9 +107,8 @@ public class GasFragment extends Fragment {
         locationHandler = new Handler();
 
         locationHandler = new Handler();
-        if (locationHelper.isConnected()) {
-            locationChecker.run();
-        }
+
+        locationChecker.run();
     }
 
     @Override
@@ -164,6 +166,18 @@ public class GasFragment extends Fragment {
                     isMapAttached = true;
                 }
                 return true;
+            case R.id.action_help:
+                Intent intentHelp = new Intent(getActivity(), PlainTextActivity.class);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.help_title);
+                intentHelp.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.help_text);
+                startActivity(intentHelp);
+                return true;
+            case R.id.action_disclaimer:
+                Intent intentDisclaimer = new Intent(getActivity(), PlainTextActivity.class);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TITLE, R.string.disclaimer_title);
+                intentDisclaimer.putExtra(PlainTextActivity.EXTRA_TEXT, R.string.disclaimer_text);
+                startActivity(intentDisclaimer);
+                return true;
             case R.id.stations_list_menu_item:
                 isMapAttached = false;
                 ft = getChildFragmentManager().beginTransaction();
@@ -190,29 +204,26 @@ public class GasFragment extends Fragment {
     Runnable locationChecker = new Runnable() {
         @Override
         public void run() {
-            location = locationHelper.getLastKnownLocation();
-            if(location!=null)
-                logging("location="+location.getLat()+":"+location.getLng());
-            else
-                logging("location=null");
-            if(location!=null) {
-                double distance = -1;
-                boolean firstTime = lastLocation==null;
-                if(!firstTime)
-                    distance = LocationHelper.distance(location,lastLocation);
-                logging("distance="+distance);
-                if(firstTime || distance>STATIONS_REFRESH_DISTANCE){
-                    lastLocation=location;
-                    StationSearch task = new StationSearch();
-                    task.execute(location.getLat(), location.getLng());
-                }
-                if(firstTime || distance>REQUEST_PLACE_REFRESH_DISTANCE){
-                    placesHelper.isAtGasStationAsync(new PlacesHelper.CurrentPlaceListener() {
-                        @Override
-                        public void OnIsAtGasStationResult(Station station) {
-                            showSpentRequestDialog(station);
-                        }
-                    });
+            if (locationHelper.isConnected()) {
+                location = locationHelper.getLastKnownLocation();
+                if (location != null) {
+                    double distance = -1;
+                    boolean firstTime = lastLocation == null;
+                    if (!firstTime)
+                        distance = LocationHelper.distance(location, lastLocation);
+                    if (firstTime || distance > STATIONS_REFRESH_DISTANCE) {
+                        lastLocation = location;
+                        StationSearch task = new StationSearch(location.getLat(), location.getLng());
+                        AsyncTaskCompat.executeParallel( task );
+                    }
+                    if (firstTime || distance > REQUEST_PLACE_REFRESH_DISTANCE) {
+                        placesHelper.isAtGasStationAsync(new PlacesHelper.CurrentPlaceListener() {
+                            @Override
+                            public void OnIsAtGasStationResult(Station station) {
+                                showSpentRequestDialog(station);
+                            }
+                        });
+                    }
                 }
             }
             locationHandler.postDelayed(locationChecker, LOCATION_REFRESH_TIME);
@@ -250,7 +261,15 @@ public class GasFragment extends Fragment {
         mapGasoFragment.setStationList(stationsList);
     }
 
-    public class StationSearch extends AsyncTask<Double,Void,Void> {
+    public class StationSearch extends AsyncTask<Void,Void,Void> {
+
+        double lat;
+        double lgn;
+
+        public StationSearch(double lat, double lgn) {
+            this.lat = lat;
+            this.lgn = lgn;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -260,13 +279,12 @@ public class GasFragment extends Fragment {
         }
 
         @Override
-        protected Void doInBackground(Double... params) {
-            double lat = params[0];
-            double lgn = params[1];
+        protected Void doInBackground(Void... params) {
             Location l = new Location();
             l.setLat(lat);
             l.setLng(lgn);
-            stationsList.addAll(googlePlaces.getStationsList(l, null));
+            if(getContext()!=null && new ConnectionDetector(getContext()).isConnectingToInternet())
+                stationsList.addAll(googlePlaces.getStationsList(l, null));
             return null;
         }
 
@@ -284,10 +302,6 @@ public class GasFragment extends Fragment {
         SharedPreferences.Editor editor = settings.edit();
         editor.putString(Constants.USER_LOGGED_TAG, "");
         editor.apply();
-    }
-
-    private void logging(String msg){
-        Log.i("GAS_DEBUG",msg);
     }
 
 }

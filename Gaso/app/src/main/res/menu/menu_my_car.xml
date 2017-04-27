@@ -3,11 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".activities.MainActivity">
 
+    <item android:id="@+id/evaluation_menu"
+        android:orderInCategory="200"
+        android:title="@string/evaluation"
+        app:showAsAction="always"
+        android:icon="@drawable/evaluation_menu"/>
+
     <item android:id="@+id/car_list_menu_item"
         android:orderInCategory="200"
         android:title="@string/car_list"
         app:showAsAction="always"
         android:icon="@drawable/car"/>
+
+    <item
+        android:id="@+id/action_help"
+        android:orderInCategory="300"
+        android:title="@string/action_help"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_disclaimer"
+        android:orderInCategory="300"
+        android:title="@string/action_disclaimer"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_logout"
