@@ -12,16 +12,30 @@ import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.SpeedCommand;
 import com.github.pires.obd.commands.control.DistanceSinceCCCommand;
 import com.github.pires.obd.commands.engine.AbsoluteLoadCommand;
+import com.github.pires.obd.commands.engine.LoadCommand;
+import com.github.pires.obd.commands.engine.MassAirFlowCommand;
+import com.github.pires.obd.commands.engine.OilTempCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
+import com.github.pires.obd.commands.engine.RuntimeCommand;
 import com.github.pires.obd.commands.engine.ThrottlePositionCommand;
 import com.github.pires.obd.commands.fuel.AirFuelRatioCommand;
+import com.github.pires.obd.commands.fuel.ConsumptionRateCommand;
+import com.github.pires.obd.commands.fuel.FindFuelTypeCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
+import com.github.pires.obd.commands.fuel.FuelTrimCommand;
+import com.github.pires.obd.commands.fuel.WidebandAirFuelRatioCommand;
+import com.github.pires.obd.commands.pressure.BarometricPressureCommand;
+import com.github.pires.obd.commands.pressure.FuelPressureCommand;
+import com.github.pires.obd.commands.pressure.FuelRailPressureCommand;
+import com.github.pires.obd.commands.pressure.IntakeManifoldPressureCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
 import com.github.pires.obd.commands.protocol.ResetTroubleCodesCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
+import com.github.pires.obd.commands.temperature.AirIntakeTemperatureCommand;
 import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
+import com.github.pires.obd.commands.temperature.EngineCoolantTemperatureCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
 import com.github.pires.obd.enums.ObdProtocols;
 
@@ -56,12 +70,36 @@ public class ObdReader {
         setupObdCommands.add(new TimeoutCommand(125));
         setupObdCommands.add(new SelectProtocolCommand(ObdProtocols.AUTO));
 
-        mObdCommands.add(new AmbientAirTemperatureCommand());
+        // speed
         mObdCommands.add(new SpeedCommand());
-        mObdCommands.add(new RPMCommand());
-        mObdCommands.add(new ThrottlePositionCommand());
-        mObdCommands.add(new AirFuelRatioCommand());
+
+        // engine
         mObdCommands.add(new AbsoluteLoadCommand());
+        mObdCommands.add(new LoadCommand());
+        mObdCommands.add(new MassAirFlowCommand());
+        mObdCommands.add(new OilTempCommand());
+        mObdCommands.add(new RPMCommand());
+        mObdCommands.add(new RuntimeCommand());
+        mObdCommands.add(new ThrottlePositionCommand());
+
+        // fuel
+        mObdCommands.add(new AirFuelRatioCommand());
+        mObdCommands.add(new ConsumptionRateCommand());
+        mObdCommands.add(new FindFuelTypeCommand());
+        mObdCommands.add(new FuelLevelCommand());
+        mObdCommands.add(new FuelTrimCommand());
+        mObdCommands.add(new WidebandAirFuelRatioCommand());
+
+        // pressure
+        mObdCommands.add(new BarometricPressureCommand());
+        mObdCommands.add(new FuelPressureCommand());
+        mObdCommands.add(new FuelRailPressureCommand());
+        mObdCommands.add(new IntakeManifoldPressureCommand());
+
+        // temperature
+        mObdCommands.add(new AirIntakeTemperatureCommand());
+        mObdCommands.add(new AmbientAirTemperatureCommand());
+        mObdCommands.add(new EngineCoolantTemperatureCommand());
 
     }
 
