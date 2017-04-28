@@ -293,7 +293,7 @@ public class MyCarFragment extends Fragment {
                     FragmentActivity activity = getActivity();
                     if(activity!=null)
                         activity.sendBroadcast(stopIntent);
-                    // TODO: 27/04/17 testar 
+                    // TODO: 27/04/17 testar
                 }
             });
         }
