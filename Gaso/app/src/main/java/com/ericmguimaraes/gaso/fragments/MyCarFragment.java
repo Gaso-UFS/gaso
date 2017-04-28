@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.IntentCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
@@ -73,6 +74,8 @@ import java.net.URL;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import static com.ericmguimaraes.gaso.services.LoggingService.SERVICE_STOP_LOGGING;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -285,8 +288,12 @@ public class MyCarFragment extends Fragment {
             fabBluetooth.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showMessage("Em desenvolvimento - encerra viagem");
-                    //// TODO: 19/04/17  encerrar viagem
+                    Intent stopIntent = new Intent(getContext(), LoggingService.class);
+                    stopIntent.setAction(SERVICE_STOP_LOGGING);
+                    FragmentActivity activity = getActivity();
+                    if(activity!=null)
+                        activity.sendBroadcast(stopIntent);
+                    // TODO: 27/04/17 testar 
                 }
             });
         }
@@ -412,7 +419,7 @@ public class MyCarFragment extends Fragment {
                         if (isAdded() && getActivity()!=null) {
                             showMessage("Tivemos algum problema, vamos encerrar a viagem.");
                             intent = new Intent(getActivity(), LoggingService.class);
-                            intent.setAction(LoggingService.SERVICE_STOP_LOGGING);
+                            intent.setAction(SERVICE_STOP_LOGGING);
                             getActivity().startService(intent);
                             hideObdCard();
                         }
