@@ -147,10 +147,10 @@
                         android:id="@+id/textView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@color/primary_light"
+                        android:background="@color/sem_consumo"
                         android:gravity="center"
                         android:padding="@dimen/text_margin"
-                        android:text="Baixo Consumo"
+                        android:text="Nível de Consumo Indisponível"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 

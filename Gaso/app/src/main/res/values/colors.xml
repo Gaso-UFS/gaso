@@ -13,5 +13,5 @@
     <color name="light_green_a600">#7CB342</color>
     <color name="vermelho_alto_consumo">#e60000</color>
     <color name="verde_baixo_consumo">#00e600</color>
-
+    <color name="sem_consumo">#a6a6a6</color>
 </resources>

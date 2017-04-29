@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -47,7 +48,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.activities.BluetoothConnectionActivity;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.EvaluationActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
@@ -61,12 +61,9 @@ import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.services.LoggingService;
+import com.ericmguimaraes.gaso.util.FuzzyManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.net.URL;
 
@@ -100,6 +97,9 @@ public class MyCarFragment extends Fragment {
 
     @Bind(R.id.fab_bluetooth)
     FloatingActionButton fabBluetooth;
+
+    @Bind(R.id.textView)
+    TextView fuzzyTextView;
 
     Car car;
 
@@ -263,6 +263,32 @@ public class MyCarFragment extends Fragment {
 
     Handler handler;
 
+    private void updateConsumoTxt(ObdLogGroup group) {
+        Double velocidade = 0.0;
+        Double rpm = 0.0;
+        Double acelarador = 0.0;
+        int counter = 0;
+        for (ObdLog obdLog : group.getLogs()) {
+            if (obdLog.getPid().equals("0D")) {
+                velocidade = Double.valueOf(obdLog.getData());
+                counter++;
+            }
+            if (obdLog.getPid().equals("0C")) {
+                rpm = Double.valueOf(obdLog.getData());
+                counter++;
+            }
+            if (obdLog.getPid().equals("11")) {
+                acelarador = Double.valueOf(obdLog.getData());
+                counter++;
+            }
+        }
+        String value = counter == 3 ? FuzzyManager.getInstance().processFuzzy(getContext(), velocidade, rpm, acelarador) : "";
+
+        fuzzyTextView.setText(FuzzyManager.getInstance().getConsumo(value));
+        fuzzyTextView.setBackgroundColor(Color.parseColor(FuzzyManager.getInstance().getCor(value)));
+    }
+
+
     // TODO: 19/03/17 use it
     private void updateObdView(ObdLogGroup group) {
         ObdLogFragment obdFragment = (ObdLogFragment) getChildFragmentManager().findFragmentByTag(OBD_FRAGMENT_TAG);
@@ -404,8 +430,10 @@ public class MyCarFragment extends Fragment {
                     }
                     case LoggingService.SERVICE_NEW_DATA: {
                         ObdLogGroup group = (ObdLogGroup) intent.getSerializableExtra(LoggingService.SERVICE_DATA_OBDGROUP);
-                        if(group!=null)
+                        if(group!=null) {
+                            updateConsumoTxt(group);
                             updateObdView(group);
+                        }
                         break;
                     }
                     case LoggingService.SERVICE_BROKEN_PIPE: {
