@@ -76,8 +76,6 @@ public class GooglePlaces {
 			request.getUrl().put("sensor", "false");
 			request.getUrl().put("key", API_KEY);
 
-			Log.e("url usado", String.valueOf(request.getUrl()));
-
 			if(nextPageToken!=null && !nextPageToken.isEmpty())
 				request.getUrl().put("pagetoken",nextPageToken);
 
