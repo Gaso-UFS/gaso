@@ -21,11 +21,6 @@ public class FuzzyManager {
 
     private static FuzzyManager ourInstance = new FuzzyManager();
 
-    public static final int VELOCIDADE = 1;
-    public static final int RPM = 2;
-    public static final int PEDAL_ACELERATOR = 3;
-    public static final int CONSUMO = 4;
-
     private final String filename = "gaso.fcl";
     private FIS fis;
     private String[] colors = {"#6dc066", "#b4eeb4", "#ffdd50", "#ffa500", "#d9534f", "#a6a6a6"};

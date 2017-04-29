@@ -57,13 +57,16 @@ import com.ericmguimaraes.gaso.bluetooth.BluetoothConnection;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
+import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.services.LoggingService;
 import com.ericmguimaraes.gaso.util.FuzzyManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
 
 import java.net.URL;
 
@@ -282,10 +285,28 @@ public class MyCarFragment extends Fragment {
                 counter++;
             }
         }
-        String value = counter == 3 ? FuzzyManager.getInstance().processFuzzy(getContext(), velocidade, rpm, acelarador) : "";
+        String consumptionName = counter == 3 ? FuzzyManager.getInstance().processFuzzy(getContext(), velocidade, rpm, acelarador) : "";
 
-        fuzzyTextView.setText(FuzzyManager.getInstance().getConsumo(value));
-        fuzzyTextView.setBackgroundColor(Color.parseColor(FuzzyManager.getInstance().getCor(value)));
+        fuzzyTextView.setText(FuzzyManager.getInstance().getConsumo(consumptionName));
+        fuzzyTextView.setBackgroundColor(Color.parseColor(FuzzyManager.getInstance().getCor(consumptionName)));
+        updateCurrentMilestoneConsumption(consumptionName);
+
+    }
+
+    private void updateCurrentMilestoneConsumption(final String consumptionName) {
+        final MilestoneDAO dao = new MilestoneDAO();
+        dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
+            @Override
+            public void onMilestoneReceived(Milestone milestone) {
+                milestone.getComsuption().incrementComsuption(consumptionName);
+                dao.addOrUpdate(milestone);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                updateCurrentMilestoneConsumption(consumptionName);
+            }
+        });
     }
 
 

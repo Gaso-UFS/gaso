@@ -1,5 +1,7 @@
 package com.ericmguimaraes.gaso.evaluation;
 
+import com.ericmguimaraes.gaso.model.Consumption;
+
 /**
  * Created by ericm on 18-Oct-16.
  */
@@ -10,6 +12,7 @@ public class Milestone {
     private long creationDate;
     private float combustiveConsumed;
     private float distanceRolled;
+    private Consumption consumption;
 
     public String getUid() {
         return uid;
@@ -41,5 +44,13 @@ public class Milestone {
 
     public void setDistanceRolled(float distanceRolled) {
         this.distanceRolled = distanceRolled;
+    }
+
+    public Consumption getComsuption() {
+        return consumption;
+    }
+
+    public  void setComsumption(Consumption consumption) {
+        this.consumption = consumption;
     }
 }
