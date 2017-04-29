@@ -298,8 +298,11 @@ public class MyCarFragment extends Fragment {
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(Milestone milestone) {
-                milestone.getComsuption().incrementComsuption(consumptionName);
-                dao.addOrUpdate(milestone);
+                if(milestone!=null) {
+                    if(milestone.getComsuption()!=null)
+                        milestone.getComsuption().incrementComsuption(consumptionName);
+                    dao.addOrUpdate(milestone);
+                }
             }
 
             @Override
