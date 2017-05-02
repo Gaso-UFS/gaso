@@ -60,6 +60,7 @@ import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.Consumption;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
@@ -301,11 +302,10 @@ public class MyCarFragment extends Fragment {
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(Milestone milestone) {
-                if(milestone!=null) {
-                    if(milestone.getComsuption()!=null)
-                        milestone.getComsuption().incrementComsuption(consumptionName);
-                    dao.addOrUpdate(milestone);
-                }
+                if (milestone.getComsuption() == null)
+                    milestone.setComsumption(new Consumption());
+                milestone.getComsuption().incrementComsuption(consumptionName);
+                dao.addOrUpdate(milestone);
             }
 
             @Override
