@@ -117,27 +117,25 @@ public class LoggingThread implements Runnable,
         CarDAO carDAO = new CarDAO();
         SessionSingleton.getInstance().currentCar.setLastFuelLevel(currentLevel);
         carDAO.addOrUpdate(SessionSingleton.getInstance().currentCar);
-        if(lastLevel>0) {
-            final MilestoneDAO dao = new MilestoneDAO();
-            dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
-                @Override
-                public void onMilestoneReceived(Milestone milestone) {
-                    if (diference > 0) {
-                        milestone.setDistanceRolled(milestone.getDistanceRolled() + Float.parseFloat(distanceStr));
-                        milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + diference);
-                    } else {
-                        sendBroadcastRefilled(diference * -1);
-                    }
+        final MilestoneDAO dao = new MilestoneDAO();
+        dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
+            @Override
+            public void onMilestoneReceived(Milestone milestone) {
+                if (diference > 0) {
+                    milestone.setDistanceRolled(milestone.getDistanceRolled() + Float.parseFloat(distanceStr));
+                    milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + diference);
+                } else {
+                    sendBroadcastRefilled(diference * -1);
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    if (count == 0)
-                        calculateConsumption();
-                    count++;
-                }
-            });
-        }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                if (count == 0)
+                    calculateConsumption();
+                count++;
+            }
+        });
     }
 
     private void sendBroadcastRefilled(float diference) {

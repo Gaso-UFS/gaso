@@ -34,6 +34,7 @@ public class Expense {
     private String uid;
     private double total;
     private double amount;
+    private double amountMine;
 
     private long date;
 
@@ -137,4 +138,13 @@ public class Expense {
     public void setStationName(String stationName) {
         this.stationName = stationName;
     }
+
+    public double getAmountMine() {
+        return amountMine;
+    }
+
+    public void setAmountMine(double amountMine) {
+        this.amountMine = amountMine;
+    }
+
 }

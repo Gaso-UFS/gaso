@@ -75,6 +75,29 @@
                     android:hint="Quantidade (L)" />
             </android.support.design.widget.TextInputLayout>
 
+            <CheckBox
+                android:id="@+id/diffCheckbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="O valor mostrado é diferente do que eu abasteci."
+                />
+
+            <!-- amount Label -->
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/amount_mine_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/input_amount_mine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Quantidade (L)"
+                    android:inputType="numberDecimal" />
+            </android.support.design.widget.TextInputLayout>
+
             <!-- Valor Label -->
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"

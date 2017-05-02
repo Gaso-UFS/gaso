@@ -86,7 +86,6 @@ public class ObdReader {
         mObdCommands.add(new AirFuelRatioCommand());
         mObdCommands.add(new ConsumptionRateCommand());
         mObdCommands.add(new FindFuelTypeCommand());
-        mObdCommands.add(new FuelLevelCommand());
         mObdCommands.add(new FuelTrimCommand());
         mObdCommands.add(new WidebandAirFuelRatioCommand());
 

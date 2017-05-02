@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -32,6 +33,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TimePicker;
@@ -40,8 +43,10 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
@@ -53,12 +58,14 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.firebase.database.DatabaseError;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 import butterknife.Bind;
+import butterknife.BindString;
 import butterknife.ButterKnife;
 
 public class ExpensesRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
@@ -88,6 +95,15 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     @Bind(R.id.btn_confirm)
     Button confirmBtn;
 
+    @Bind(R.id.amount_mine_layout)
+    TextInputLayout amountMineLayout;
+
+    @Bind(R.id.diffCheckbox)
+    CheckBox diffCheckbox;
+
+    @Bind(R.id.input_amount_mine)
+    TextInputEditText inputAmountMine;
+
     int PLACE_PICKER_REQUEST = 1;
     PlacePicker.IntentBuilder builder;
 
@@ -97,6 +113,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     SimpleDateFormat dayFormat = new SimpleDateFormat("dd/MM/yy");
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
+    private float lastAmount = -1;
 
 
     @Override
@@ -121,6 +138,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             @Override
             public void onClick(View v) {
                 if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputStation.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
+                    // TODO: 02/05/17 criar dialogo para confirmar cadastro com dados nulos
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
@@ -168,8 +186,24 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
 
-        if(getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA))
-            inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA))+"L");
+        if(getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA)) {
+            inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
+            lastAmount = getIntent().getExtras().getFloat(REFIL_EXTRA);
+            diffCheckbox.setVisibility(View.VISIBLE);
+            amountMineLayout.setVisibility(View.GONE);
+            diffCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked)
+                        amountMineLayout.setVisibility(View.VISIBLE);
+                    else
+                        amountMineLayout.setVisibility(View.GONE);
+                }
+            });
+        } else {
+            diffCheckbox.setVisibility(View.GONE);
+            amountMineLayout.setVisibility(View.GONE);
+        }
     }
 
     public void setSpinner(){
@@ -260,10 +294,22 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void saveOnDatabase() {
-
+        saveAmountOnCar();
         // TODO: 16/04/17 criar novo milestone, disparar avaliaçao e
         createNewMilestone();
+        saveExpense();
+        sucessEventUI();
+    }
 
+    private void sucessEventUI() {
+        CharSequence text = "Gasto adicionado com sucesso.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+        toast.show();
+        onBackPressed();
+    }
+
+    private void saveExpense() {
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
         e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
@@ -276,15 +322,24 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         e.setStationName(stationSelected.getName());
         e.setStation(stationSelected);
         e.setCar(SessionSingleton.getInstance().currentCar);
+        e.setAmountMine(lastAmount);
         dao.add(e);
+    }
 
-        CharSequence text = "Gasto adicionado com sucesso.";
-        int duration = Toast.LENGTH_SHORT;
+    private void saveAmountOnCar() {
+        final CarDAO dao = new CarDAO();
+        dao.findCarByID(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()).getUid(), new CarDAO.OneCarReceivedListener() {
+            @Override
+            public void onCarReceived(Car car) {
+                car.setLastFuelLevel(lastAmount);
+                dao.addOrUpdate(car);
+            }
 
-        Toast toast = Toast.makeText(getApplicationContext(), text, duration);
-        toast.show();
-
-        onBackPressed();
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // ignore error
+            }
+        });
     }
 
     private void createNewMilestone() {
