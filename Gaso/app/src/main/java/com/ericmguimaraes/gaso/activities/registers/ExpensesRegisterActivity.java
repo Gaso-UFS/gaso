@@ -44,12 +44,14 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.Consumption;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
+import com.ericmguimaraes.gaso.util.EvaluationHelper;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
@@ -114,6 +116,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     SimpleDateFormat dayFormat = new SimpleDateFormat("dd/MM/yy");
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
     private float lastAmount = -1;
+    private boolean obdRefil = false;
 
 
     @Override
@@ -186,7 +189,9 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
 
-        if(getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA)) {
+        obdRefil = getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA);
+
+        if(obdRefil) {
             inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
             lastAmount = getIntent().getExtras().getFloat(REFIL_EXTRA);
             diffCheckbox.setVisibility(View.VISIBLE);
@@ -294,9 +299,12 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void saveOnDatabase() {
-        saveAmountOnCar();
-        // TODO: 16/04/17 criar novo milestone, disparar avaliaçao e
-        createNewMilestone();
+        if(obdRefil) {
+            saveAmountOnCar();
+            MilestoneDAO dao = new MilestoneDAO();
+            dao.createNewMilestone();
+            EvaluationHelper.initEvaluation();
+        }
         saveExpense();
         sucessEventUI();
     }
@@ -340,14 +348,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
                 // ignore error
             }
         });
-    }
-
-    private void createNewMilestone() {
-        MilestoneDAO dao = new MilestoneDAO();
-        Milestone milestone = new Milestone();
-        milestone.setCreationDate(new Date().getTime());
-        //milestone.
-        // TODO: 17/04/17 create milestone
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

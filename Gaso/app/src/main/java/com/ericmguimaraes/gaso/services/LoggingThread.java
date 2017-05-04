@@ -124,6 +124,7 @@ public class LoggingThread implements Runnable,
                 if (diference > 0) {
                     milestone.setDistanceRolled(milestone.getDistanceRolled() + Float.parseFloat(distanceStr));
                     milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + diference);
+                    dao.addOrUpdate(milestone);
                 } else {
                     sendBroadcastRefilled(diference * -1);
                 }

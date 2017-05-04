@@ -21,6 +21,7 @@ package com.ericmguimaraes.gaso.persistence;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.model.Consumption;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -94,7 +95,7 @@ public class MilestoneDAO {
                     if(list.size()>0)
                         listener.onMilestoneReceived(list.get(list.size()-1));
                     else
-                        listener.onMilestoneReceived(new Milestone());
+                        listener.onMilestoneReceived(createNewMilestone());
                 }
 
                 @Override
@@ -103,6 +104,16 @@ public class MilestoneDAO {
                 }
             });
         }
+    }
+
+    public Milestone createNewMilestone() {
+        Milestone milestone = new Milestone();
+        milestone.setCreationDate(new Date().getTime());
+        milestone.setCombustiveConsumed(0);
+        milestone.setComsumption(new Consumption());
+        milestone.setDistanceRolled(0);
+        addOrUpdate(milestone);
+        return milestone;
     }
 
     public interface OneMilestoneReceivedListener {
