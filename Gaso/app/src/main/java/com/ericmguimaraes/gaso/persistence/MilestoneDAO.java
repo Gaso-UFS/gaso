@@ -106,6 +106,11 @@ public class MilestoneDAO {
         }
     }
 
+    public void findLastMilestoneWithFuelSources(final OneMilestoneReceivedListener listener){
+        // TODO: 03/05/17  findLastMilestoneWithFuelSources
+
+    }
+
     public Milestone createNewMilestone() {
         Milestone milestone = new Milestone();
         milestone.setCreationDate(new Date().getTime());

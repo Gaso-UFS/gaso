@@ -42,16 +42,14 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
-import com.ericmguimaraes.gaso.model.Consumption;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
-import com.ericmguimaraes.gaso.util.EvaluationHelper;
+import com.ericmguimaraes.gaso.evaluation.EvaluationHelper;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
@@ -67,7 +65,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import butterknife.Bind;
-import butterknife.BindString;
 import butterknife.ButterKnife;
 
 public class ExpensesRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
@@ -302,6 +299,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         if(obdRefil) {
             saveAmountOnCar();
             MilestoneDAO dao = new MilestoneDAO();
+            //// TODO: 03/05/17 enviar quantidade total de combustivel e valor extra do posto atual
             dao.createNewMilestone();
             EvaluationHelper.initEvaluation();
         }
