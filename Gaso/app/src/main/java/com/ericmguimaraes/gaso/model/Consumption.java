@@ -1,6 +1,8 @@
 package com.ericmguimaraes.gaso.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by adrianodias on 4/29/17.
@@ -30,19 +32,37 @@ public class Consumption implements Serializable {
         veryhigh++;
     }
 
+    public int getVerylow() {
+        return verylow;
+    }
+
+    public int getLow() {
+        return low;
+    }
+
+    public int getAverage() {
+        return average;
+    }
+
+    public int getHigh() {
+        return high;
+    }
+
+    public int getVeryhigh() {
+        return veryhigh;
+    }
+
     public void incrementComsuption(String str) {
-        switch (str) {
-            case "muito_baixo":
-                incrementVeryLow();
-            case "baixo":
-                incrementLow();
-            case "medio":
-                incrementAverage();
-            case "alto":
-                incrementHigh();
-            case "muito_alto":
-                incrementVeryHigh();
-            default: break;
+        if (str.equals("muito_baixo")) {
+            incrementVeryLow();
+        } else if (str.equals("baixo")) {
+            incrementLow();
+        } else if (str.equals("medio")) {
+            incrementAverage();
+        } else if (str.equals("alto")) {
+            incrementHigh();
+        } else if (str.equals("muito_alto")) {
+            incrementVeryHigh();
         }
     }
 
@@ -63,24 +83,45 @@ public class Consumption implements Serializable {
         }
     }
 
-    public int[] getValuesOfComsumptions() {
-        return new int[] {verylow, low, average, high, veryhigh};
+//    public int[] getValuesOfComsumptions() {
+//        return new int[] {verylow, low, average, high, veryhigh};
+//    }
+//    public String[] getNamesOfComsumptions() {
+//        return new String[] {"muito_baixo", "baixo", "medio", "alto", "muito_alto"};
+//    }
+
+    public List<Integer> getValuesOfComsumptions() {
+        List<Integer> c = new ArrayList<>();
+        c.add(verylow);
+        c.add(low);
+        c.add(average);
+        c.add(high);
+        c.add(veryhigh);
+        return c;
     }
-    public String[] getNamesOfComsumptions() {
-        return new String[] {"muito_baixo", "baixo", "medio", "alto", "muito_alto"};
+
+    public List<String> getNamesOfComsumptions() {
+        List<String> c = new ArrayList<>();
+        c.add("muito_baixo");
+        c.add("baixo");
+        c.add("medio");
+        c.add("alto");
+        c.add("muito_alto");
+        return c;
     }
 
     public String mostFrequentConsumptionName() {
         int max = 0;
         int indexOfMax = 0;
-        int[] comsumptions = getValuesOfComsumptions();
-        for(int i = 0; i < comsumptions.length; i++) {
-            if(comsumptions[i] > max) {
-                max = comsumptions[i];
-                indexOfMax = i;
+        List<Integer> comsumptions = getValuesOfComsumptions();
+        for (Integer comsumption : comsumptions) {
+            if (comsumption > max) {
+                max = comsumption;
+                indexOfMax = comsumptions.indexOf(comsumption);
             }
         }
-        return getNamesOfComsumptions()[indexOfMax];
+
+        return getNamesOfComsumptions().get(indexOfMax);
     }
 
 }

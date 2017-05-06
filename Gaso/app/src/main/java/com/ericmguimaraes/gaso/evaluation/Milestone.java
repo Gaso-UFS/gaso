@@ -3,7 +3,6 @@ package com.ericmguimaraes.gaso.evaluation;
 import com.ericmguimaraes.gaso.model.Consumption;
 import com.ericmguimaraes.gaso.model.FuelSource;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -51,20 +50,12 @@ public class Milestone {
         this.distanceRolled = distanceRolled;
     }
 
-    public Consumption getComsuption() {
-        return consumption;
-    }
-
-    public  void setComsumption(Consumption consumption) {
+    public  void setConsumption(Consumption consumption) {
         this.consumption = consumption;
     }
 
     public Consumption getConsumption() {
         return consumption;
-    }
-
-    public void setConsumption(Consumption consumption) {
-        this.consumption = consumption;
     }
 
     public List<FuelSource> getFuelSources() {

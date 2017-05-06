@@ -115,7 +115,7 @@ public class MilestoneDAO {
         Milestone milestone = new Milestone();
         milestone.setCreationDate(new Date().getTime());
         milestone.setCombustiveConsumed(0);
-        milestone.setComsumption(new Consumption());
+        milestone.setConsumption(new Consumption());
         milestone.setDistanceRolled(0);
         addOrUpdate(milestone);
         return milestone;
