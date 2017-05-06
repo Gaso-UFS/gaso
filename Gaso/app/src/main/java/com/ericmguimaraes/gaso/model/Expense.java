@@ -20,12 +20,6 @@ package com.ericmguimaraes.gaso.model;
 
 import com.google.firebase.database.Exclude;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Created by ericm on 2/28/2016.
  */
@@ -34,7 +28,7 @@ public class Expense {
     private String uid;
     private double total;
     private double amount;
-    private double amountMine;
+    private double amountOBDRefil;
 
     private long date;
 
@@ -139,12 +133,12 @@ public class Expense {
         this.stationName = stationName;
     }
 
-    public double getAmountMine() {
-        return amountMine;
+    public double getAmountOBDRefil() {
+        return amountOBDRefil;
     }
 
-    public void setAmountMine(double amountMine) {
-        this.amountMine = amountMine;
+    public void setAmountOBDRefil(double amountOBDRefil) {
+        this.amountOBDRefil = amountOBDRefil;
     }
 
 }

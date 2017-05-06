@@ -1,6 +1,8 @@
 package com.ericmguimaraes.gaso.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by adrianodias on 4/29/17.
@@ -63,9 +65,16 @@ public class Consumption implements Serializable {
         }
     }
 
-    public int[] getValuesOfComsumptions() {
-        return new int[] {verylow, low, average, high, veryhigh};
+    public List<Integer> getValuesOfComsumptions() {
+        List<Integer> c = new ArrayList<>();
+        c.add(verylow);
+        c.add(low);
+        c.add(average);
+        c.add(high);
+        c.add(veryhigh);
+        return c;
     }
+
     public String[] getNamesOfComsumptions() {
         return new String[] {"muito_baixo", "baixo", "medio", "alto", "muito_alto"};
     }
@@ -73,10 +82,10 @@ public class Consumption implements Serializable {
     public String mostFrequentConsumptionName() {
         int max = 0;
         int indexOfMax = 0;
-        int[] comsumptions = getValuesOfComsumptions();
-        for(int i = 0; i < comsumptions.length; i++) {
-            if(comsumptions[i] > max) {
-                max = comsumptions[i];
+        List<Integer> comsumptions = getValuesOfComsumptions();
+        for(int i = 0; i < comsumptions.size(); i++) {
+            if(comsumptions.get(i) > max) {
+                max = comsumptions.get(i);
                 indexOfMax = i;
             }
         }

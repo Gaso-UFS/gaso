@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.obd.ObdReader;
@@ -28,7 +29,6 @@ import com.google.firebase.database.DatabaseError;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @SuppressWarnings({"MissingPermission"})
@@ -111,22 +111,20 @@ public class LoggingThread implements Runnable,
 
     private void calculateConsumption() {
         final String distanceStr = mObdReader.getDistanceobdLog().getData();
-        float currentLevel = Float.parseFloat(mObdReader.getFuelLevelLog().getData());
-        float lastLevel = SessionSingleton.getInstance().currentCar.getLastFuelLevel();
-        final float diference = lastLevel - currentLevel;
-        CarDAO carDAO = new CarDAO();
-        SessionSingleton.getInstance().currentCar.setLastFuelLevel(currentLevel);
-        carDAO.addOrUpdate(SessionSingleton.getInstance().currentCar);
+        float currentFuelLevel = Float.parseFloat(mObdReader.getFuelLevelLog().getData());
+        float lastFuelLevel = SessionSingleton.getInstance().currentCar.getLastFuelLevel();
+        final float fuelDiference = lastFuelLevel - currentFuelLevel;
+        saveDistanceOnCar(distanceStr);
         final MilestoneDAO dao = new MilestoneDAO();
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(Milestone milestone) {
-                if (diference > 0) {
+                if (fuelDiference >= 0) {
                     milestone.setDistanceRolled(milestone.getDistanceRolled() + Float.parseFloat(distanceStr));
-                    milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + diference);
+                    milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + fuelDiference);
                     dao.addOrUpdate(milestone);
                 } else {
-                    sendBroadcastRefilled(diference * -1);
+                    sendBroadcastRefilled(fuelDiference * -1);
                 }
             }
 
@@ -137,6 +135,19 @@ public class LoggingThread implements Runnable,
                 count++;
             }
         });
+    }
+
+    private void saveDistanceOnCar(String distanceStr) {
+        final CarDAO dao = new CarDAO();
+        float dist = Float.parseFloat(distanceStr);
+        Car car = SessionSingleton.getInstance().currentCar;
+        if(car.getLastDistanceRead()<dist) {
+            car.setTotalDistance(car.getTotalDistance()+dist);
+        } else {
+            car.setTotalDistance(car.getTotalDistance()+dist-car.getLastDistanceRead());
+        }
+        car.setLastDistanceRead(dist);
+        dao.addOrUpdate(SessionSingleton.getInstance().currentCar);
     }
 
     private void sendBroadcastRefilled(float diference) {
@@ -169,6 +180,11 @@ public class LoggingThread implements Runnable,
         LoggingService service = mLoggingServiceReference.get();
 
         if (service == null) return;
+
+        if(mLastLocation!=null)
+            Log.d("LOCATION", mLastLocation.getLatitude()+":"+mLastLocation.getLongitude()+"");
+        else
+            Log.d("LOCATION", "mLastLocation==null");
 
         Intent intent = new Intent(LoggingService.SERVICE_BROADCAST_MESSAGE);
         intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_NEW_DATA);

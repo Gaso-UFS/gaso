@@ -3,7 +3,6 @@ package com.ericmguimaraes.gaso.evaluation;
 import com.ericmguimaraes.gaso.model.Consumption;
 import com.ericmguimaraes.gaso.model.FuelSource;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,6 +17,7 @@ public class Milestone {
     private float distanceRolled;
     private Consumption consumption;
     List<FuelSource> fuelSources;
+    private float initialFuelLevel;
 
     public String getUid() {
         return uid;
@@ -73,5 +73,13 @@ public class Milestone {
 
     public void setFuelSources(List<FuelSource> fuelSources) {
         this.fuelSources = fuelSources;
+    }
+
+    public void setInitialFuelLevel(float initialFuelLevel) {
+        this.initialFuelLevel = initialFuelLevel;
+    }
+
+    public float getInitialFuelLevel() {
+        return initialFuelLevel;
     }
 }

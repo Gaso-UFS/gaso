@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,8 +32,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TimePicker;
@@ -54,6 +51,7 @@ import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
+import com.google.android.gms.cast.framework.Session;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
@@ -94,15 +92,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     @Bind(R.id.btn_confirm)
     Button confirmBtn;
 
-    @Bind(R.id.amount_mine_layout)
-    TextInputLayout amountMineLayout;
-
-    @Bind(R.id.diffCheckbox)
-    CheckBox diffCheckbox;
-
-    @Bind(R.id.input_amount_mine)
-    TextInputEditText inputAmountMine;
-
     int PLACE_PICKER_REQUEST = 1;
     PlacePicker.IntentBuilder builder;
 
@@ -112,7 +101,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     SimpleDateFormat dayFormat = new SimpleDateFormat("dd/MM/yy");
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
-    private float lastAmount = -1;
+    private float amountOBDRefil = -1;
     private boolean obdRefil = false;
 
 
@@ -189,22 +178,9 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         obdRefil = getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA);
 
         if(obdRefil) {
-            inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
-            lastAmount = getIntent().getExtras().getFloat(REFIL_EXTRA);
-            diffCheckbox.setVisibility(View.VISIBLE);
-            amountMineLayout.setVisibility(View.GONE);
-            diffCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if(isChecked)
-                        amountMineLayout.setVisibility(View.VISIBLE);
-                    else
-                        amountMineLayout.setVisibility(View.GONE);
-                }
-            });
-        } else {
-            diffCheckbox.setVisibility(View.GONE);
-            amountMineLayout.setVisibility(View.GONE);
+            amountOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
+            String amount = Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L";
+            inputAmount.setText(amount);
         }
     }
 
@@ -297,10 +273,8 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     private void saveOnDatabase() {
         if(obdRefil) {
-            saveAmountOnCar();
             MilestoneDAO dao = new MilestoneDAO();
-            //// TODO: 03/05/17 enviar quantidade total de combustivel e valor extra do posto atual
-            dao.createNewMilestone();
+            dao.createNewMilestone(SessionSingleton.getInstance().currentCar.getLastFuelLevel());
             EvaluationHelper.initEvaluation();
         }
         saveExpense();
@@ -318,34 +292,28 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     private void saveExpense() {
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
-        e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
+        e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(",","").replace("$","");
+        String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
         e.setTotal(Double.parseDouble(parsableDouble));
         e.setStationUid(stationSelected.getId());
-        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
+        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "")));
         e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
         e.setStationName(stationSelected.getName());
         e.setStation(stationSelected);
         e.setCar(SessionSingleton.getInstance().currentCar);
-        e.setAmountMine(lastAmount);
+        e.setAmountOBDRefil(amountOBDRefil);
         dao.add(e);
+        saveCarLastFluel();
     }
 
-    private void saveAmountOnCar() {
-        final CarDAO dao = new CarDAO();
-        dao.findCarByID(SessionSingleton.getInstance().getCurrentUser(getApplicationContext()).getUid(), new CarDAO.OneCarReceivedListener() {
-            @Override
-            public void onCarReceived(Car car) {
-                car.setLastFuelLevel(lastAmount);
-                dao.addOrUpdate(car);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // ignore error
-            }
-        });
+    private void saveCarLastFluel() {
+        if(obdRefil){
+            Car c = SessionSingleton.getInstance().currentCar;
+            c.setLastFuelLevel(c.getLastFuelLevel()+amountOBDRefil);
+            CarDAO dao = new CarDAO();
+            dao.addOrUpdate(c);
+        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

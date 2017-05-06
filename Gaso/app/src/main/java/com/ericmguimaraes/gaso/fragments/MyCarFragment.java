@@ -259,6 +259,7 @@ public class MyCarFragment extends Fragment {
             LocalBroadcastManager.getInstance(getContext())
                     .registerReceiver(mBroadcastReceiver, filter);
         }
+
     }
 
     @Override
