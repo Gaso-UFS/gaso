@@ -91,6 +91,7 @@ public class Expense {
 
     public void setCar(Car car) {
         this.car = car;
+        this.carUid = car.getid();
     }
 
     public String getUid() {

@@ -1,7 +1,9 @@
 package com.ericmguimaraes.gaso.evaluation;
 
-import com.ericmguimaraes.gaso.model.Consumption;
+import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.model.FuelSource;
+import com.google.firebase.database.Exclude;
 
 import java.util.List;
 
@@ -15,9 +17,15 @@ public class Milestone {
     private long creationDate;
     private float combustiveConsumed;
     private float distanceRolled;
-    private Consumption consumption;
-    List<FuelSource> fuelSources;
+    private FuzzyConsumption fuzzyConsumption;
+    private List<FuelSource> fuelSources;
     private float initialFuelLevel;
+    private List<Evaluation> evaluations;
+
+    @Exclude
+    private Car car;
+
+    private String carUid;
 
     public String getUid() {
         return uid;
@@ -51,12 +59,12 @@ public class Milestone {
         this.distanceRolled = distanceRolled;
     }
 
-    public  void setConsumption(Consumption consumption) {
-        this.consumption = consumption;
+    public  void setFuzzyConsumption(FuzzyConsumption fuzzyConsumption) {
+        this.fuzzyConsumption = fuzzyConsumption;
     }
 
-    public Consumption getConsumption() {
-        return consumption;
+    public FuzzyConsumption getFuzzyConsumption() {
+        return fuzzyConsumption;
     }
 
     public List<FuelSource> getFuelSources() {
@@ -73,5 +81,29 @@ public class Milestone {
 
     public float getInitialFuelLevel() {
         return initialFuelLevel;
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
+    public String getCarUid() {
+        return carUid;
+    }
+
+    public void setCarUid(String carUid) {
+        this.carUid = carUid;
+    }
+
+    public List<Evaluation> getEvaluations() {
+        return evaluations;
+    }
+
+    public void setEvaluations(List<Evaluation> evaluations) {
+        this.evaluations = evaluations;
     }
 }
