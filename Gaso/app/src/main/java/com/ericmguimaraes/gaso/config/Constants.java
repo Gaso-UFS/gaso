@@ -18,8 +18,6 @@
 
 package com.ericmguimaraes.gaso.config;
 
-import com.ericmguimaraes.gaso.util.StringUtils;
-
 /**
  * Created by ericm on 17-Aug-16.
  */
@@ -65,4 +63,5 @@ public class Constants {
     public static final String FIREBASE_OBD_LOG = "obd_logs";
     public static final String FIREBASE_UNTRACEABLE_OBD_LOG = "untraceable_obd_logs";
     public static final String FIREBASE_MILESTONES = "milestones";
+    public static final String FIREBASE_STATIONS = "stations";
 }
