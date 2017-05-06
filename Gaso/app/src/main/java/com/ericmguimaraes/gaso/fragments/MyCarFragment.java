@@ -133,7 +133,7 @@ public class MyCarFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
         }
-        handler = new Handler();
+
     }
 
     @Override
@@ -303,9 +303,9 @@ public class MyCarFragment extends Fragment {
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(Milestone milestone) {
-                if (milestone.getComsuption() == null)
-                    milestone.setComsumption(new Consumption());
-                milestone.getComsuption().incrementComsuption(consumptionName);
+                if (milestone.getConsumption() == null)
+                    milestone.setConsumption(new Consumption());
+                milestone.getConsumption().incrementComsuption(consumptionName);
                 dao.addOrUpdate(milestone);
             }
 

@@ -179,8 +179,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         if(obdRefil) {
             amountOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
-            String amount = Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L";
-            inputAmount.setText(amount);
+            inputAmount.setText(String.format("%.2f", getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
         }
     }
 

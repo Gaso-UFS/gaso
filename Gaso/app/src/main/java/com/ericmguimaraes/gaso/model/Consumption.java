@@ -32,40 +32,41 @@ public class Consumption implements Serializable {
         veryhigh++;
     }
 
+    public int getVerylow() {
+        return verylow;
+    }
+
+    public int getLow() {
+        return low;
+    }
+
+    public int getAverage() {
+        return average;
+    }
+
+    public int getHigh() {
+        return high;
+    }
+
+    public int getVeryhigh() {
+        return veryhigh;
+    }
+
     public void incrementComsuption(String str) {
-        switch (str) {
-            case "muito_baixo":
-                incrementVeryLow();
-            case "baixo":
-                incrementLow();
-            case "medio":
-                incrementAverage();
-            case "alto":
-                incrementHigh();
-            case "muito_alto":
-                incrementVeryHigh();
-            default: break;
+        if (str.equals("muito_baixo")) {
+            incrementVeryLow();
+        } else if (str.equals("baixo")) {
+            incrementLow();
+        } else if (str.equals("medio")) {
+            incrementAverage();
+        } else if (str.equals("alto")) {
+            incrementHigh();
+        } else if (str.equals("muito_alto")) {
+            incrementVeryHigh();
         }
     }
 
-    public int getComsumptionValue(String consumption) {
-        switch (consumption) {
-            case "muito_baixo":
-                return verylow;
-            case "baixo":
-                return low;
-            case "medio":
-                return average;
-            case "alto":
-                return high;
-            case "muito_alto":
-                return veryhigh;
-            default:
-                return 0;
-        }
-    }
-
-    public List<Integer> getValuesOfComsumptions() {
+    private List<Integer> getValuesOfComsumptions() {
         List<Integer> c = new ArrayList<>();
         c.add(verylow);
         c.add(low);
@@ -75,21 +76,27 @@ public class Consumption implements Serializable {
         return c;
     }
 
-    public String[] getNamesOfComsumptions() {
-        return new String[] {"muito_baixo", "baixo", "medio", "alto", "muito_alto"};
+    private List<String> getNamesOfComsumptions() {
+        List<String> c = new ArrayList<>();
+        c.add("muito_baixo");
+        c.add("baixo");
+        c.add("medio");
+        c.add("alto");
+        c.add("muito_alto");
+        return c;
     }
 
     public String mostFrequentConsumptionName() {
         int max = 0;
         int indexOfMax = 0;
         List<Integer> comsumptions = getValuesOfComsumptions();
-        for(int i = 0; i < comsumptions.size(); i++) {
-            if(comsumptions.get(i) > max) {
-                max = comsumptions.get(i);
-                indexOfMax = i;
+        for (Integer comsumption : comsumptions) {
+            if (comsumption > max) {
+                max = comsumption;
+                indexOfMax = comsumptions.indexOf(comsumption);
             }
         }
-        return getNamesOfComsumptions()[indexOfMax];
+        return getNamesOfComsumptions().get(indexOfMax);
     }
 
 }

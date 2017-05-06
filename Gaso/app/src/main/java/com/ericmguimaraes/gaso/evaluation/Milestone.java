@@ -51,20 +51,12 @@ public class Milestone {
         this.distanceRolled = distanceRolled;
     }
 
-    public Consumption getComsuption() {
-        return consumption;
-    }
-
-    public  void setComsumption(Consumption consumption) {
+    public  void setConsumption(Consumption consumption) {
         this.consumption = consumption;
     }
 
     public Consumption getConsumption() {
         return consumption;
-    }
-
-    public void setConsumption(Consumption consumption) {
-        this.consumption = consumption;
     }
 
     public List<FuelSource> getFuelSources() {
