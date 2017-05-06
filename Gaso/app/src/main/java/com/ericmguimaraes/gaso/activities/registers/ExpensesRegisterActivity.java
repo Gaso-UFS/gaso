@@ -189,7 +189,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         obdRefil = getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA);
 
         if(obdRefil) {
-            inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
+            inputAmount.setText(String.format("%.2f", getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
             lastAmount = getIntent().getExtras().getFloat(REFIL_EXTRA);
             diffCheckbox.setVisibility(View.VISIBLE);
             amountMineLayout.setVisibility(View.GONE);

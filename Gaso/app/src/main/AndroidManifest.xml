@@ -46,7 +46,10 @@
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".activities.registers.ExpensesRegisterActivity" />
+        <activity android:name=".activities.registers.ExpensesRegisterActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            />
         <activity
             android:name=".activities.StationDetailsActivity"
             android:label="@string/title_activity_station_details"
