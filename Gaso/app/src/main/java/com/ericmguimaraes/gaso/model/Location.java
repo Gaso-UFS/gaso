@@ -18,12 +18,10 @@
 
 package com.ericmguimaraes.gaso.model;
 
-import io.realm.RealmObject;
-
 /**
  * Created by ericm on 3/19/2016.
  */
-public class Location extends RealmObject {
+public class Location {
 
     private double lng;
 

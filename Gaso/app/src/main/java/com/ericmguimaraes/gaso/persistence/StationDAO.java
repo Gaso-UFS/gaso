@@ -18,47 +18,46 @@
 
 package com.ericmguimaraes.gaso.persistence;
 
-import android.content.Context;
-
-import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.model.Station;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
 
 /**
  * Created by ericm on 2/27/2016.
  */
 public class StationDAO {
 
-    Context context;
+    private DatabaseReference mDatabase;
 
-    RealmConfiguration realmConfig;
-
-    Realm realm;
-
-    public StationDAO(Context context){
-        this.context = context;
-        realmConfig = new RealmConfiguration.Builder(context).deleteRealmIfMigrationNeeded().build();
+    public StationDAO(){
+        mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
-    public Station addOrMerge(Station station){
-        realm = Realm.getInstance(realmConfig);
-        Station fromDatabase = findById(station.getId());
-        Station stationToSave;
-        if(fromDatabase!=null)
-            stationToSave = merge(station,fromDatabase);
-        else
-            stationToSave = station;
-        realm.beginTransaction();
-        realm.copyToRealmOrUpdate(stationToSave);
-        realm.commitTransaction();
-        return stationToSave;
+    public void addOrUpdate(final Station station, final OneStationReceivedListener listener){
+        if(station.getId() != null) {
+            mDatabase.child(Constants.FIREBASE_STATIONS).child(station.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Station gasStation = dataSnapshot.getValue() != null ? merge(dataSnapshot.getValue(Station.class), station) : station;
+                    mDatabase.child(Constants.FIREBASE_STATIONS).child(gasStation.getId()).setValue(gasStation);
+                    listener.onStationReceived(gasStation);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    listener.onCancelled(databaseError);
+                }
+            });
+        }
     }
 
     private Station merge(Station stationFromMemory, Station stationFromDatabase) {
@@ -77,41 +76,58 @@ public class StationDAO {
     }
 
     public void remove(Station station){
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Station> query = realm.where(Station.class);
-        query.equals(station);
-        RealmResults<Station> result = query.findAll();
-        realm.beginTransaction();
-        if(!result.isEmpty())
-            result.deleteLastFromRealm();
-        realm.commitTransaction();
-    }
-
-    public List<Station> findAll(){
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Station> query = realm.where(Station.class);
-        RealmResults<Station> result = query.findAll();
-        List<Station> list = new ArrayList<>();
-        for(Station u: result){
-            list.add(createNewStation(u));
+        if(station.getId() !=null) {
+            mDatabase.child(Constants.FIREBASE_STATIONS).child(station.getId()).removeValue();
         }
-        return list;
+    }
+    public void removeAll() {
+        mDatabase.child(Constants.FIREBASE_STATIONS).removeValue();
     }
 
-    public Station findFirst(){
-        realm = Realm.getInstance(realmConfig);
-        return realm.where(Station.class).findFirst();
+    public void findStationById(String id, final OneStationReceivedListener listener) {
+        mDatabase.child(Constants.FIREBASE_STATIONS).child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                listener.onStationReceived(dataSnapshot.getValue(Station.class));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                listener.onCancelled(databaseError);
+            }
+        });
     }
 
-    public Station findById(String id){
-        realm = Realm.getInstance(realmConfig);
-        realm = Realm.getInstance(realmConfig);
-        RealmQuery<Station> query = realm.where(Station.class);
-        query.equalTo("id",id);
-        Station result = query.findFirst();
-        return result;
+    public void findAll(final StationsListReceivedListener listener){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            mDatabase.child(Constants.FIREBASE_STATIONS).orderByChild("name").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<Station> list = new ArrayList<Station>();
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        list.add((Station) postSnapshot.getValue(Station.class));
+                    }
+                    listener.onStationsReceived(list);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    listener.onCancelled(databaseError);
+                }
+            });
+        }
     }
 
+    public interface OneStationReceivedListener {
+        void onStationReceived(Station station);
+        void onCancelled(DatabaseError databaseError);
+    }
+
+    public interface StationsListReceivedListener {
+        void onStationsReceived(List<Station> stations);
+        void onCancelled(DatabaseError databaseError);
+    }
     private Station createNewStation(Station oldStation){
         Station newStation = new Station();
         newStation.setId(oldStation.getId());
@@ -127,11 +143,5 @@ public class StationDAO {
         return newStation;
     }
 
-    public long count(){
-        realm = Realm.getInstance(realmConfig);
-        realm = Realm.getInstance(realmConfig);
-      //  RealmQuery<Car> query = realm.where(Car.class);
-        return 0;// query.count();
-    }
 
 }

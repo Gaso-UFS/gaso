@@ -18,12 +18,10 @@
 
 package com.ericmguimaraes.gaso.model;
 
-import io.realm.RealmObject;
-
 /**
  * Created by ericm on 3/15/2016.
  */
-public class Combustive extends RealmObject {
+public class Combustive {
 
     private long id;
 
