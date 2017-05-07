@@ -55,7 +55,6 @@ public class ObdReader {
     public boolean hasGotDistanceFuel;
     private boolean isFirstTime = true;
     private int counter = 0;
-    private boolean isToReset = false;
     private ObdLog fuelLevelLog;
     private ObdLog distanceobdLog;
     private List<ObdCommand> toDeletePermanentlyCommands = new ArrayList<>();
@@ -74,19 +73,21 @@ public class ObdReader {
         mObdCommands.add(new SpeedCommand());
 
         // engine
+        mObdCommands.add(new RPMCommand());
         mObdCommands.add(new AbsoluteLoadCommand());
         mObdCommands.add(new LoadCommand());
         mObdCommands.add(new MassAirFlowCommand());
         mObdCommands.add(new OilTempCommand());
-        mObdCommands.add(new RPMCommand());
         mObdCommands.add(new RuntimeCommand());
         mObdCommands.add(new ThrottlePositionCommand());
+
+        mObdCommands.add(new DistanceSinceCCCommand());
+        mObdCommands.add(new FuelLevelCommand());
 
         // fuel
         mObdCommands.add(new AirFuelRatioCommand());
         mObdCommands.add(new ConsumptionRateCommand());
         mObdCommands.add(new FindFuelTypeCommand());
-        mObdCommands.add(new FuelLevelCommand());
         mObdCommands.add(new FuelTrimCommand());
         mObdCommands.add(new WidebandAirFuelRatioCommand());
 
@@ -148,18 +149,6 @@ public class ObdReader {
                 }
                 if (!gotError)
                     hasGotDistanceFuel = true;
-            if(hasGotDistanceFuel)
-                isToReset = true;
-        }
-
-        if(isToReset) {
-            ResetTroubleCodesCommand resetCommand = new ResetTroubleCodesCommand();
-            try {
-                resetCommand.run(mBtSocket.getInputStream(), mBtSocket.getOutputStream());
-                isToReset = !isLogOkay(getLog(resetCommand));
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         //run commands

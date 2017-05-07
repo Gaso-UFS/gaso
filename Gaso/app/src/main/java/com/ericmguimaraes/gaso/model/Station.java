@@ -22,17 +22,32 @@ import com.google.android.gms.location.places.Place;
 
 import java.util.List;
 
-import io.realm.RealmList;
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Created by ericm on 2/28/2016.
  */
-public class Station extends RealmObject {
+public class Station {
 
-    public Station(){
-    }
+    private String id;
+
+    private String name;
+
+    private String address;
+
+    private String phoneNumber;
+
+    private Location location;
+
+    private float generalRate;
+
+    private float combustiveRate;
+
+    private float moneyRate;
+
+    private List<Combustive> combustives;
+
+    private String reference;
+
+    public Station() {}
 
     public Station(Place place){
         List<Integer> types = place.getPlaceTypes();
@@ -56,27 +71,6 @@ public class Station extends RealmObject {
             throw new IllegalArgumentException("Place is not a gas station.");
         }
     }
-
-    @PrimaryKey
-    private String id;
-
-    private String name;
-
-    private String address;
-
-    private String phoneNumber;
-
-    private Location location;
-
-    private float generalRate;
-
-    private float combustiveRate;
-
-    private float moneyRate;
-
-    private RealmList<Combustive> combustives;
-
-    private String reference;
 
     public String getId() {
         return id;
@@ -134,14 +128,6 @@ public class Station extends RealmObject {
         this.combustiveRate = combustiveRate;
     }
 
-    public RealmList<Combustive> getCombustives() {
-        return combustives;
-    }
-
-    public void setCombustives(RealmList<Combustive> combustives) {
-        this.combustives = combustives;
-    }
-
     public float getMoneyRate() {
         return moneyRate;
     }
@@ -156,5 +142,13 @@ public class Station extends RealmObject {
 
     public void setReference(String reference) {
         this.reference = reference;
+    }
+
+    public List<Combustive> getCombustives() {
+        return combustives;
+    }
+
+    public void setCombustives(List<Combustive> combustives) {
+        this.combustives = combustives;
     }
 }

@@ -33,6 +33,7 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
+import com.google.firebase.database.DatabaseError;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -105,15 +106,29 @@ public class StationDetailsActivity extends AppCompatActivity {
         PlacesHelper placesHelper = new PlacesHelper(this);
         placesHelper.findStationByID(stationId, new PlacesHelper.StationFoundListener() {
             @Override
-            public void OnFindStationResult(Station station) {
+            public void OnFindStationResult(final Station station) {
                 if(station==null){
                     Toast toast = Toast.makeText(getApplicationContext(),"ops, tivemos um problema.",Toast.LENGTH_SHORT);
                     toast.show();
                     onBackPressed();
                 } else {
-                    StationDAO dao = new StationDAO(getApplicationContext());
-                    StationDetailsActivity.this.station = dao.addOrMerge(station);
-                    fillFields();
+                    StationDAO dao = new StationDAO();
+                    dao.addOrUpdate(station, new StationDAO.OneStationReceivedListener() {
+                        @Override
+                        public void onStationReceived(Station gasStation) {
+                            StationDetailsActivity.this.station = gasStation;
+                            fillFields();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            StationDetailsActivity.this.station = station;
+                            fillFields();
+                            Toast toast = Toast.makeText(getApplicationContext(),"ops, tivemos um problema.",Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+                    });
+
                 }
             }
         });

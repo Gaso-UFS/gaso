@@ -39,20 +39,24 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
-import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
+import com.ericmguimaraes.gaso.evaluation.EvaluationHelper;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
+import com.google.android.gms.cast.framework.Session;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.firebase.database.DatabaseError;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -97,6 +101,8 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     SimpleDateFormat dayFormat = new SimpleDateFormat("dd/MM/yy");
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
+    private float amountOBDRefil = -1;
+    private boolean obdRefil = false;
 
 
     @Override
@@ -121,6 +127,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             @Override
             public void onClick(View v) {
                 if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputStation.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
+                    // TODO: 02/05/17 criar dialogo para confirmar cadastro com dados nulos
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
@@ -168,8 +175,12 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
 
-        if(getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA))
-            inputAmount.setText(Float.toString(getIntent().getExtras().getFloat(REFIL_EXTRA))+"L");
+        obdRefil = getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA);
+
+        if(obdRefil) {
+            amountOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
+            inputAmount.setText(String.format("%.2f", getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
+        }
     }
 
     public void setSpinner(){
@@ -260,39 +271,48 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void saveOnDatabase() {
+        if(obdRefil) {
+            MilestoneDAO dao = new MilestoneDAO();
+            dao.createNewMilestone(SessionSingleton.getInstance().currentCar.getLastFuelLevel());
+            EvaluationHelper.initEvaluation();
+        }
+        saveExpense();
+        sucessEventUI();
+    }
 
-        // TODO: 16/04/17 criar novo milestone, disparar avaliaçao e
-        createNewMilestone();
+    private void sucessEventUI() {
+        CharSequence text = "Gasto adicionado com sucesso.";
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+        toast.show();
+        onBackPressed();
+    }
 
+    private void saveExpense() {
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
-        e.setDate(calendarSelected==null?new Date().getTime():calendarSelected.getTime().getTime());
+        e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        String parsableDouble = inputTotal.getText().toString().replace("R$","").replace(",","").replace("$","");
+        String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
         e.setTotal(Double.parseDouble(parsableDouble));
         e.setStationUid(stationSelected.getId());
-        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L","")));
+        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "")));
         e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
         e.setStationName(stationSelected.getName());
         e.setStation(stationSelected);
         e.setCar(SessionSingleton.getInstance().currentCar);
+        e.setAmountOBDRefil(amountOBDRefil);
         dao.add(e);
-
-        CharSequence text = "Gasto adicionado com sucesso.";
-        int duration = Toast.LENGTH_SHORT;
-
-        Toast toast = Toast.makeText(getApplicationContext(), text, duration);
-        toast.show();
-
-        onBackPressed();
+        saveCarLastFluel();
     }
 
-    private void createNewMilestone() {
-        MilestoneDAO dao = new MilestoneDAO();
-        Milestone milestone = new Milestone();
-        milestone.setCreationDate(new Date().getTime());
-        //milestone.
-        // TODO: 17/04/17 create milestone
+    private void saveCarLastFluel() {
+        if(obdRefil){
+            Car c = SessionSingleton.getInstance().currentCar;
+            c.setLastFuelLevel(c.getLastFuelLevel()+amountOBDRefil);
+            CarDAO dao = new CarDAO();
+            dao.addOrUpdate(c);
+        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

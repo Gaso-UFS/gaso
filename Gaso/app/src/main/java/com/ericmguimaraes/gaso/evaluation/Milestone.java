@@ -1,6 +1,9 @@
 package com.ericmguimaraes.gaso.evaluation;
 
 import com.ericmguimaraes.gaso.model.Consumption;
+import com.ericmguimaraes.gaso.model.FuelSource;
+
+import java.util.List;
 
 /**
  * Created by ericm on 18-Oct-16.
@@ -13,6 +16,8 @@ public class Milestone {
     private float combustiveConsumed;
     private float distanceRolled;
     private Consumption consumption;
+    List<FuelSource> fuelSources;
+    private float initialFuelLevel;
 
     public String getUid() {
         return uid;
@@ -46,11 +51,27 @@ public class Milestone {
         this.distanceRolled = distanceRolled;
     }
 
-    public Consumption getComsuption() {
+    public  void setConsumption(Consumption consumption) {
+        this.consumption = consumption;
+    }
+
+    public Consumption getConsumption() {
         return consumption;
     }
 
-    public  void setComsumption(Consumption consumption) {
-        this.consumption = consumption;
+    public List<FuelSource> getFuelSources() {
+        return fuelSources;
+    }
+
+    public void setFuelSources(List<FuelSource> fuelSources) {
+        this.fuelSources = fuelSources;
+    }
+
+    public void setInitialFuelLevel(float initialFuelLevel) {
+        this.initialFuelLevel = initialFuelLevel;
+    }
+
+    public float getInitialFuelLevel() {
+        return initialFuelLevel;
     }
 }
