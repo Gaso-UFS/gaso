@@ -502,6 +502,7 @@ public class MyCarFragment extends Fragment {
         new AlertDialog.Builder(getContext())
                 .setTitle("Confirmação.")
                 .setMessage("Parece que você abasteceu, você já cadastrou este abastecimento?")
+
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         handleExpenseRefil(true, valorTotal, hasDiference);
@@ -512,6 +513,7 @@ public class MyCarFragment extends Fragment {
                         handleExpenseRefil(false, valorTotal, hasDiference);
                     }
                 })
+                .setCancelable(false)
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .show();
     }
@@ -521,18 +523,20 @@ public class MyCarFragment extends Fragment {
         dao.findLast(new ExpensesDAO.OnOneExpensesReceivedListener() {
             @Override
             public void OnExpenseReceived(Expense expense) {
+                MilestoneDAO milestoneDAO = new MilestoneDAO();
+                Milestone milestone;
                 if (expense != null) {
                     if (hasAlreadyRegisteredExpense)
                         expense.setAmountOBDRefil(valorTotal);
-
-                    MilestoneDAO milestoneDAO = new MilestoneDAO();
-                    Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
-                    milestoneDAO.addOrUpdate(milestone);
-                    Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
-                    if(hasRefilDiference)
-                        intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
-                    startActivity(intentExp);
+                    milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
+                } else {
+                    milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), null);
                 }
+                milestoneDAO.addOrUpdate(milestone);
+                Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
+                if(hasRefilDiference)
+                    intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
+                startActivity(intentExp);
 
             }
 
