@@ -20,6 +20,7 @@ package com.ericmguimaraes.gaso.fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -37,6 +38,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.IntentCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,9 +63,11 @@ import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
+import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.services.LoggingService;
 import com.ericmguimaraes.gaso.util.FuzzyManager;
@@ -434,6 +438,7 @@ public class MyCarFragment extends Fragment {
             Log.d(TAG, "Received broadcast from Service");
 
             if (intent.getAction().equals(LoggingService.SERVICE_BROADCAST_MESSAGE)) {
+                final float valorTotal = intent.getExtras().getFloat(LoggingService.SERVICE_REFIL_DIFERENCE);
                 switch (intent.getStringExtra(LoggingService.SERVICE_MESSAGE)) {
                     case LoggingService.SERVICE_BLUETOOTH_CONNECTING: {
                         Log.d(TAG, "Service connecting");
@@ -483,11 +488,7 @@ public class MyCarFragment extends Fragment {
                     }
                     case LoggingService.SERVICE_COMBUSTIVE_REFIL: {
                         if (isAdded() && getActivity()!=null) {
-                            Toast.makeText(getContext(), "Parece que você abasteceu, vamos registrar?", Toast.LENGTH_LONG).show();
-                            Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
-                            if(intent.hasExtra(LoggingService.SERVICE_REFIL_DIFERENCE))
-                                intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, intent.getExtras().getFloat(LoggingService.SERVICE_REFIL_DIFERENCE));
-                            startActivity(intentExp);
+                            showExpenseConfirmationDialog(intent.getExtras().getFloat(LoggingService.SERVICE_REFIL_DIFERENCE), intent.hasExtra(LoggingService.SERVICE_REFIL_DIFERENCE));
                         }
                         break;
                     }
@@ -496,6 +497,51 @@ public class MyCarFragment extends Fragment {
         }
     };
 
+    private void showExpenseConfirmationDialog(final float valorTotal, final boolean hasDiference) {
+
+        new AlertDialog.Builder(getContext())
+                .setTitle("Confirmação.")
+                .setMessage("Parece que você abasteceu, você já cadastrou este abastecimento?")
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        handleExpenseRefil(true, valorTotal, hasDiference);
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        handleExpenseRefil(false, valorTotal, hasDiference);
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
+    }
+
+    private void handleExpenseRefil(final boolean hasAlreadyRegisteredExpense, final float valorTotal, final boolean hasRefilDiference) {
+        ExpensesDAO dao = new ExpensesDAO();
+        dao.findLast(new ExpensesDAO.OnOneExpensesReceivedListener() {
+            @Override
+            public void OnExpenseReceived(Expense expense) {
+                if (expense != null) {
+                    if (hasAlreadyRegisteredExpense)
+                        expense.setAmountOBDRefil(valorTotal);
+
+                    MilestoneDAO milestoneDAO = new MilestoneDAO();
+                    Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
+                    milestoneDAO.addOrUpdate(milestone);
+                    Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
+                    if(hasRefilDiference)
+                        intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
+                    startActivity(intentExp);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
     private void showMessage(String message) {
         Snackbar.make(nameText,message,Snackbar.LENGTH_LONG).show();
     }

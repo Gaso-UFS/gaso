@@ -72,7 +72,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:hint="Quantidade (L)" />
+                    android:hint="Quantidade (L)*" />
             </android.support.design.widget.TextInputLayout>
 
             <!-- Valor Label -->
@@ -86,7 +86,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
-                    android:hint="Valor Total" />
+                    android:hint="Valor Total*" />
             </android.support.design.widget.TextInputLayout>
 
             <!-- station Label -->
@@ -114,7 +114,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="date"
-                    android:hint="Data" />
+                    android:hint="Data*" />
             </android.support.design.widget.TextInputLayout>
 
             <!-- Date Label -->
@@ -128,7 +128,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="time"
-                    android:hint="Hora" />
+                    android:hint="Hora*" />
             </android.support.design.widget.TextInputLayout>
 
             <!-- Signup Button -->
