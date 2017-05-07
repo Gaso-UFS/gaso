@@ -30,6 +30,7 @@ public class Car {
     private float lastFuelLevel;
     private float totalDistance;
     private float lastDistanceRead;
+    private double totalFuelUsed;
 
     public String getModel() {
         return model;
@@ -85,5 +86,13 @@ public class Car {
 
     public void setLastDistanceRead(float lastDistanceRead) {
         this.lastDistanceRead = lastDistanceRead;
+    }
+
+    public double getTotalFuelUsed() {
+        return totalFuelUsed;
+    }
+
+    public void setTotalFuelUsed(double totalFuelUsed) {
+        this.totalFuelUsed = totalFuelUsed;
     }
 }

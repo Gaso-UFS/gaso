@@ -2,6 +2,10 @@ package com.ericmguimaraes.gaso.evaluation;
 
 import android.os.AsyncTask;
 
+import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
+import com.ericmguimaraes.gaso.evaluation.evaluations.OBDConsumptionEvaluation;
+import com.ericmguimaraes.gaso.evaluation.evaluators.FuelAmountEvaluator;
+import com.ericmguimaraes.gaso.evaluation.evaluators.OBDConsumptionEvaluator;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 
 import java.util.ArrayList;
@@ -21,8 +25,6 @@ public final class EvaluationHelper {
         EvaluationHelper.milestone = milestone;
         EvaluationHelper.listener = listener;
         new EvaluationHelperAsyncTask().execute();
-        // TODO: 03/05/17  initEvaluation
-
     }
 
     private static class EvaluationHelperAsyncTask extends AsyncTask<Void, Void , Void> {
@@ -33,11 +35,16 @@ public final class EvaluationHelper {
 
             FuelAmountEvaluator fuelAmountEvaluator = new FuelAmountEvaluator(milestone);
             Evaluation fuelAmountEvaluation = fuelAmountEvaluator.evaluate();
-            evaluations.add(fuelAmountEvaluation);
+            if(fuelAmountEvaluation!=null)
+                evaluations.add(fuelAmountEvaluation);
 
             OBDConsumptionEvaluator obdConsumptionEvaluator = new OBDConsumptionEvaluator(milestone);
-            Evaluation obdConsumptionEvaluation = obdConsumptionEvaluator.evaluate();
-            evaluations.add(obdConsumptionEvaluation);
+            OBDConsumptionEvaluation obdConsumptionEvaluation = (OBDConsumptionEvaluation) obdConsumptionEvaluator.evaluate();
+            if(obdConsumptionEvaluation!=null) {
+                evaluations.add(obdConsumptionEvaluation);
+                milestone.setConsumptionRateCar(obdConsumptionEvaluation.getConsumptionRateCar());
+                milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
+            }
 
             milestone.setEvaluations(evaluations);
             MilestoneDAO dao = new MilestoneDAO();

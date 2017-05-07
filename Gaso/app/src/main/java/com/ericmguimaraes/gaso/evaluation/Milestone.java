@@ -2,6 +2,7 @@ package com.ericmguimaraes.gaso.evaluation;
 
 import android.support.annotation.Nullable;
 
+import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
@@ -9,7 +10,6 @@ import com.ericmguimaraes.gaso.model.FuelSource;
 import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,6 +35,8 @@ public class Milestone {
     private Expense expense;
 
     private String carUid;
+    private double consumptionRateCar;
+    private double consumptionRateMilestone;
 
     public Milestone() {
     }
@@ -176,4 +178,19 @@ public class Milestone {
         }
     }
 
+    public void setConsumptionRateCar(double consumptionRateCar) {
+        this.consumptionRateCar = consumptionRateCar;
+    }
+
+    public void setConsumptionRateMilestone(double consumptionRateMilestone) {
+        this.consumptionRateMilestone = consumptionRateMilestone;
+    }
+
+    public double getConsumptionRateCar() {
+        return consumptionRateCar;
+    }
+
+    public double getConsumptionRateMilestone() {
+        return consumptionRateMilestone;
+    }
 }

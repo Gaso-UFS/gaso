@@ -1,4 +1,8 @@
-package com.ericmguimaraes.gaso.evaluation;
+package com.ericmguimaraes.gaso.evaluation.evaluators;
+
+import com.ericmguimaraes.gaso.evaluation.FeatureType;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 
 /**
  * Created by ericmguimaraes on 07/05/17.
