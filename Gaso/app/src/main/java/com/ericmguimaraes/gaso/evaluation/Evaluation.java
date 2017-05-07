@@ -1,16 +1,14 @@
 package com.ericmguimaraes.gaso.evaluation;
 
-import com.ericmguimaraes.gaso.model.Car;
-
 /**
  * Created by ericm on 18-Oct-16.
  */
 
-public class Evaluation {
+public class Evaluation<T> {
 
     private String uid;
 
-    private float rate;
+    private T rate;
 
     private String message;
 

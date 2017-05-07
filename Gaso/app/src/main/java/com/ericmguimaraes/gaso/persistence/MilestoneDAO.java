@@ -18,9 +18,13 @@
 
 package com.ericmguimaraes.gaso.persistence;
 
+import android.support.annotation.Nullable;
+
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.model.Expense;
+import com.ericmguimaraes.gaso.model.FuelSource;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,8 +35,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ericm on 2/27/2016.
@@ -84,18 +91,11 @@ public class MilestoneDAO {
     public void findLastMilestone(final OneMilestoneReceivedListener listener){
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    List<Milestone> list = new ArrayList<Milestone>();
-                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-                        list.add((Milestone) postSnapshot.getValue(Milestone.class));
-                    }
-                    // TODO: 16/04/17 melhorar captura do ultimo milestone
-                    if(list.size()>0)
-                        listener.onMilestoneReceived(list.get(list.size()-1));
-                    else
-                        listener.onMilestoneReceived(createNewMilestone(SessionSingleton.getInstance().currentCar.getLastFuelLevel()));
+                    Milestone m = dataSnapshot.getValue(Milestone.class);
+                    listener.onMilestoneReceived(m);
                 }
 
                 @Override
@@ -106,24 +106,32 @@ public class MilestoneDAO {
         }
     }
 
-    public void findLastMilestoneWithFuelSources(final OneMilestoneReceivedListener listener){
-        // TODO: 03/05/17  findLastMilestoneWithFuelSources
-
-    }
-
-    public Milestone createNewMilestone(float fuelLevel) {
-        Milestone milestone = new Milestone();
+    public Milestone createNewMilestone(final float amountOBDRefil, final float fuelLevel, @Nullable final Expense expense) {
+        final Milestone milestone = new Milestone();
         milestone.setCreationDate(new Date().getTime());
         milestone.setCombustiveConsumed(0);
         milestone.setFuzzyConsumption(new FuzzyConsumption());
         milestone.setDistanceRolled(0);
         milestone.setInitialFuelLevel(fuelLevel);
-        addOrUpdate(milestone);
+        milestone.setCar(SessionSingleton.getInstance().currentCar);
+        milestone.setExpense(expense);
+        findLastMilestone(new OneMilestoneReceivedListener() {
+            @Override
+            public void onMilestoneReceived(@Nullable Milestone lastmilestone) {
+                milestone.calculateFuelSource(amountOBDRefil, fuelLevel, lastmilestone, expense);
+                addOrUpdate(milestone);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // TODO: 07/05/17 ignore?
+            }
+        });
         return milestone;
     }
 
     public interface OneMilestoneReceivedListener {
-        void onMilestoneReceived(Milestone milestone);
+        void onMilestoneReceived(@Nullable Milestone milestone);
         void onCancelled(DatabaseError databaseError);
     }
 

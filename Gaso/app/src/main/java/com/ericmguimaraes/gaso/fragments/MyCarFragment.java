@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -302,7 +303,9 @@ public class MyCarFragment extends Fragment {
         final MilestoneDAO dao = new MilestoneDAO();
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
-            public void onMilestoneReceived(Milestone milestone) {
+            public void onMilestoneReceived(@Nullable Milestone milestone) {
+                if(milestone==null)
+                    milestone = dao.createNewMilestone(0, 0,null);
                 if (milestone.getFuzzyConsumption() == null)
                     milestone.setFuzzyConsumption(new FuzzyConsumption());
                 milestone.getFuzzyConsumption().incrementComsuption(consumptionName);

@@ -1,10 +1,15 @@
 package com.ericmguimaraes.gaso.evaluation;
 
+import android.support.annotation.Nullable;
+
 import com.ericmguimaraes.gaso.model.Car;
+import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.model.FuelSource;
 import com.google.firebase.database.Exclude;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -21,11 +26,18 @@ public class Milestone {
     private List<FuelSource> fuelSources;
     private float initialFuelLevel;
     private List<Evaluation> evaluations;
+    private String expenseUid;
 
     @Exclude
     private Car car;
 
+    @Exclude
+    private Expense expense;
+
     private String carUid;
+
+    public Milestone() {
+    }
 
     public String getUid() {
         return uid;
@@ -89,6 +101,7 @@ public class Milestone {
 
     public void setCar(Car car) {
         this.car = car;
+        this.carUid = car.getid();
     }
 
     public String getCarUid() {
@@ -106,4 +119,61 @@ public class Milestone {
     public void setEvaluations(List<Evaluation> evaluations) {
         this.evaluations = evaluations;
     }
+
+    public String getExpenseUid() {
+        return expenseUid;
+    }
+
+    public void setExpenseUid(String expenseUid) {
+        this.expenseUid = expenseUid;
+    }
+
+    public Expense getExpense() {
+        return expense;
+    }
+
+    public void setExpense(Expense expense) {
+        this.expense = expense;
+        this.expenseUid = expense.getUid();
+    }
+
+    public void calculateFuelSource(float amountOBDRefil, float fuelLevel, @Nullable Milestone before, @Nullable Expense expense) {
+        List<FuelSource> fuelSources = new ArrayList<>();
+        if(before==null || before.getFuelSources()==null) {
+            if(expense==null)
+                fuelSources.add(new FuelSource("","Outros",fuelLevel));
+            else {
+                fuelSources.add(new FuelSource("","Outros",fuelLevel-expense.getAmountOBDRefil()));
+                fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
+            }
+        } else {
+            List<FuelSource> fuelSourcesBefore = before.getFuelSources();
+            float beforeFuelLevel = before.getInitialFuelLevel();
+            List<Double> percentages = new ArrayList<>();
+            // prepara as porcentagens de cada combustivel no milestone anterior
+            for(FuelSource f : fuelSourcesBefore) {
+                percentages.add(f.getValue() / beforeFuelLevel);
+            }
+            // adiciona os novos valores de combustiveis baseado na procentagem e quantidade de restante
+            for(int i = 0; i<percentages.size(); i++) {
+                FuelSource f = fuelSourcesBefore.get(i);
+                fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (fuelLevel-amountOBDRefil)));
+            }
+            //adiciona o refil
+            if (expense==null) {
+                boolean found = false;
+                for(FuelSource f : fuelSources) {
+                    if (f.getStationId().equals("")) {
+                        f.setValue(f.getValue() + amountOBDRefil);
+                        found = true;
+                    }
+                }
+                if(!found)
+                    fuelSources.add(new FuelSource("","Outros",amountOBDRefil));
+            } else {
+                fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
+            }
+        }
+    }
+
 }

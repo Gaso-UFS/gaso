@@ -51,12 +51,10 @@ import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
-import com.google.android.gms.cast.framework.Session;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.firebase.database.DatabaseError;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -271,12 +269,12 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void saveOnDatabase() {
+        Expense e = saveExpense();
         if(obdRefil) {
             MilestoneDAO dao = new MilestoneDAO();
-            dao.createNewMilestone(SessionSingleton.getInstance().currentCar.getLastFuelLevel());
+            dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
             EvaluationHelper.initEvaluation();
         }
-        saveExpense();
         sucessEventUI();
     }
 
@@ -288,7 +286,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         onBackPressed();
     }
 
-    private void saveExpense() {
+    private Expense saveExpense() {
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
         e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
@@ -304,6 +302,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         e.setAmountOBDRefil(amountOBDRefil);
         dao.add(e);
         saveCarLastFluel();
+        return e;
     }
 
     private void saveCarLastFluel() {
