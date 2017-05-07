@@ -39,6 +39,7 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.Station;
@@ -272,8 +273,8 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         Expense e = saveExpense();
         if(obdRefil) {
             MilestoneDAO dao = new MilestoneDAO();
-            dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
-            EvaluationHelper.initEvaluation();
+            Milestone milestone = dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
+            EvaluationHelper.initEvaluation(milestone);
         }
         sucessEventUI();
     }

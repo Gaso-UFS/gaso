@@ -137,13 +137,13 @@ public class Milestone {
         this.expenseUid = expense.getUid();
     }
 
-    public void calculateFuelSource(float amountOBDRefil, float fuelLevel, @Nullable Milestone before, @Nullable Expense expense) {
+    public void calculateFuelSource(float amountOBDRefil, @Nullable Milestone before) {
         List<FuelSource> fuelSources = new ArrayList<>();
         if(before==null || before.getFuelSources()==null) {
             if(expense==null)
-                fuelSources.add(new FuelSource("","Outros",fuelLevel));
+                fuelSources.add(new FuelSource("","Outros",initialFuelLevel));
             else {
-                fuelSources.add(new FuelSource("","Outros",fuelLevel-expense.getAmountOBDRefil()));
+                fuelSources.add(new FuelSource("","Outros",initialFuelLevel-expense.getAmountOBDRefil()));
                 fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
             }
         } else {
@@ -157,7 +157,7 @@ public class Milestone {
             // adiciona os novos valores de combustiveis baseado na procentagem e quantidade de restante
             for(int i = 0; i<percentages.size(); i++) {
                 FuelSource f = fuelSourcesBefore.get(i);
-                fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (fuelLevel-amountOBDRefil)));
+                fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (initialFuelLevel-amountOBDRefil)));
             }
             //adiciona o refil
             if (expense==null) {
