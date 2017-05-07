@@ -14,4 +14,5 @@
     <color name="vermelho_alto_consumo">#e60000</color>
     <color name="verde_baixo_consumo">#00e600</color>
     <color name="sem_consumo">#a6a6a6</color>
+    <color name="light_gray">#22000000</color>
 </resources>

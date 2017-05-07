@@ -24,7 +24,6 @@ import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Expense;
-import com.ericmguimaraes.gaso.model.FuelSource;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,11 +34,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by ericm on 2/27/2016.
@@ -130,13 +126,34 @@ public class MilestoneDAO {
         return milestone;
     }
 
+    public void findAll(final MilestonesListReceivedListener listener){
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    List<Milestone> list = new ArrayList<Milestone>();
+                    for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
+                        list.add((Milestone) postSnapshot.getValue(Milestone.class));
+                    }
+                    listener.onMilestonesReceived(list);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    listener.onCancelled(databaseError);
+                }
+            });
+        }
+    }
+
     public interface OneMilestoneReceivedListener {
         void onMilestoneReceived(@Nullable Milestone milestone);
         void onCancelled(DatabaseError databaseError);
     }
 
     public interface MilestonesListReceivedListener {
-        void onMilestoneReceived(List<Milestone> milestones);
+        void onMilestonesReceived(List<Milestone> milestones);
         void onCancelled(DatabaseError databaseError);
     }
 

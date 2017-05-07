@@ -2,8 +2,8 @@ package com.ericmguimaraes.gaso.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,8 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent;
 import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
+import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
+import com.google.firebase.database.DatabaseError;
 
 import java.util.List;
 
@@ -58,9 +61,22 @@ public class EvaluationFragment extends Fragment {
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
+            final RecyclerView recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new MyEvaluationRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            final MilestoneDAO dao = new MilestoneDAO();
+            dao.findAll(new MilestoneDAO.MilestonesListReceivedListener() {
+                @Override
+                public void onMilestonesReceived(@Nullable List<Milestone> milestones) {
+                    if (milestones != null)
+                        recyclerView.setAdapter(new MyEvaluationRecyclerViewAdapter(DummyContent.ITEMS, mListener, milestones));
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         }
         return view;
     }
