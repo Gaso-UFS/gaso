@@ -9,6 +9,7 @@ import com.ericmguimaraes.gaso.evaluation.evaluators.OBDConsumptionEvaluator;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -31,17 +32,17 @@ public final class EvaluationHelper {
 
         @Override
         protected Void doInBackground(Void... params) {
-            List<Evaluation> evaluations = new ArrayList<>();
+            HashMap<FeatureType, Evaluation> evaluations = new HashMap<FeatureType, Evaluation>();
 
             FuelAmountEvaluator fuelAmountEvaluator = new FuelAmountEvaluator(milestone);
             Evaluation fuelAmountEvaluation = fuelAmountEvaluator.evaluate();
             if(fuelAmountEvaluation!=null)
-                evaluations.add(fuelAmountEvaluation);
+                evaluations.put(fuelAmountEvaluation.getFeatureType(), fuelAmountEvaluation);
 
             OBDConsumptionEvaluator obdConsumptionEvaluator = new OBDConsumptionEvaluator(milestone);
             OBDConsumptionEvaluation obdConsumptionEvaluation = (OBDConsumptionEvaluation) obdConsumptionEvaluator.evaluate();
             if(obdConsumptionEvaluation!=null) {
-                evaluations.add(obdConsumptionEvaluation);
+                evaluations.put(obdConsumptionEvaluation.getFeatureType(), obdConsumptionEvaluation);
                 milestone.setConsumptionRateCar(obdConsumptionEvaluation.getConsumptionRateCar());
                 milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
             }

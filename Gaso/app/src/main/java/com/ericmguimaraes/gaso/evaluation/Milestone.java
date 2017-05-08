@@ -10,6 +10,7 @@ import com.ericmguimaraes.gaso.model.FuelSource;
 import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class Milestone {
     private FuzzyConsumption fuzzyConsumption;
     private List<FuelSource> fuelSources;
     private float initialFuelLevel;
-    private List<Evaluation> evaluations;
+    private HashMap<FeatureType, Evaluation> evaluations;
     private String expenseUid;
 
     @Exclude
@@ -37,6 +38,9 @@ public class Milestone {
     private String carUid;
     private double consumptionRateCar;
     private double consumptionRateMilestone;
+    private String carModel;
+    private double expenseAmount;
+    private double expenseAmountOBDRefil;
 
     public Milestone() {
     }
@@ -104,6 +108,7 @@ public class Milestone {
     public void setCar(Car car) {
         this.car = car;
         this.carUid = car.getid();
+        this.carModel = car.getModel();
     }
 
     public String getCarUid() {
@@ -114,11 +119,11 @@ public class Milestone {
         this.carUid = carUid;
     }
 
-    public List<Evaluation> getEvaluations() {
+    public HashMap<FeatureType, Evaluation> getEvaluations() {
         return evaluations;
     }
 
-    public void setEvaluations(List<Evaluation> evaluations) {
+    public void setEvaluations(HashMap<FeatureType, Evaluation> evaluations) {
         this.evaluations = evaluations;
     }
 
@@ -136,7 +141,11 @@ public class Milestone {
 
     public void setExpense(Expense expense) {
         this.expense = expense;
-        this.expenseUid = expense.getUid();
+        if(expense!=null) {
+            this.expenseUid = expense.getUid();
+            this.expenseAmount = expense.getAmount();
+            this.expenseAmountOBDRefil = expense.getAmountOBDRefil();
+        }
     }
 
     public void calculateFuelSource(float amountOBDRefil, @Nullable Milestone before) {
@@ -178,6 +187,14 @@ public class Milestone {
         }
     }
 
+    public String getCarModel() {
+        return carModel;
+    }
+
+    public void setCarModel(String carModel) {
+        this.carModel = carModel;
+    }
+
     public void setConsumptionRateCar(double consumptionRateCar) {
         this.consumptionRateCar = consumptionRateCar;
     }
@@ -192,5 +209,21 @@ public class Milestone {
 
     public double getConsumptionRateMilestone() {
         return consumptionRateMilestone;
+    }
+
+    public double getExpenseAmount() {
+        return expenseAmount;
+    }
+
+    public void setExpenseAmount(double expenseAmount) {
+        this.expenseAmount = expenseAmount;
+    }
+
+    public double getExpenseAmountOBDRefil() {
+        return expenseAmountOBDRefil;
+    }
+
+    public void setExpenseAmountOBDRefil(double expenseAmountOBDRefil) {
+        this.expenseAmountOBDRefil = expenseAmountOBDRefil;
     }
 }

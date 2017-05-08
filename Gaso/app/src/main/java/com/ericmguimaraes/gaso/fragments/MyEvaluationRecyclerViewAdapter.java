@@ -11,29 +11,24 @@ import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.adapters.TextAdapter;
+import com.ericmguimaraes.gaso.evaluation.FeatureType;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
-import com.ericmguimaraes.gaso.fragments.EvaluationFragment.OnListFragmentInteractionListener;
-import com.ericmguimaraes.gaso.fragments.dummy.DummyContent.DummyItem;
+import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 import com.ericmguimaraes.gaso.model.FuelSource;
+import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.SimpleFormatter;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
 public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEvaluationRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
-    private final OnListFragmentInteractionListener mListener;
-    private final List<Milestone> mMilestones;
+    private final List<Milestone> mValues;
 
-    public MyEvaluationRecyclerViewAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener, List<Milestone> milestones) {
-        mValues = items;
-        mListener = listener;
-        mMilestones = milestones;
+    public MyEvaluationRecyclerViewAdapter(List<Milestone> milestones) {
+        mValues = milestones;
     }
 
     @Override
@@ -45,27 +40,54 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
-        ArrayList<FuelSource> fuelSources = new ArrayList<FuelSource>();
-        fuelSources.add(new FuelSource("1", "posto 1: 20L", 20.0));
-        fuelSources.add(new FuelSource("2", "posto 2: 10L", 20.0));
-        fuelSources.add(new FuelSource("3", "posto 3: 5L", 20.0));
-        fuelSources.add(new FuelSource("4", "posto 4: 1L", 20.0));
-        holder.recyclerView.setLayoutManager(new LinearLayoutManager(holder.recyclerView.getContext(), LinearLayoutManager.HORIZONTAL, true));
-        holder.recyclerView.setAdapter(new TextAdapter(fuelSources));
+        Milestone m = mValues.get(position);
+        holder.mItem = m;
+        holder.carNameText.setText(m.getCarModel());
+        holder.dataText.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(m.getCreationDate())));
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+        if(m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT)) {
+            holder.abastecidoUsuario.setText("Usuário : " + m.getExpenseAmount() + "L");
+            holder.abastecidoOBD.setText("OBDII: " + m.getExpenseAmountOBDRefil() + "L");
+            holder.abastecidoDescricao.setText(m.getEvaluations().get(FeatureType.OBD_FUEL_AMOUNT).getMessage());
+        } else
+            holder.abastecimentoSection.setVisibility(View.GONE);
+
+        holder.recyclerView.setLayoutManager(new LinearLayoutManager(holder.recyclerView.getContext(), LinearLayoutManager.HORIZONTAL, true));
+        if(m.getFuelSources().size()>0)
+            holder.recyclerView.setAdapter(new TextAdapter(m.getFuelSources()));
+        else
+            holder.origemSection.setVisibility(View.GONE);
+
+        if(m.getDistanceRolled()!=0 && m.getCombustiveConsumed()!=0){
+            holder.consumido.setText(m.getCombustiveConsumed()+"L");
+            holder.percorrido.setText(m.getDistanceRolled()+"");
+        } else
+            holder.perfilConsumoSection.setVisibility(View.GONE);
+
+        if (m.getFuzzyConsumption()!=null) {
+            FuzzyConsumption f = m.getFuzzyConsumption();
+            holder.muitoBaixoConsumo.setText(f.getPercentage(f.getVerylow())+"%");
+            holder.baixoConsumo.setText(f.getPercentage(f.getLow())+"%");
+            holder.medioConsumo.setText(f.getPercentage(f.getAverage())+"%");
+            holder.altoConsumo.setText(f.getPercentage(f.getHigh())+"%");
+            holder.muitoAltoConsumo.setText(f.getPercentage(f.getVeryhigh())+"%");
+        } else
+            holder.perfilConsumoSection.setVisibility(View.GONE);
+
+        if (m.getEvaluations().containsKey(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
+            Evaluation e = m.getEvaluations().get(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE);
+            if(e.getRate()>0)
+                holder.altaAvaliacao.setAlpha(1f);
+            else if (e.getRate()<0)
+                holder.baixaAvaliacao.setAlpha(1f);
+            else
+                holder.igualAvaliacao.setAlpha(1f);
+
+            holder.avaliacaoGeral.setText("Geral: "+m.getConsumptionRateCar()+"KM/L");
+            holder.avaliacaoAtual.setText("Atual: "+m.getConsumptionRateMilestone()+"KM/L");
+            holder.avaliacaoDescricao.setText(e.getMessage());
+        } else
+            holder.avaliacaoSection.setVisibility(View.GONE);
     }
 
     @Override
@@ -75,9 +97,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public DummyItem mItem;
+        public Milestone mItem;
         public RecyclerView recyclerView;
 
         // sections
@@ -93,6 +113,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         public final TextView dataText;
         public final TextView abastecidoUsuario;
         public final TextView abastecidoOBD;
+        public final TextView abastecidoDescricao;
         public final TextView consumido;
         public final TextView percorrido;
         public final TextView muitoBaixoConsumo;
@@ -110,8 +131,6 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
             recyclerView = (RecyclerView) view.findViewById(R.id.stations_recycler_view);
 
             // sections
@@ -127,6 +146,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
             dataText = (TextView) view.findViewById(R.id.dataText);
             abastecidoUsuario = (TextView) view.findViewById(R.id.abastecidoUsuario);
             abastecidoOBD = (TextView) view.findViewById(R.id.abastecidoOBD);
+            abastecidoDescricao = (TextView) view.findViewById(R.id.abastecidoDescricao);
             consumido = (TextView) view.findViewById(R.id.consumido);
             percorrido = (TextView) view.findViewById(R.id.percorrido);
             muitoBaixoConsumo = (TextView) view.findViewById(R.id.muitoBaixoConsumo);
@@ -142,9 +162,5 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
             altaAvaliacao = (ImageView) view.findViewById(R.id.altaAvaliacao);
         }
 
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
-        }
     }
 }

@@ -10,6 +10,7 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.model.FuelSource;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by adrianodias on 5/7/17.
@@ -17,9 +18,9 @@ import java.util.ArrayList;
 
 public class TextAdapter extends RecyclerView.Adapter<TextAdapter.ViewHolder> {
     //All methods in this adapter are required for a bare minimum recyclerview adapter
-    private ArrayList<FuelSource> itemList;
+    private List<FuelSource> itemList;
     // Constructor of the class
-    public TextAdapter(ArrayList<FuelSource> itemList) {
+    public TextAdapter(List<FuelSource> itemList) {
         this.itemList = itemList;
     }
 

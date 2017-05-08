@@ -99,4 +99,12 @@ public class FuzzyConsumption implements Serializable {
         return getNamesOfComsumptions().get(indexOfMax);
     }
 
+    public int getTotal() {
+        return verylow+low+average+high+veryhigh;
+    }
+
+    public float getPercentage(int value){
+        return (value/getTotal())*100;
+    }
+
 }
