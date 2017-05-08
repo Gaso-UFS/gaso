@@ -6,8 +6,42 @@ package com.ericmguimaraes.gaso.model;
 
 public class FuelSource {
 
-    int stationId;
+    String stationId;
 
-    float value;
+    String stationName;
 
+    double value;
+
+    public FuelSource() {
+    }
+
+    public FuelSource(String stationId, String stationName, double value) {
+        this.stationId = stationId;
+        this.stationName = stationName;
+        this.value = value;
+    }
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
+    }
 }

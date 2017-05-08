@@ -98,7 +98,7 @@ public class ExpensesListAdapter extends RecyclerView.Adapter<ExpensesListAdapte
                         @Override
                         public void onClick(View view) {
                             ExpensesDAO dao = new ExpensesDAO();
-                            dao.add(lastRemoved);
+                            dao.addOrUpdate(lastRemoved);
                             expenseList.add(posistion, lastRemoved);
                             notifyItemInserted(posistion);
                         }

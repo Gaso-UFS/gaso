@@ -73,16 +73,13 @@ public class ObdReader {
         mObdCommands.add(new SpeedCommand());
 
         // engine
-        mObdCommands.add(new RPMCommand());
+
         mObdCommands.add(new AbsoluteLoadCommand());
         mObdCommands.add(new LoadCommand());
         mObdCommands.add(new MassAirFlowCommand());
         mObdCommands.add(new OilTempCommand());
         mObdCommands.add(new RuntimeCommand());
         mObdCommands.add(new ThrottlePositionCommand());
-
-        mObdCommands.add(new DistanceSinceCCCommand());
-        mObdCommands.add(new FuelLevelCommand());
 
         // fuel
         mObdCommands.add(new AirFuelRatioCommand());

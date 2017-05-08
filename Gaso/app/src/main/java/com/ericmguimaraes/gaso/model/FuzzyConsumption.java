@@ -8,7 +8,7 @@ import java.util.List;
  * Created by adrianodias on 4/29/17.
  */
 
-public class Consumption implements Serializable {
+public class FuzzyConsumption implements Serializable {
 
     private int verylow = 0;
     private int low = 0;
@@ -97,6 +97,14 @@ public class Consumption implements Serializable {
             }
         }
         return getNamesOfComsumptions().get(indexOfMax);
+    }
+
+    public int getTotal() {
+        return verylow+low+average+high+veryhigh;
+    }
+
+    public float getPercentage(int value){
+        return (value/getTotal())*100;
     }
 
 }
