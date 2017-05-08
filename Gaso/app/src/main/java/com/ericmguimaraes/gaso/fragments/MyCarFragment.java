@@ -138,7 +138,6 @@ public class MyCarFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
         }
-
     }
 
     @Override
@@ -499,7 +498,8 @@ public class MyCarFragment extends Fragment {
 
     private void showExpenseConfirmationDialog(final float valorTotal, final boolean hasDiference) {
 
-        new AlertDialog.Builder(getContext())
+        if(getContext()!=null)
+            new AlertDialog.Builder(getContext())
                 .setTitle("Confirmação.")
                 .setMessage("Parece que você abasteceu, você já cadastrou este abastecimento?")
 
@@ -519,25 +519,24 @@ public class MyCarFragment extends Fragment {
     }
 
     private void handleExpenseRefil(final boolean hasAlreadyRegisteredExpense, final float valorTotal, final boolean hasRefilDiference) {
-        ExpensesDAO dao = new ExpensesDAO();
+        final ExpensesDAO dao = new ExpensesDAO();
         dao.findLast(new ExpensesDAO.OnOneExpensesReceivedListener() {
             @Override
             public void OnExpenseReceived(Expense expense) {
-                MilestoneDAO milestoneDAO = new MilestoneDAO();
-                Milestone milestone;
-                if (expense != null) {
-                    if (hasAlreadyRegisteredExpense)
-                        expense.setAmountOBDRefil(valorTotal);
-                    milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
-                } else {
-                    milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), null);
-                }
-                milestoneDAO.addOrUpdate(milestone);
-                Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
-                if(hasRefilDiference)
-                    intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
-                startActivity(intentExp);
 
+                if (expense != null && hasAlreadyRegisteredExpense) {
+                    expense.setAmountOBDRefil(valorTotal);
+                    dao.addOrUpdate(expense);
+                }
+                MilestoneDAO milestoneDAO = new MilestoneDAO();
+                Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
+                milestoneDAO.addOrUpdate(milestone);
+                if (!hasAlreadyRegisteredExpense) {
+                    Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
+                    if(hasRefilDiference)
+                        intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
+                    startActivity(intentExp);
+                }
             }
 
             @Override

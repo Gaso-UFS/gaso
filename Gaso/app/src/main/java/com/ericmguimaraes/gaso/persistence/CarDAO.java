@@ -18,8 +18,6 @@
 
 package com.ericmguimaraes.gaso.persistence;
 
-import android.content.Context;
-
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.model.Car;
 import com.google.firebase.auth.FirebaseAuth;
@@ -110,7 +108,9 @@ public class CarDAO {
                     listener.onCancelled(databaseError);
                 }
             });
-        }
+        } else
+            listener.onCancelled(null);
+
     }
 
     public interface OneCarReceivedListener {

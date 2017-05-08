@@ -27,6 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ericm on 2/28/2016.
@@ -47,23 +49,27 @@ public class ExpensesDAO {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
-    public void add(Expense expense){
+    public void addOrUpdate(Expense expense){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            String key = mDatabase.child(Constants.FIREBASE_EXPENSES).child(user.getUid()).push().getKey();
-            expense.setUid(key);
+            String key;
+            if(expense.getUid()==null || expense.getUid().isEmpty()) {
+                key = mDatabase.child(Constants.FIREBASE_EXPENSES).child(user.getUid()).push().getKey();
+                expense.setUid(key);
+            }
+
             if(expense.getCar()!=null)
                 expense.setCarUid(expense.getCar().getid());
-            expense.setCar(null);
+//            expense.setCar(null);
             if(expense.getStation()!=null)
                 expense.setStationName(expense.getStationName());
             expense.setStation(null);
-            mDatabase.child(Constants.FIREBASE_EXPENSES).child(user.getUid()).child(key).setValue(expense);
+            mDatabase.child(Constants.FIREBASE_EXPENSES).child(user.getUid()).child(expense.getUid()).setValue(expense);
             if(expense.getDate()!=0) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(expense.getDate());
                 String monthYear = calendar.get(Calendar.MONTH)+":"+calendar.get(Calendar.YEAR);
-                mDatabase.child(Constants.FIREBASE_EXPENSES_MONTH).child(user.getUid()).child(monthYear).child(key).setValue(true);
+                mDatabase.child(Constants.FIREBASE_EXPENSES_MONTH).child(user.getUid()).child(monthYear).child(expense.getUid()).setValue(true);
             }
         }
     }
@@ -166,9 +172,13 @@ public class ExpensesDAO {
                     limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    final Expense e = dataSnapshot.getValue(Expense.class);
+
+                    GenericTypeIndicator<Map<String,Expense>> indicator = new GenericTypeIndicator<Map<String, Expense>>() {};
+                    Map<String, Expense> map = dataSnapshot.getValue(indicator);
+                    final Expense e = map.get(map.keySet().iterator().next());
+
                     CarDAO dao = new CarDAO();
-                    if(e!=null)
+                    if(e!=null) {
                         dao.findCarByID(e.getCarUid(), new CarDAO.OneCarReceivedListener() {
                             @Override
                             public void onCarReceived(Car car) {
@@ -181,8 +191,9 @@ public class ExpensesDAO {
                                 listener.onCancelled(databaseError);
                             }
                         });
-                    else
+                    } else {
                         listener.onCancelled(null);
+                    }
                 }
 
                 @Override

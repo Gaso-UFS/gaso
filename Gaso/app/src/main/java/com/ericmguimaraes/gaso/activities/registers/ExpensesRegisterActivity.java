@@ -330,7 +330,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         e.setStation(stationSelected);
         e.setCar(SessionSingleton.getInstance().currentCar);
         e.setAmountOBDRefil(amountOBDRefil);
-        dao.add(e);
+        dao.addOrUpdate(e);
         saveCarLastFluel();
         return e;
     }

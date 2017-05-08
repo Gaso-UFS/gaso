@@ -4,12 +4,11 @@ import android.support.annotation.Nullable;
 
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
-import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.model.FuelSource;
+import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -144,7 +143,8 @@ public class Milestone {
                 fuelSources.add(new FuelSource("","Outros",initialFuelLevel));
             else {
                 fuelSources.add(new FuelSource("","Outros",initialFuelLevel-expense.getAmountOBDRefil()));
-                fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
+                if (expense.getStation() != null)
+                    fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
             }
         } else {
             List<FuelSource> fuelSourcesBefore = before.getFuelSources();
