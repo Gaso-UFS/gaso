@@ -10,6 +10,7 @@ import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
