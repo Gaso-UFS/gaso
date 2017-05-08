@@ -32,6 +32,8 @@ public class ObdLogGroup implements Serializable {
     private List<ObdLog> logs;
 
     private long timestamp;
+    private double latitude;
+    private double longitude;
 
     public List<ObdLog> getLogs() {
         return logs;
@@ -61,5 +63,13 @@ public class ObdLogGroup implements Serializable {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

@@ -181,6 +181,11 @@ public class LoggingThread implements Runnable,
         ObdLogGroup obdLogGroup = new ObdLogGroup();
         obdLogGroup.setLogs(obdValues);
 
+        if(mLastLocation!=null){
+            obdLogGroup.setLatitude(mLastLocation.getLatitude());
+            obdLogGroup.setLongitude(mLastLocation.getLongitude());
+        }
+
         LoggingService service = mLoggingServiceReference.get();
 
         if (service == null) return;
