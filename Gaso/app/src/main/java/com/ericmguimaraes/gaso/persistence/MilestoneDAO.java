@@ -19,6 +19,7 @@
 package com.ericmguimaraes.gaso.persistence;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
@@ -31,11 +32,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ericm on 2/27/2016.
@@ -90,7 +93,10 @@ public class MilestoneDAO {
             mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Milestone m = dataSnapshot.getValue(Milestone.class);
+                    GenericTypeIndicator<Map<String,Milestone>> indicator = new GenericTypeIndicator<Map<String, Milestone>>() {};
+                    Map<String, Milestone> map = dataSnapshot.getValue(indicator);
+                    final Milestone m = map.get(map.keySet().iterator().next());
+                    Log.e("DataSnapshot", m.toString());
                     listener.onMilestoneReceived(m);
                 }
 
