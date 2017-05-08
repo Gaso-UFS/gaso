@@ -19,11 +19,13 @@
 package com.ericmguimaraes.gaso.activities.registers;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -39,6 +41,7 @@ import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.evaluation.EvaluationHelper;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
@@ -47,7 +50,6 @@ import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.util.DatePickerFragment;
-import com.ericmguimaraes.gaso.evaluation.EvaluationHelper;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
@@ -125,14 +127,17 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputStation.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
+                if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
                     // TODO: 02/05/17 criar dialogo para confirmar cadastro com dados nulos
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 } else {
-                    saveOnDatabase();
+                    if (inputStation.getText().length() == 0)
+                        showSpentConfirmationDialog();
+                    else
+                        saveOnDatabase();
                 }
             }
         });
@@ -180,6 +185,25 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             amountOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
             inputAmount.setText(String.format("%.2f", getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
         }
+    }
+
+    private void showSpentConfirmationDialog() {
+
+        new AlertDialog.Builder(this)
+                .setTitle("Confirmação.")
+                .setMessage("Você gostaria de confirmar o abastecimento sem informar o posto?")
+                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveOnDatabase();
+                    }
+                })
+                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 
     public void setSpinner(){
@@ -306,7 +330,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         e.setStation(stationSelected);
         e.setCar(SessionSingleton.getInstance().currentCar);
         e.setAmountOBDRefil(amountOBDRefil);
-        dao.add(e);
+        dao.addOrUpdate(e);
         saveCarLastFluel();
         return e;
     }
