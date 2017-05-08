@@ -106,9 +106,11 @@ public class Milestone {
     }
 
     public void setCar(Car car) {
-        this.car = car;
-        this.carUid = car.getid();
-        this.carModel = car.getModel();
+        if(car!=null) {
+            this.car = car;
+            this.carUid = car.getid();
+            this.carModel = car.getModel();
+        }
     }
 
     public String getCarUid() {

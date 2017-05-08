@@ -74,7 +74,10 @@ public class Expense {
     }
 
     public void setStation(Station station) {
-        this.station = station;
+        if(station!=null) {
+            this.station = station;
+            this.stationUid = station.getId();
+        }
     }
 
     public int getType() {
@@ -90,8 +93,10 @@ public class Expense {
     }
 
     public void setCar(Car car) {
-        this.car = car;
-        this.carUid = car.getid();
+        if(car!=null) {
+            this.car = car;
+            this.carUid = car.getid();
+        }
     }
 
     public String getUid() {
