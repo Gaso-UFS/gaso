@@ -174,7 +174,7 @@ public class LoggingService extends Service {
 
         Log.d(TAG, "onDestroy");
 
-        if (mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient!=null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
 

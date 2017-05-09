@@ -45,7 +45,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         holder.carNameText.setText(m.getCarModel());
         holder.dataText.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(m.getCreationDate())));
 
-        if(m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT)) {
+        if(m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT)) {
             holder.abastecidoUsuario.setText("Usuário : " + m.getExpenseAmount() + "L");
             holder.abastecidoOBD.setText("OBDII: " + m.getExpenseAmountOBDRefil() + "L");
             holder.abastecidoDescricao.setText(m.getEvaluations().get(FeatureType.OBD_FUEL_AMOUNT).getMessage());
@@ -53,7 +53,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
             holder.abastecimentoSection.setVisibility(View.GONE);
 
         holder.recyclerView.setLayoutManager(new LinearLayoutManager(holder.recyclerView.getContext(), LinearLayoutManager.HORIZONTAL, true));
-        if(m.getFuelSources().size()>0)
+        if(m.getFuelSources()!=null && m.getFuelSources().size()>0)
             holder.recyclerView.setAdapter(new TextAdapter(m.getFuelSources()));
         else
             holder.origemSection.setVisibility(View.GONE);
@@ -74,7 +74,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         } else
             holder.perfilConsumoSection.setVisibility(View.GONE);
 
-        if (m.getEvaluations().containsKey(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
+        if (m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
             Evaluation e = m.getEvaluations().get(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE);
             if(e.getRate()>0)
                 holder.altaAvaliacao.setAlpha(1f);

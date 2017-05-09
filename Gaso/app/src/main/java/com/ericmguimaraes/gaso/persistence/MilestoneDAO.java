@@ -95,9 +95,15 @@ public class MilestoneDAO {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     GenericTypeIndicator<Map<String,Milestone>> indicator = new GenericTypeIndicator<Map<String, Milestone>>() {};
                     Map<String, Milestone> map = dataSnapshot.getValue(indicator);
-                    final Milestone m = map.get(map.keySet().iterator().next());
-                    Log.e("DataSnapshot", m.toString());
-                    listener.onMilestoneReceived(m);
+                    if (map != null) {
+                        final Milestone m = map.get(map.keySet().iterator().next());
+                        Log.e("DataSnapshot", m.toString());
+                        listener.onMilestoneReceived(m);
+                    } else {
+                        listener.onMilestoneReceived(null);
+                    }
+
+
                 }
 
                 @Override

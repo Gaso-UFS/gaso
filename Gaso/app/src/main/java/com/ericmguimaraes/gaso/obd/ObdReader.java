@@ -45,7 +45,7 @@ import java.util.List;
 
 public class ObdReader {
     private static final String TAG = ObdReader.class.getSimpleName();
-    private static final int MAX_COUNT_TO_TRY_AGAIN = 15;
+    private static final int MAX_COUNT_TO_TRY_AGAIN = 20;
     private final BluetoothSocket mBtSocket;
     private List<ObdCommand> mObdCommands = new ArrayList<>();
     private List<ObdCommand> setupObdCommands = new ArrayList<>();
@@ -71,7 +71,7 @@ public class ObdReader {
 
         // speed
         mObdCommands.add(new SpeedCommand());
-
+        mObdCommands.add(new RPMCommand());
         // engine
 
         mObdCommands.add(new AbsoluteLoadCommand());
@@ -178,7 +178,7 @@ public class ObdReader {
                     if(isLogOkay(obdLog))
                         toSucessfullCommands.add(command);
                 } catch (com.github.pires.obd.exceptions.UnsupportedCommandException e) {
-                    toDeletePermanentlyCommands.add(command);
+                    //toDeletePermanentlyCommands.add(command);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
