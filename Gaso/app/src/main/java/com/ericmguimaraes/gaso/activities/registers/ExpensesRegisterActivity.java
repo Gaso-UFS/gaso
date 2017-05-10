@@ -127,14 +127,14 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
+                if (typeSelected==-1 || inputAmount.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
                     // TODO: 02/05/17 criar dialogo para confirmar cadastro com dados nulos
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 } else {
-                    if (inputStation.getText().length() == 0)
+                    if (inputStation.getText().length() == 0 || inputTotal.getText().length() == 0)
                         showSpentConfirmationDialog();
                     else
                         saveOnDatabase();
@@ -191,7 +191,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         new AlertDialog.Builder(this)
                 .setTitle("Confirmação.")
-                .setMessage("Você gostaria de confirmar o abastecimento sem informar o posto?")
+                .setMessage("Você gostaria de confirmar o abastecimento sem informar todos os dados?")
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         saveOnDatabase();
