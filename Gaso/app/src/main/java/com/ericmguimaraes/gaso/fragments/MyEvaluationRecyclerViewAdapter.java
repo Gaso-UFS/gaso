@@ -66,11 +66,11 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
 
         if (m.getFuzzyConsumption()!=null) {
             FuzzyConsumption f = m.getFuzzyConsumption();
-            holder.muitoBaixoConsumo.setText(f.getPercentage(f.getVerylow())+"%");
-            holder.baixoConsumo.setText(f.getPercentage(f.getLow())+"%");
-            holder.medioConsumo.setText(f.getPercentage(f.getAverage())+"%");
-            holder.altoConsumo.setText(f.getPercentage(f.getHigh())+"%");
-            holder.muitoAltoConsumo.setText(f.getPercentage(f.getVeryhigh())+"%");
+            holder.muitoBaixoConsumo.setText(String.format("%.2f", f.getPercentage(f.getVerylow()))+"%");
+            holder.baixoConsumo.setText(String.format("%.2f", f.getPercentage(f.getLow()))+"%");
+            holder.medioConsumo.setText(String.format("%.2f", f.getPercentage(f.getAverage()))+"%");
+            holder.altoConsumo.setText(String.format("%.2f", f.getPercentage(f.getHigh()))+"%");
+            holder.muitoAltoConsumo.setText(String.format("%.2f", f.getPercentage(f.getVeryhigh()))+"%");
         } else
             holder.perfilConsumoSection.setVisibility(View.GONE);
 
