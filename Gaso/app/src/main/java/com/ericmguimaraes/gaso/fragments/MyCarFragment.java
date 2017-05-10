@@ -69,6 +69,7 @@ import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.services.LoggingService;
 import com.ericmguimaraes.gaso.util.FuzzyManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -306,13 +307,31 @@ public class MyCarFragment extends Fragment {
         final MilestoneDAO dao = new MilestoneDAO();
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
-            public void onMilestoneReceived(@Nullable Milestone milestone) {
+            public void onMilestoneReceived(@Nullable final Milestone milestone) {
                 if(milestone==null)
                     return;
                 if (milestone.getFuzzyConsumption() == null)
                     milestone.setFuzzyConsumption(new FuzzyConsumption());
                 milestone.getFuzzyConsumption().incrementComsuption(consumptionName);
                 dao.addOrUpdate(milestone);
+
+                final UserDAO userDAO = new UserDAO();
+                userDAO.findFuzzyConsumption(new FuzzyConsumption.FuzzyConsumptionListener() {
+                    @Override
+                    public void onConsumptionFound(FuzzyConsumption consumption) {
+                        if(consumption==null)
+                            consumption = milestone.getFuzzyConsumption();
+                        else {
+                            consumption.incrementComsuption(consumptionName);
+                        }
+                        userDAO.addFuzzyConsumption(consumption);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //ignore
+                    }
+                });
             }
 
             @Override

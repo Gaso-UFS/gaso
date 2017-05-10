@@ -1,5 +1,7 @@
 package com.ericmguimaraes.gaso.model;
 
+import com.google.firebase.database.DatabaseError;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
 
 public class FuzzyConsumption implements Serializable {
 
+    private static final float ALLOWANCE = 20f;
     private int verylow = 0;
     private int low = 0;
     private int average = 0;
@@ -108,4 +111,23 @@ public class FuzzyConsumption implements Serializable {
         return ((float) value/getTotal()*100);
     }
 
+    public boolean isSimilar(FuzzyConsumption consumption) {
+        if(Math.abs(getPercentage(verylow)-consumption.getPercentage(consumption.verylow))>ALLOWANCE)
+            return false;
+        if(Math.abs(getPercentage(low)-consumption.getPercentage(consumption.low))>ALLOWANCE)
+            return false;
+        if(Math.abs(getPercentage(average)-consumption.getPercentage(consumption.average))>ALLOWANCE)
+            return false;
+        if(Math.abs(getPercentage(high)-consumption.getPercentage(consumption.high))>ALLOWANCE)
+            return false;
+        if(Math.abs(getPercentage(veryhigh)-consumption.getPercentage(consumption.veryhigh))>ALLOWANCE)
+            return false;
+        return true;
+    }
+
+    public interface FuzzyConsumptionListener {
+        void onConsumptionFound(FuzzyConsumption consumption);
+
+        void onCancelled(DatabaseError databaseError);
+    }
 }

@@ -49,13 +49,13 @@ public class Constants {
     public static final int WRITE_ALL_SPENTS = 2;
     public static final int WRITE_MONTH_SPENT = 3;
     public static final int PERMISSION_REQUEST_LOCATION = 2;
-
     public static String genericError = "Desculpe, tivemos um problema.";
 
     public static final String PREFS_NAME = "config";
-    public static final String USER_LOGGED_TAG = "user_logged";
 
+    public static final String USER_LOGGED_TAG = "user_logged";
     public static final String FIREBASE_USERS = "users";
+
     public static final String FIREBASE_CARS = "cars";
     public static final String FIREBASE_FAVORITE_CAR = "favorite_car";
     public static final String FIREBASE_EXPENSES = "expenses";
@@ -64,4 +64,5 @@ public class Constants {
     public static final String FIREBASE_UNTRACEABLE_OBD_LOG = "untraceable_obd_logs";
     public static final String FIREBASE_MILESTONES = "milestones";
     public static final String FIREBASE_STATIONS = "stations";
+    public static final String FIREBASE_FUZZYCONSUMPTION = "fuzzyConsumption";
 }
