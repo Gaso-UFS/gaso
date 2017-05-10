@@ -6,7 +6,10 @@ import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluations.OBDConsumptionEvaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluators.FuelAmountEvaluator;
 import com.ericmguimaraes.gaso.evaluation.evaluators.OBDConsumptionEvaluator;
+import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
+import com.google.firebase.database.DatabaseError;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,26 +35,37 @@ public final class EvaluationHelper {
 
         @Override
         protected Void doInBackground(Void... params) {
-            HashMap<String, Evaluation> evaluations = new HashMap<String, Evaluation>();
+            UserDAO dao = new UserDAO();
+            dao.findFuzzyConsumption(new FuzzyConsumption.FuzzyConsumptionListener() {
+                @Override
+                public void onConsumptionFound(FuzzyConsumption consumption) {
+                    HashMap<String, Evaluation> evaluations = new HashMap<String, Evaluation>();
 
-            FuelAmountEvaluator fuelAmountEvaluator = new FuelAmountEvaluator(milestone);
-            Evaluation fuelAmountEvaluation = fuelAmountEvaluator.evaluate();
-            if(fuelAmountEvaluation!=null)
-                evaluations.put(fuelAmountEvaluation.getFeatureType().toString(), fuelAmountEvaluation);
+                    FuelAmountEvaluator fuelAmountEvaluator = new FuelAmountEvaluator(milestone);
+                    Evaluation fuelAmountEvaluation = fuelAmountEvaluator.evaluate();
+                    if(fuelAmountEvaluation!=null)
+                        evaluations.put(fuelAmountEvaluation.getFeatureType().toString(), fuelAmountEvaluation);
 
-            OBDConsumptionEvaluator obdConsumptionEvaluator = new OBDConsumptionEvaluator(milestone);
-            OBDConsumptionEvaluation obdConsumptionEvaluation = (OBDConsumptionEvaluation) obdConsumptionEvaluator.evaluate();
-            if(obdConsumptionEvaluation!=null) {
-                evaluations.put(obdConsumptionEvaluation.getFeatureType().toString(), obdConsumptionEvaluation);
-                milestone.setConsumptionRateCar(obdConsumptionEvaluation.getConsumptionRateCar());
-                milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
-            }
+                    OBDConsumptionEvaluator obdConsumptionEvaluator = new OBDConsumptionEvaluator(milestone, consumption);
+                    OBDConsumptionEvaluation obdConsumptionEvaluation = (OBDConsumptionEvaluation) obdConsumptionEvaluator.evaluate();
+                    if(obdConsumptionEvaluation!=null) {
+                        evaluations.put(obdConsumptionEvaluation.getFeatureType().toString(), obdConsumptionEvaluation);
+                        milestone.setConsumptionRateCar(obdConsumptionEvaluation.getConsumptionRateCar());
+                        milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
+                    }
 
-            milestone.setEvaluations(evaluations);
-            MilestoneDAO dao = new MilestoneDAO();
-            dao.addOrUpdate(milestone);
+                    milestone.setEvaluations(evaluations);
+                    MilestoneDAO dao = new MilestoneDAO();
+                    dao.addOrUpdate(milestone);
 
-            listener.onDone();
+                    listener.onDone();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    //ignore
+                }
+            });
             return null;
         }
 
