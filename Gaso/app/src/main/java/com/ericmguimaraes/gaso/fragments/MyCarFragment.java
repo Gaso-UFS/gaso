@@ -69,6 +69,7 @@ import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
+import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.ericmguimaraes.gaso.services.LoggingService;
 import com.ericmguimaraes.gaso.util.FuzzyManager;
 import com.google.firebase.auth.FirebaseAuth;
@@ -306,13 +307,31 @@ public class MyCarFragment extends Fragment {
         final MilestoneDAO dao = new MilestoneDAO();
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
-            public void onMilestoneReceived(@Nullable Milestone milestone) {
+            public void onMilestoneReceived(@Nullable final Milestone milestone) {
                 if(milestone==null)
-                    milestone = dao.createNewMilestone(0, 0,null);
+                    return;
                 if (milestone.getFuzzyConsumption() == null)
                     milestone.setFuzzyConsumption(new FuzzyConsumption());
                 milestone.getFuzzyConsumption().incrementComsuption(consumptionName);
                 dao.addOrUpdate(milestone);
+
+                final UserDAO userDAO = new UserDAO();
+                userDAO.findFuzzyConsumption(new FuzzyConsumption.FuzzyConsumptionListener() {
+                    @Override
+                    public void onConsumptionFound(FuzzyConsumption consumption) {
+                        if(consumption==null)
+                            consumption = milestone.getFuzzyConsumption();
+                        else {
+                            consumption.incrementComsuption(consumptionName);
+                        }
+                        userDAO.addFuzzyConsumption(consumption);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //ignore
+                    }
+                });
             }
 
             @Override
@@ -519,32 +538,38 @@ public class MyCarFragment extends Fragment {
     }
 
     private void handleExpenseRefil(final boolean hasAlreadyRegisteredExpense, final float valorTotal, final boolean hasRefilDiference) {
-        final ExpensesDAO dao = new ExpensesDAO();
-        dao.findLast(new ExpensesDAO.OnOneExpensesReceivedListener() {
-            @Override
-            public void OnExpenseReceived(Expense expense) {
-
-                if (expense != null && hasAlreadyRegisteredExpense) {
+        if (hasAlreadyRegisteredExpense) {
+            final ExpensesDAO dao = new ExpensesDAO();
+            dao.findLast(new ExpensesDAO.OnOneExpensesReceivedListener() {
+                @Override
+                public void OnExpenseReceived(Expense expense) {
+                    if (expense == null)
+                        expense = new Expense();
                     expense.setAmountOBDRefil(valorTotal);
                     dao.addOrUpdate(expense);
-                }
-                MilestoneDAO milestoneDAO = new MilestoneDAO();
-                Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
-                milestoneDAO.addOrUpdate(milestone);
-                if (!hasAlreadyRegisteredExpense) {
-                    Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
-                    if(hasRefilDiference)
-                        intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
-                    startActivity(intentExp);
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    MilestoneDAO milestoneDAO = new MilestoneDAO();
+                    Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
+                    milestoneDAO.addOrUpdate(milestone);
 
-            }
-        });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    //ignore
+                }
+            });
+        } else
+            showExpenseCreationActicity(valorTotal, hasRefilDiference);
     }
+
+    private void showExpenseCreationActicity(float valorTotal, boolean hasRefilDiference) {
+        Intent intentExp = new Intent(getActivity(), ExpensesRegisterActivity.class);
+        if (hasRefilDiference)
+            intentExp.putExtra(ExpensesRegisterActivity.REFIL_EXTRA, valorTotal);
+        startActivity(intentExp);
+    }
+
     private void showMessage(String message) {
         Snackbar.make(nameText,message,Snackbar.LENGTH_LONG).show();
     }

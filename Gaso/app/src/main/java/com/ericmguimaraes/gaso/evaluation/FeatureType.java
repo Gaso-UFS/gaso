@@ -6,12 +6,21 @@ package com.ericmguimaraes.gaso.evaluation;
 
 public enum FeatureType {
 
-    FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE(0), OBD_FUEL_AMOUNT(1);
+    FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE("FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE"), OBD_FUEL_AMOUNT("OBD_FUEL_AMOUNT");
 
-    public int id;
+    public String name;
 
-    FeatureType(int id) {
-        this.id = id;
+    FeatureType(String name) {
+        this.name = name;
+    }
+
+    public boolean equalsName(String otherName) {
+        // (otherName == null) check is not needed because name.equals(null) returns false
+        return name.equals(otherName);
+    }
+
+    public String toString() {
+        return this.name;
     }
 
 }

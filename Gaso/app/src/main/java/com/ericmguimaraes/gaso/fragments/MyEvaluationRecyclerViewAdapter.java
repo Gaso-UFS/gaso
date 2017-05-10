@@ -45,10 +45,10 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         holder.carNameText.setText(m.getCarModel());
         holder.dataText.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(m.getCreationDate())));
 
-        if(m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT)) {
+        if(m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT.toString())) {
             holder.abastecidoUsuario.setText("Usuário : " + m.getExpenseAmount() + "L");
             holder.abastecidoOBD.setText("OBDII: " + m.getExpenseAmountOBDRefil() + "L");
-            holder.abastecidoDescricao.setText(m.getEvaluations().get(FeatureType.OBD_FUEL_AMOUNT).getMessage());
+            holder.abastecidoDescricao.setText(m.getEvaluations().get(FeatureType.OBD_FUEL_AMOUNT.toString()).getMessage());
         } else
             holder.abastecimentoSection.setVisibility(View.GONE);
 
@@ -62,20 +62,20 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
             holder.consumido.setText(m.getCombustiveConsumed()+"L");
             holder.percorrido.setText(m.getDistanceRolled()+"");
         } else
-            holder.perfilConsumoSection.setVisibility(View.GONE);
+            holder.consumidoPericorridoSection.setVisibility(View.GONE);
 
         if (m.getFuzzyConsumption()!=null) {
             FuzzyConsumption f = m.getFuzzyConsumption();
-            holder.muitoBaixoConsumo.setText(f.getPercentage(f.getVerylow())+"%");
-            holder.baixoConsumo.setText(f.getPercentage(f.getLow())+"%");
-            holder.medioConsumo.setText(f.getPercentage(f.getAverage())+"%");
-            holder.altoConsumo.setText(f.getPercentage(f.getHigh())+"%");
-            holder.muitoAltoConsumo.setText(f.getPercentage(f.getVeryhigh())+"%");
+            holder.muitoBaixoConsumo.setText(String.format("%.2f", f.getPercentage(f.getVerylow()))+"%");
+            holder.baixoConsumo.setText(String.format("%.2f", f.getPercentage(f.getLow()))+"%");
+            holder.medioConsumo.setText(String.format("%.2f", f.getPercentage(f.getAverage()))+"%");
+            holder.altoConsumo.setText(String.format("%.2f", f.getPercentage(f.getHigh()))+"%");
+            holder.muitoAltoConsumo.setText(String.format("%.2f", f.getPercentage(f.getVeryhigh()))+"%");
         } else
             holder.perfilConsumoSection.setVisibility(View.GONE);
 
-        if (m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
-            Evaluation e = m.getEvaluations().get(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE);
+        if (m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE.toString())) {
+            Evaluation e = m.getEvaluations().get(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE.toString());
             if(e.getRate()>0)
                 holder.altaAvaliacao.setAlpha(1f);
             else if (e.getRate()<0)

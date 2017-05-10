@@ -26,7 +26,7 @@ public class Milestone {
     private FuzzyConsumption fuzzyConsumption;
     private List<FuelSource> fuelSources;
     private float initialFuelLevel;
-    private HashMap<FeatureType, Evaluation> evaluations;
+    private HashMap<String, Evaluation> evaluations;
     private String expenseUid;
 
     @Exclude
@@ -101,10 +101,6 @@ public class Milestone {
         return initialFuelLevel;
     }
 
-    public Car getCar() {
-        return car;
-    }
-
     public void setCar(Car car) {
         if(car!=null) {
             this.car = car;
@@ -121,11 +117,11 @@ public class Milestone {
         this.carUid = carUid;
     }
 
-    public HashMap<FeatureType, Evaluation> getEvaluations() {
+    public HashMap<String, Evaluation> getEvaluations() {
         return evaluations;
     }
 
-    public void setEvaluations(HashMap<FeatureType, Evaluation> evaluations) {
+    public void setEvaluations(HashMap<String, Evaluation> evaluations) {
         this.evaluations = evaluations;
     }
 

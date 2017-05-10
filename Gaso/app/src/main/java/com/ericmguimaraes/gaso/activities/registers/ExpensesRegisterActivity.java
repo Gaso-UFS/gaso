@@ -67,6 +67,8 @@ import java.util.Date;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import static com.google.api.client.http.HttpMethods.HEAD;
+
 public class ExpensesRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
 
     public static final String REFIL_EXTRA = "refil";
@@ -360,8 +362,10 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     private void setExpense(Expense e) {
         e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "")));
-        e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
+        if (stationSelected.getId() != null)
+            e.setStationUid(stationSelected.getId());
+        if (SessionSingleton.getInstance().currentCar != null && SessionSingleton.getInstance().currentCar.getid() != null)
+            e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
         if (stationSelected != null) {
             e.setStationUid(stationSelected.getId());
             e.setStationName(stationSelected.getName());

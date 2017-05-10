@@ -10,9 +10,6 @@
         android:name="com.ericmguimaraes.gaso.fragments.EvaluationFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:background="#EFEFEF"
         app:layoutManager="LinearLayoutManager"
         tools:context="com.ericmguimaraes.gaso.fragments.EvaluationFragment"
         tools:listitem="@layout/fragment_evaluation" />
