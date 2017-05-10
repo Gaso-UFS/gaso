@@ -321,13 +321,17 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         Expense e = new Expense();
         e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
-        e.setTotal(Double.parseDouble(parsableDouble));
-        e.setStationUid(stationSelected.getId());
         e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "")));
         e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
-        e.setStationName(stationSelected.getName());
-        e.setStation(stationSelected);
+        if (stationSelected != null) {
+            e.setStationUid(stationSelected.getId());
+            e.setStationName(stationSelected.getName());
+            e.setStation(stationSelected);
+        }
+        if (inputTotal.getText() != null && inputTotal.getText().length() != 0) {
+            String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
+            e.setTotal(Double.parseDouble(parsableDouble));
+        }
         e.setCar(SessionSingleton.getInstance().currentCar);
         e.setAmountOBDRefil(amountOBDRefil);
         dao.addOrUpdate(e);
