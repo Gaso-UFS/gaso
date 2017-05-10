@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -44,18 +43,17 @@ import android.widget.Toast;
 import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.registers.CarRegisterActivity;
 import com.ericmguimaraes.gaso.adapters.ViewPagerAdapter;
+import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.fragments.GasFragment;
-
-import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.MonthlyExpensesFragment;
+import com.ericmguimaraes.gaso.fragments.MyCarFragment;
 import com.ericmguimaraes.gaso.fragments.ObdLogFragment;
 import com.ericmguimaraes.gaso.maps.LocationHelper;
 import com.ericmguimaraes.gaso.model.CombustiveType;
-import com.ericmguimaraes.gaso.model.ObdLog;
-import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.model.Expense;
+import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.services.LoggingService;
 import com.ericmguimaraes.gaso.util.CSVHelper;
@@ -103,6 +101,9 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
 
     @Bind(R.id.net_out)
     RelativeLayout netRecyclerView;
+
+    @Bind(R.id.analysis_out)
+    RelativeLayout analysisRecyclerView;
 
     @Bind(R.id.blue_out)
     RelativeLayout blueRecyclerView;
@@ -271,6 +272,14 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
 
     public void hideNetLayout(){
         netRecyclerView.setVisibility(View.GONE);
+    }
+
+    public void showAnalysisLayout(){
+        analysisRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    public void hideAnalysistLayout(){
+        analysisRecyclerView.setVisibility(View.GONE);
     }
 
     public boolean checkServicesStatus(){

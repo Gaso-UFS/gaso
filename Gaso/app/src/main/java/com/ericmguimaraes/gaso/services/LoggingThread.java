@@ -98,6 +98,8 @@ public class LoggingThread implements Runnable,
 
                 if(mObdReader.isHasGotDistanceFuel())
                     calculateConsumption();
+                else
+                    sendUnsupportedAnalysisBroadcas();
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error", e);
                 e.printStackTrace();
@@ -173,6 +175,15 @@ public class LoggingThread implements Runnable,
 
         Intent intent = new Intent(LoggingService.SERVICE_BROADCAST_MESSAGE);
         intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_BROKEN_PIPE);
+
+        service.mBroadcastManager.sendBroadcast(intent);
+    }
+
+    private void sendUnsupportedAnalysisBroadcas() {
+        LoggingService service = mLoggingServiceReference.get();
+        if (service == null) return;
+        Intent intent = new Intent(LoggingService.SERVICE_BROADCAST_MESSAGE);
+        intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_UNSUPPORTED_ANALYSIS);
 
         service.mBroadcastManager.sendBroadcast(intent);
     }

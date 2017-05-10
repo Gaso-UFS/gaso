@@ -55,6 +55,7 @@ import com.ericmguimaraes.gaso.R;
 import com.ericmguimaraes.gaso.activities.CarListActivity;
 import com.ericmguimaraes.gaso.activities.EvaluationActivity;
 import com.ericmguimaraes.gaso.activities.LoginActivity;
+import com.ericmguimaraes.gaso.activities.MainActivity;
 import com.ericmguimaraes.gaso.activities.PlainTextActivity;
 import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.bluetooth.BluetoothConnection;
@@ -489,6 +490,11 @@ public class MyCarFragment extends Fragment {
                         if (isAdded() && getActivity()!=null) {
                             showExpenseConfirmationDialog(intent.getExtras().getFloat(LoggingService.SERVICE_REFIL_DIFERENCE), intent.hasExtra(LoggingService.SERVICE_REFIL_DIFERENCE));
                         }
+                        break;
+                    }
+                    case LoggingService.SERVICE_UNSUPPORTED_ANALYSIS: {
+                        if (isAdded() && getActivity()!=null)
+                            ((MainActivity)getActivity()).showAnalysisLayout();
                         break;
                     }
                 }
