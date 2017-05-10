@@ -80,6 +80,20 @@
                 android:text="Adaptador bluetooth não encontrado."/>
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/analysis_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/darker_gray"
+            android:visibility="visible"
+            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Os dados para a análise da qualidade de combustível estão indisponíveis."/>
+        </RelativeLayout>
+
 
     </android.support.design.widget.AppBarLayout>
 
