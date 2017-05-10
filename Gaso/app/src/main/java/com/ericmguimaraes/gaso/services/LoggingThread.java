@@ -121,7 +121,7 @@ public class LoggingThread implements Runnable,
             public void onMilestoneReceived(Milestone milestone) {
                 if (fuelDiference >= 0) {
                     if(milestone==null)
-                        milestone = dao.createNewMilestone(0, lastFuelLevel, null);
+                        return;
                     milestone.setDistanceRolled(milestone.getDistanceRolled() + Float.parseFloat(distanceStr));
                     milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + fuelDiference);
                     dao.addOrUpdate(milestone);
