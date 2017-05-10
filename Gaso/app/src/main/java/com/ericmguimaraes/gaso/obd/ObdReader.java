@@ -28,8 +28,11 @@ import com.github.pires.obd.commands.pressure.BarometricPressureCommand;
 import com.github.pires.obd.commands.pressure.FuelPressureCommand;
 import com.github.pires.obd.commands.pressure.FuelRailPressureCommand;
 import com.github.pires.obd.commands.pressure.IntakeManifoldPressureCommand;
+import com.github.pires.obd.commands.protocol.CloseCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.ObdResetCommand;
+import com.github.pires.obd.commands.protocol.ObdWarmstartCommand;
 import com.github.pires.obd.commands.protocol.ResetTroubleCodesCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
@@ -107,6 +110,15 @@ public class ObdReader {
 
     public List<ObdLog> readValues() throws BrokenPipeException {
         Log.d(TAG, "Reading values");
+
+        if(isFirstTime)
+            try {
+                new ObdResetCommand().run(mBtSocket.getInputStream(), mBtSocket.getOutputStream());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        //Below is to give the adapter enough time to reset before sending the commands, otherwise the first startup commands could be ignored.
+        try { Thread.sleep(1000); } catch (InterruptedException e) { e.printStackTrace(); }
 
         //setup
         List<ObdLog> obdValues = new ArrayList<>();

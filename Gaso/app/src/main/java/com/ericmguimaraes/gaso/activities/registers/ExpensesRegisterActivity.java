@@ -324,7 +324,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
         e.setTotal(Double.parseDouble(parsableDouble));
         e.setStationUid(stationSelected.getId());
-        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "")));
+        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "").replace(",",".")));
         e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
         e.setStationName(stationSelected.getName());
         e.setStation(stationSelected);

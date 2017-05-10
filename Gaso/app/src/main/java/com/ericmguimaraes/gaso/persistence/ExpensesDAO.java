@@ -175,6 +175,10 @@ public class ExpensesDAO {
 
                     GenericTypeIndicator<Map<String,Expense>> indicator = new GenericTypeIndicator<Map<String, Expense>>() {};
                     Map<String, Expense> map = dataSnapshot.getValue(indicator);
+                    if(map==null) {
+                        listener.OnExpenseReceived(null);
+                        return;
+                    }
                     final Expense e = map.get(map.keySet().iterator().next());
 
                     CarDAO dao = new CarDAO();

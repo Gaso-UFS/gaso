@@ -100,11 +100,12 @@ public class FuzzyConsumption implements Serializable {
     }
 
     public int getTotal() {
-        return verylow+low+average+high+veryhigh;
+        int total = verylow+low+average+high+veryhigh;
+        return total;
     }
 
     public float getPercentage(int value){
-        return (value/getTotal())*100;
+        return ((int) ((float) value/getTotal()*100));
     }
 
 }

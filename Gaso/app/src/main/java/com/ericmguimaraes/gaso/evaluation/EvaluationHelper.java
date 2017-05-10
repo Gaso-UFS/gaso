@@ -32,17 +32,17 @@ public final class EvaluationHelper {
 
         @Override
         protected Void doInBackground(Void... params) {
-            HashMap<FeatureType, Evaluation> evaluations = new HashMap<FeatureType, Evaluation>();
+            HashMap<String, Evaluation> evaluations = new HashMap<String, Evaluation>();
 
             FuelAmountEvaluator fuelAmountEvaluator = new FuelAmountEvaluator(milestone);
             Evaluation fuelAmountEvaluation = fuelAmountEvaluator.evaluate();
             if(fuelAmountEvaluation!=null)
-                evaluations.put(fuelAmountEvaluation.getFeatureType(), fuelAmountEvaluation);
+                evaluations.put(fuelAmountEvaluation.getFeatureType().toString(), fuelAmountEvaluation);
 
             OBDConsumptionEvaluator obdConsumptionEvaluator = new OBDConsumptionEvaluator(milestone);
             OBDConsumptionEvaluation obdConsumptionEvaluation = (OBDConsumptionEvaluation) obdConsumptionEvaluator.evaluate();
             if(obdConsumptionEvaluation!=null) {
-                evaluations.put(obdConsumptionEvaluation.getFeatureType(), obdConsumptionEvaluation);
+                evaluations.put(obdConsumptionEvaluation.getFeatureType().toString(), obdConsumptionEvaluation);
                 milestone.setConsumptionRateCar(obdConsumptionEvaluation.getConsumptionRateCar());
                 milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
             }

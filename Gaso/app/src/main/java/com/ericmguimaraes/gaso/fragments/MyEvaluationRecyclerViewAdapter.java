@@ -62,7 +62,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
             holder.consumido.setText(m.getCombustiveConsumed()+"L");
             holder.percorrido.setText(m.getDistanceRolled()+"");
         } else
-            holder.perfilConsumoSection.setVisibility(View.GONE);
+            holder.consumidoPericorridoSection.setVisibility(View.GONE);
 
         if (m.getFuzzyConsumption()!=null) {
             FuzzyConsumption f = m.getFuzzyConsumption();
