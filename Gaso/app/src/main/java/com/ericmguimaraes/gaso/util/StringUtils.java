@@ -21,6 +21,8 @@ package com.ericmguimaraes.gaso.util;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Locale;
 
 public class StringUtils {
@@ -41,5 +43,21 @@ public class StringUtils {
 
     public static String formatMoney(double value) {
         return formatMoney(Double.toString(value));
+    }
+
+    public static String millisecondsToDateDMY(long milliseconds) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(milliseconds);
+        return formatter.format(calendar.getTime());
+    }
+
+    public static String millisecondsToHM(long milliseconds) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(milliseconds);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        return String.format("%02d:%02d", hour, minute);
     }
 }

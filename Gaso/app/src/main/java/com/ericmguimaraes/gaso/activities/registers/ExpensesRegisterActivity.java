@@ -53,6 +53,7 @@ import com.ericmguimaraes.gaso.util.DatePickerFragment;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
+import com.ericmguimaraes.gaso.util.StringUtils;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -95,7 +96,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     int PLACE_PICKER_REQUEST = 1;
     PlacePicker.IntentBuilder builder;
-
+    Expense expenseSelected;
     Station stationSelected;
     Calendar calendarSelected;
     int typeSelected = -1;
@@ -104,7 +105,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
     private float amountOBDRefil = -1;
     private boolean obdRefil = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,6 +174,23 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
                 if(stationSelected!=null) {
                     inputStation.setText(stationSelected.getName());
                 }
+            }
+            if(intent.hasExtra("edit_expense")){
+                Log.e("edit_expense", "edit_expense");
+                expenseSelected = GsonManager.getGsonInstance().fromJson(intent.getStringExtra("edit_expense"), Expense.class);
+                Log.e("edit_expense", intent.getStringExtra("edit_expense"));
+                inputTotal.setText("$"+String.format("%.2f", expenseSelected.getTotal()));
+                inputAmount.setText(String.format("%.2f", expenseSelected.getAmount())  + "L");
+                if (expenseSelected.getDate() > 0) {
+                    calendarSelected = Calendar.getInstance();
+                    calendarSelected.setTimeInMillis(expenseSelected.getDate());
+                    inputDate.setText(StringUtils.millisecondsToDateDMY(expenseSelected.getDate()));
+                    inputHour.setText(StringUtils.millisecondsToHM(expenseSelected.getDate()));
+                }
+                if (expenseSelected.getStation() != null)
+                    stationSelected = expenseSelected.getStation();
+                if(stationSelected!=null)
+                    inputStation.setText(stationSelected.getName());
             }
         }
 
@@ -274,12 +291,12 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void callHourPicker() {
-        DialogFragment newFragment = new TimePickerFragment(this);
+        DialogFragment newFragment = calendarSelected != null ? new TimePickerFragment(this, calendarSelected) : new TimePickerFragment(this);
         newFragment.show(getSupportFragmentManager(), "timePicker");
     }
 
     private void callDatePicker() {
-        DialogFragment newFragment = new DatePickerFragment(this);
+        DialogFragment newFragment = calendarSelected != null ? new DatePickerFragment(this, calendarSelected) : new DatePickerFragment(this);
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
@@ -294,7 +311,11 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void saveOnDatabase() {
-        Expense e = saveExpense();
+        Expense e;
+        if (expenseSelected != null)
+            e = editExpense();
+        else
+            e = saveExpense();
         if(obdRefil) {
             MilestoneDAO dao = new MilestoneDAO();
             Milestone milestone = dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
@@ -305,11 +326,14 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
                 }
             });
         }
-        sucessEventUI();
+        if (expenseSelected != null)
+            sucessEventUI("Gasto alterado com sucesso.");
+        else
+            sucessEventUI("Gasto adicionado com sucesso.");
     }
 
-    private void sucessEventUI() {
-        CharSequence text = "Gasto adicionado com sucesso.";
+    private void sucessEventUI(String texto) {
+        CharSequence text = texto;
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(getApplicationContext(), text, duration);
         toast.show();
@@ -319,6 +343,21 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     private Expense saveExpense() {
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
+        setExpense(e);
+        dao.addOrUpdate(e);
+        saveCarLastFluel();
+        return e;
+    }
+
+    private Expense editExpense() {
+        ExpensesDAO dao = new ExpensesDAO();
+        setExpense(expenseSelected);
+        dao.addOrUpdate(expenseSelected);
+        saveCarLastFluel();
+        return expenseSelected;
+    }
+
+    private void setExpense(Expense e) {
         e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
         e.setType(typeSelected);
         e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "")));
@@ -334,9 +373,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         }
         e.setCar(SessionSingleton.getInstance().currentCar);
         e.setAmountOBDRefil(amountOBDRefil);
-        dao.addOrUpdate(e);
-        saveCarLastFluel();
-        return e;
     }
 
     private void saveCarLastFluel() {
