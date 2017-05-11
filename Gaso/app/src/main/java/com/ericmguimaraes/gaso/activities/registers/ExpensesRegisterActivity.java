@@ -53,6 +53,7 @@ import com.ericmguimaraes.gaso.util.DatePickerFragment;
 import com.ericmguimaraes.gaso.util.GsonManager;
 import com.ericmguimaraes.gaso.util.Mask;
 import com.ericmguimaraes.gaso.util.MaskEditTextChangedListener;
+import com.ericmguimaraes.gaso.util.StringUtils;
 import com.ericmguimaraes.gaso.util.TimePickerFragment;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -65,6 +66,8 @@ import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+
+import static com.google.api.client.http.HttpMethods.HEAD;
 
 public class ExpensesRegisterActivity extends AppCompatActivity implements DatePickerFragment.DatePickerInterface, TimePickerFragment.TimePickerInterface, AdapterView.OnItemSelectedListener {
 
@@ -95,7 +98,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     int PLACE_PICKER_REQUEST = 1;
     PlacePicker.IntentBuilder builder;
-
+    Expense expenseSelected;
     Station stationSelected;
     Calendar calendarSelected;
     int typeSelected = -1;
@@ -104,7 +107,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
     private float amountOBDRefil = -1;
     private boolean obdRefil = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,14 +129,14 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (typeSelected==-1 || inputTotal.getText().length() == 0 || inputAmount.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
+                if (typeSelected==-1 || inputAmount.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
                     // TODO: 02/05/17 criar dialogo para confirmar cadastro com dados nulos
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 } else {
-                    if (inputStation.getText().length() == 0)
+                    if (inputStation.getText().length() == 0 || inputTotal.getText().length() == 0)
                         showSpentConfirmationDialog();
                     else
                         saveOnDatabase();
@@ -175,6 +177,23 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
                     inputStation.setText(stationSelected.getName());
                 }
             }
+            if(intent.hasExtra("edit_expense")){
+                Log.e("edit_expense", "edit_expense");
+                expenseSelected = GsonManager.getGsonInstance().fromJson(intent.getStringExtra("edit_expense"), Expense.class);
+                Log.e("edit_expense", intent.getStringExtra("edit_expense"));
+                inputTotal.setText("$"+String.format("%.2f", expenseSelected.getTotal()));
+                inputAmount.setText(String.format("%.2f", expenseSelected.getAmount())  + "L");
+                if (expenseSelected.getDate() > 0) {
+                    calendarSelected = Calendar.getInstance();
+                    calendarSelected.setTimeInMillis(expenseSelected.getDate());
+                    inputDate.setText(StringUtils.millisecondsToDateDMY(expenseSelected.getDate()));
+                    inputHour.setText(StringUtils.millisecondsToHM(expenseSelected.getDate()));
+                }
+                if (expenseSelected.getStation() != null)
+                    stationSelected = expenseSelected.getStation();
+                if(stationSelected!=null)
+                    inputStation.setText(stationSelected.getName());
+            }
         }
 
         inputTotal.addTextChangedListener(Mask.moneyMask(inputTotal));
@@ -191,7 +210,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         new AlertDialog.Builder(this)
                 .setTitle("Confirmação.")
-                .setMessage("Você gostaria de confirmar o abastecimento sem informar o posto?")
+                .setMessage("Você gostaria de confirmar o abastecimento sem informar todos os dados?")
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         saveOnDatabase();
@@ -274,12 +293,12 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void callHourPicker() {
-        DialogFragment newFragment = new TimePickerFragment(this);
+        DialogFragment newFragment = calendarSelected != null ? new TimePickerFragment(this, calendarSelected) : new TimePickerFragment(this);
         newFragment.show(getSupportFragmentManager(), "timePicker");
     }
 
     private void callDatePicker() {
-        DialogFragment newFragment = new DatePickerFragment(this);
+        DialogFragment newFragment = calendarSelected != null ? new DatePickerFragment(this, calendarSelected) : new DatePickerFragment(this);
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
@@ -294,7 +313,11 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     }
 
     private void saveOnDatabase() {
-        Expense e = saveExpense();
+        Expense e;
+        if (expenseSelected != null)
+            e = editExpense();
+        else
+            e = saveExpense();
         if(obdRefil) {
             MilestoneDAO dao = new MilestoneDAO();
             Milestone milestone = dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
@@ -305,11 +328,14 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
                 }
             });
         }
-        sucessEventUI();
+        if (expenseSelected != null)
+            sucessEventUI("Gasto alterado com sucesso.");
+        else
+            sucessEventUI("Gasto adicionado com sucesso.");
     }
 
-    private void sucessEventUI() {
-        CharSequence text = "Gasto adicionado com sucesso.";
+    private void sucessEventUI(String texto) {
+        CharSequence text = texto;
         int duration = Toast.LENGTH_SHORT;
         Toast toast = Toast.makeText(getApplicationContext(), text, duration);
         toast.show();
@@ -319,20 +345,38 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     private Expense saveExpense() {
         ExpensesDAO dao = new ExpensesDAO();
         Expense e = new Expense();
-        e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
-        e.setType(typeSelected);
-        String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
-        e.setTotal(Double.parseDouble(parsableDouble));
-        e.setStationUid(stationSelected.getId());
-        e.setAmount(Double.parseDouble(inputAmount.getText().toString().replace("L", "").replace(",",".")));
-        e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
-        e.setStationName(stationSelected.getName());
-        e.setStation(stationSelected);
-        e.setCar(SessionSingleton.getInstance().currentCar);
-        e.setAmountOBDRefil(amountOBDRefil);
+        setExpense(e);
         dao.addOrUpdate(e);
         saveCarLastFluel();
         return e;
+    }
+
+    private Expense editExpense() {
+        ExpensesDAO dao = new ExpensesDAO();
+        setExpense(expenseSelected);
+        dao.addOrUpdate(expenseSelected);
+        saveCarLastFluel();
+        return expenseSelected;
+    }
+
+    private void setExpense(Expense e) {
+        e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
+        e.setType(typeSelected);
+        if (stationSelected.getId() != null)
+            e.setStationUid(stationSelected.getId());
+        if (SessionSingleton.getInstance().currentCar != null && SessionSingleton.getInstance().currentCar.getid() != null)
+            e.setCarUid(SessionSingleton.getInstance().currentCar.getid());
+        if (stationSelected != null) {
+            e.setStationUid(stationSelected.getId());
+            e.setStationName(stationSelected.getName());
+            e.setStation(stationSelected);
+        }
+        if (inputTotal.getText() != null && inputTotal.getText().length() != 0) {
+            String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
+            e.setTotal(Double.parseDouble(parsableDouble));
+        }
+        e.setCar(SessionSingleton.getInstance().currentCar);
+        e.setAmountOBDRefil(amountOBDRefil);
     }
 
     private void saveCarLastFluel() {
