@@ -27,10 +27,11 @@ public class Car {
     private String model;
     private String description;
     private long creationDate;
-    private float lastFuelLevel;
+    private float lastFuelPercentageLevel;
     private float totalDistance;
     private float lastDistanceRead;
-    private double totalFuelUsed;
+    private double totalFuelPercentageUsed;
+    private double tankMaxLevel;
 
     public String getModel() {
         return model;
@@ -64,12 +65,12 @@ public class Car {
         this.creationDate = creationDate;
     }
 
-    public float getLastFuelLevel() {
-        return lastFuelLevel;
+    public float getLastFuelPercentageLevel() {
+        return lastFuelPercentageLevel;
     }
 
-    public void setLastFuelLevel(float lastFuelLevel) {
-        this.lastFuelLevel = lastFuelLevel;
+    public void setLastFuelPercentageLevel(float lastFuelPercentageLevel) {
+        this.lastFuelPercentageLevel = lastFuelPercentageLevel;
     }
 
     public float getTotalDistance() {
@@ -88,11 +89,31 @@ public class Car {
         this.lastDistanceRead = lastDistanceRead;
     }
 
-    public double getTotalFuelUsed() {
-        return totalFuelUsed;
+    public double getTotalFuelPercentageUsed() {
+        return totalFuelPercentageUsed;
     }
 
-    public void setTotalFuelUsed(double totalFuelUsed) {
-        this.totalFuelUsed = totalFuelUsed;
+    public void setTotalFuelPercentageUsed(double totalFuelPercentageUsed) {
+        this.totalFuelPercentageUsed = totalFuelPercentageUsed;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public double getTankMaxLevel() {
+        return tankMaxLevel;
+    }
+
+    public void setTankMaxLevel(double tankMaxLevel) {
+        this.tankMaxLevel = tankMaxLevel;
+    }
+
+    public boolean isHasTankMaxLevel(){
+        return tankMaxLevel>0;
     }
 }

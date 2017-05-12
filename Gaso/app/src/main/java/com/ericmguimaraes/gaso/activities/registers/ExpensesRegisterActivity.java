@@ -103,7 +103,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
     SimpleDateFormat dayFormat = new SimpleDateFormat("dd/MM/yy");
     SimpleDateFormat houtFormat = new SimpleDateFormat("HH:mm");
-    private float amountOBDRefil = -1;
+    private float amountPercentageOBDRefil = -1;
     private boolean obdRefil = false;
 
     @Override
@@ -128,7 +128,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             @Override
             public void onClick(View v) {
                 if (typeSelected==-1 || inputAmount.getText().length() == 0 || inputDate.getText().length() == 0 || inputHour.getText().length() == 0) {
-                    // TODO: 02/05/17 criar dialogo para confirmar cadastro com dados nulos
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
@@ -200,7 +199,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         obdRefil = getIntent()!=null && getIntent().hasExtra(ExpensesRegisterActivity.REFIL_EXTRA);
 
         if(obdRefil) {
-            amountOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
+            amountPercentageOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
             inputAmount.setText(String.format("%.2f", getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
         }
     }
@@ -319,7 +318,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             e = saveExpense();
         if(obdRefil) {
             MilestoneDAO dao = new MilestoneDAO();
-            Milestone milestone = dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
+            Milestone milestone = dao.createNewMilestone(amountPercentageOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelPercentageLevel(), e);
             EvaluationHelper.initEvaluation(milestone, true, null);
         }
         if (expenseSelected != null)
@@ -374,13 +373,13 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             e.setAmount(Double.parseDouble(parsableDouble));
         }
         e.setCar(SessionSingleton.getInstance().currentCar);
-        e.setAmountOBDRefil(amountOBDRefil);
+        e.setAmountPercentageOBDRefil(amountPercentageOBDRefil);
     }
 
     private void saveCarLastFluel() {
         if(obdRefil){
             Car c = SessionSingleton.getInstance().currentCar;
-            c.setLastFuelLevel(c.getLastFuelLevel()+amountOBDRefil);
+            c.setLastFuelPercentageLevel(c.getLastFuelPercentageLevel()+ amountPercentageOBDRefil);
             CarDAO dao = new CarDAO();
             dao.addOrUpdate(c);
         }

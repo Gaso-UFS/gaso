@@ -14,14 +14,11 @@ import com.ericmguimaraes.gaso.adapters.TextAdapter;
 import com.ericmguimaraes.gaso.evaluation.FeatureType;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
-import com.ericmguimaraes.gaso.model.FuelSource;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.SimpleFormatter;
 
 public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEvaluationRecyclerViewAdapter.ViewHolder> {
 
@@ -45,9 +42,9 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         holder.carNameText.setText(m.getCarModel());
         holder.dataText.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(new Date(m.getCreationDate())));
 
-        if(m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT)) {
+        if(m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT) && m.isHasTankMax()) {
             holder.abastecidoUsuario.setText("Usuário : " + m.getExpenseAmount() + "L");
-            holder.abastecidoOBD.setText("OBDII: " + m.getExpenseAmountOBDRefil() + "L");
+            holder.abastecidoOBD.setText("OBDII: " + m.getExpenseAmountPercentageOBDRefil() + "L");
             holder.abastecidoDescricao.setText(m.getEvaluations().get(FeatureType.OBD_FUEL_AMOUNT).getMessage());
         } else
             holder.abastecimentoSection.setVisibility(View.GONE);
@@ -58,8 +55,11 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         else
             holder.origemSection.setVisibility(View.GONE);
 
-        if(m.getDistanceRolled()!=0 && m.getCombustiveConsumed()!=0){
-            holder.consumido.setText(m.getCombustiveConsumed()+"L");
+        if(m.getDistanceRolled()!=0 && m.getCombustivePercentageConsumed()!=0){
+            if(m.isHasTankMax())
+                holder.consumido.setText(String.format("%.2f", ((float)m.getCombustivePercentageConsumed()*m.getTankMax()/100))+"L");
+            else
+                holder.consumido.setText(m.getCombustivePercentageConsumed()+"%");
             holder.percorrido.setText(m.getDistanceRolled()+"");
         } else
             holder.consumidoPericorridoSection.setVisibility(View.GONE);
@@ -83,8 +83,13 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
             else
                 holder.igualAvaliacao.setAlpha(1f);
 
-            holder.avaliacaoGeral.setText("Geral: "+m.getConsumptionRateCar()+"KM/L");
-            holder.avaliacaoAtual.setText("Atual: "+m.getConsumptionRateMilestone()+"KM/L");
+            if(m.isHasTankMax()) {
+                holder.avaliacaoGeral.setText("Geral: " + m.getConsumptionRateCar() + "KM/L");
+                holder.avaliacaoAtual.setText("Atual: " + m.getConsumptionRateMilestone() + "KM/L");
+            } else {
+                holder.avaliacaoGeral.setVisibility(View.GONE);
+                holder.avaliacaoAtual.setVisibility(View.GONE);
+            }
             holder.avaliacaoDescricao.setText(e.getMessage());
         } else
             holder.avaliacaoSection.setVisibility(View.GONE);

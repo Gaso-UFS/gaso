@@ -117,7 +117,7 @@ public class MilestoneDAO {
     public Milestone createNewMilestone(final float amountOBDRefil, final float fuelLevel, @Nullable final Expense expense) {
         final Milestone milestone = new Milestone();
         milestone.setCreationDate(new Date().getTime());
-        milestone.setCombustiveConsumed(0);
+        milestone.setCombustivePercentageConsumed(0);
         milestone.setFuzzyConsumption(new FuzzyConsumption());
         milestone.setDistanceRolled(0);
         milestone.setInitialFuelLevel(fuelLevel);

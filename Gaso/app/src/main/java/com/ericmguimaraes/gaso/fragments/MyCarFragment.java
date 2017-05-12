@@ -551,11 +551,11 @@ public class MyCarFragment extends Fragment {
                 public void OnExpenseReceived(Expense expense) {
                     if (expense == null)
                         expense = new Expense();
-                    expense.setAmountOBDRefil(valorTotal);
+                    expense.setAmountPercentageOBDRefil(valorTotal);
                     dao.addOrUpdate(expense);
 
                     MilestoneDAO milestoneDAO = new MilestoneDAO();
-                    Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), expense);
+                    Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelPercentageLevel(), expense);
                     milestoneDAO.addOrUpdate(milestone);
 
                 }

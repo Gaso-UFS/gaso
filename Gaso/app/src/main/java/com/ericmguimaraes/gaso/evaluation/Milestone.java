@@ -21,7 +21,7 @@ public class Milestone {
 
     private String uid;
     private long creationDate;
-    private float combustiveConsumed;
+    private float combustivePercentageConsumed;
     private float distanceRolled;
     private FuzzyConsumption fuzzyConsumption;
     private List<FuelSource> fuelSources;
@@ -40,7 +40,8 @@ public class Milestone {
     private double consumptionRateMilestone;
     private String carModel;
     private double expenseAmount;
-    private double expenseAmountOBDRefil;
+    private double expenseAmountPercentageOBDRefil;
+    private double tankMax;
 
     public Milestone() {
     }
@@ -61,12 +62,12 @@ public class Milestone {
         this.creationDate = creationDate;
     }
 
-    public float getCombustiveConsumed() {
-        return combustiveConsumed;
+    public float getCombustivePercentageConsumed() {
+        return combustivePercentageConsumed;
     }
 
-    public void setCombustiveConsumed(float combustiveConsumed) {
-        this.combustiveConsumed = combustiveConsumed;
+    public void setCombustivePercentageConsumed(float combustivePercentageConsumed) {
+        this.combustivePercentageConsumed = combustivePercentageConsumed;
     }
 
     public float getDistanceRolled() {
@@ -143,7 +144,7 @@ public class Milestone {
         if(expense!=null) {
             this.expenseUid = expense.getUid();
             this.expenseAmount = expense.getAmount();
-            this.expenseAmountOBDRefil = expense.getAmountOBDRefil();
+            this.expenseAmountPercentageOBDRefil = expense.getAmountPercentageOBDRefil();
         }
     }
 
@@ -153,9 +154,9 @@ public class Milestone {
             if(expense==null)
                 fuelSources.add(new FuelSource(initialFuelLevel));
             else {
-                fuelSources.add(new FuelSource(initialFuelLevel-expense.getAmountOBDRefil()));
+                fuelSources.add(new FuelSource(initialFuelLevel-expense.getAmountPercentageOBDRefil()));
                 if (expense.getStation() != null)
-                    fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
+                    fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountPercentageOBDRefil()));
             }
         } else {
             List<FuelSource> fuelSourcesBefore = before.getFuelSources();
@@ -184,7 +185,7 @@ public class Milestone {
                 if(!found)
                     fuelSources.add(new FuelSource(amountOBDRefil));
             } else {
-                fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
+                fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountPercentageOBDRefil()));
             }
         }
     }
@@ -221,11 +222,23 @@ public class Milestone {
         this.expenseAmount = expenseAmount;
     }
 
-    public double getExpenseAmountOBDRefil() {
-        return expenseAmountOBDRefil;
+    public double getExpenseAmountPercentageOBDRefil() {
+        return expenseAmountPercentageOBDRefil;
     }
 
-    public void setExpenseAmountOBDRefil(double expenseAmountOBDRefil) {
-        this.expenseAmountOBDRefil = expenseAmountOBDRefil;
+    public void setExpenseAmountPercentageOBDRefil(double expenseAmountPercentageOBDRefil) {
+        this.expenseAmountPercentageOBDRefil = expenseAmountPercentageOBDRefil;
+    }
+
+    public double getTankMax() {
+        return tankMax;
+    }
+
+    public void setTankMax(double tankMax) {
+        this.tankMax = tankMax;
+    }
+
+    public boolean isHasTankMax() {
+        return this.tankMax>0;
     }
 }

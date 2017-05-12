@@ -27,19 +27,26 @@ public class OBDConsumptionEvaluator extends Evaluator {
         OBDConsumptionEvaluation evaluation = new OBDConsumptionEvaluation();
         evaluation.setFeatureType(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE);
         double totalDistance = SessionSingleton.getInstance().currentCar.getTotalDistance();
-        double totalFuelUsed = SessionSingleton.getInstance().currentCar.getTotalFuelUsed();
-        if(totalFuelUsed==0 || totalDistance==0)
+        double totalPercentageFuelUsed = SessionSingleton.getInstance().currentCar.getTotalFuelPercentageUsed();
+        if(totalPercentageFuelUsed==0 || totalDistance==0)
             return null;
-        double consumptionRateCar = totalDistance/totalFuelUsed;
         double milestoneDistance = milestone.getDistanceRolled();
-        double milestoneFuelUsed = milestone.getCombustiveConsumed();
+        double milestoneFuelUsed = milestone.getCombustivePercentageConsumed();
         if(milestoneDistance==0 || milestoneFuelUsed==0)
             return null;
-        double consumptionRateMilestone = milestoneDistance/milestoneFuelUsed;
+        double consumptionRateMilestone;
+        double consumptionRateCar;
+        if(milestone.isHasTankMax()){
+            consumptionRateCar = totalDistance / ((totalPercentageFuelUsed * milestone.getTankMax())/100);
+            consumptionRateMilestone = milestoneDistance / ((milestoneFuelUsed * milestone.getTankMax())/100);
+        } else {
+            consumptionRateCar = totalDistance / totalPercentageFuelUsed;
+            consumptionRateMilestone = milestoneDistance / milestoneFuelUsed;
+        }
         evaluation.setConsumptionRateCar(consumptionRateCar);
         evaluation.setConsumptionRateMilestone(consumptionRateMilestone);
         double diference = consumptionRateCar - consumptionRateMilestone;
-        if(userConsumption==null || milestone.getFuzzyConsumption().isSimilar(userConsumption)) {
+        if(userConsumption==null || milestone.getFuzzyConsumption()==null || milestone.getFuzzyConsumption().isSimilar(userConsumption)) {
             if(diference>0 && diference>ALLOWANCE) {
                 evaluation.setRate(1);
                 evaluation.setMessage("O consumo de combustível nesse percurso foi menor que a média geral de consumo do carro. Isso pode significar um problema no carro, variações na qualidade do combustível ou uma forma diferente de dirigir durante esse percurso.");

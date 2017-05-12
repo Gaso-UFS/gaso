@@ -30,7 +30,7 @@ public class Expense implements Serializable {
     private String uid;
     private double total;
     private double amount;
-    private double amountOBDRefil;
+    private double amountPercentageOBDRefil;
 
     private long date;
 
@@ -141,12 +141,12 @@ public class Expense implements Serializable {
         this.stationName = stationName;
     }
 
-    public double getAmountOBDRefil() {
-        return amountOBDRefil;
+    public double getAmountPercentageOBDRefil() {
+        return amountPercentageOBDRefil;
     }
 
-    public void setAmountOBDRefil(double amountOBDRefil) {
-        this.amountOBDRefil = amountOBDRefil;
+    public void setAmountPercentageOBDRefil(double amountPercentageOBDRefil) {
+        this.amountPercentageOBDRefil = amountPercentageOBDRefil;
     }
 
 }

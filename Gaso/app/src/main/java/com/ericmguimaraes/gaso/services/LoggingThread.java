@@ -114,7 +114,7 @@ public class LoggingThread implements Runnable,
     private void calculateConsumption() {
         final String distanceStr = mObdReader.getDistanceobdLog().getData();
         float currentFuelLevel = Float.parseFloat(mObdReader.getFuelLevelLog().getData());
-        final float lastFuelLevel = SessionSingleton.getInstance().currentCar.getLastFuelLevel();
+        final float lastFuelLevel = SessionSingleton.getInstance().currentCar.getLastFuelPercentageLevel();
         final float fuelDiference = lastFuelLevel - currentFuelLevel;
         saveDistanceAndFuelConsumedOnCar(distanceStr, fuelDiference);
         final MilestoneDAO dao = new MilestoneDAO();
@@ -125,7 +125,7 @@ public class LoggingThread implements Runnable,
                     if(milestone==null)
                         return;
                     milestone.setDistanceRolled(milestone.getDistanceRolled() + Float.parseFloat(distanceStr));
-                    milestone.setCombustiveConsumed(milestone.getCombustiveConsumed() + fuelDiference);
+                    milestone.setCombustivePercentageConsumed(milestone.getCombustivePercentageConsumed() + fuelDiference);
                     dao.addOrUpdate(milestone);
                 } else {
                     sendBroadcastRefilled(fuelDiference * -1);
@@ -146,7 +146,7 @@ public class LoggingThread implements Runnable,
         float dist = Float.parseFloat(distanceStr);
         Car car = SessionSingleton.getInstance().currentCar;
         if(fuelDiference>0)
-            car.setTotalFuelUsed(car.getTotalFuelUsed()+fuelDiference);
+            car.setTotalFuelPercentageUsed(car.getTotalFuelPercentageUsed()+fuelDiference);
         if(car.getLastDistanceRead()<dist) {
             car.setTotalDistance(car.getTotalDistance()+dist);
         } else {
