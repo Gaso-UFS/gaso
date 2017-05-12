@@ -85,6 +85,10 @@ public class GasFragment extends Fragment {
 
     Location lastLocation;
 
+    Station lastStation;
+
+    boolean blockAlert = false;
+
     public GasFragment() {
     }
 
@@ -231,7 +235,10 @@ public class GasFragment extends Fragment {
     };
 
     private void showSpentRequestDialog(final Station station) {
-        new AlertDialog.Builder(getContext())
+        if (lastStation == null || lastStation.getId() != station.getId() || !blockAlert) {
+            lastStation = station;
+            blockAlert = false;
+            new AlertDialog.Builder(getContext())
                 .setTitle("Abastecendo?")
                 .setMessage("Você está num posto? Deseja cadastrar um gasto?")
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
@@ -248,11 +255,14 @@ public class GasFragment extends Fragment {
                 })
                 .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        blockAlert = true;
                         dialog.dismiss();
                     }
                 })
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .show();
+
+        }
     }
 
 
