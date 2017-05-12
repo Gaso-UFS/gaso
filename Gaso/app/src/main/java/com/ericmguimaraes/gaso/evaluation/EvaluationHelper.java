@@ -3,11 +3,13 @@ package com.ericmguimaraes.gaso.evaluation;
 import android.os.AsyncTask;
 
 import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
+import com.ericmguimaraes.gaso.evaluation.evaluations.GeneralStationEvaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluations.OBDConsumptionEvaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluators.FuelAmountEvaluator;
 import com.ericmguimaraes.gaso.evaluation.evaluators.OBDConsumptionEvaluator;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
+import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
 import com.google.firebase.database.DatabaseError;
 
@@ -24,10 +26,12 @@ public final class EvaluationHelper {
     private static Milestone milestone;
 
     private static OnEvaluationListener listener;
+    private static boolean evaluateStation;
 
-    public static void initEvaluation(Milestone milestone, OnEvaluationListener listener) {
+    public static void initEvaluation(Milestone milestone, boolean evaluateStation, OnEvaluationListener listener) {
         EvaluationHelper.milestone = milestone;
         EvaluationHelper.listener = listener;
+        EvaluationHelper.evaluateStation = evaluateStation;
         new EvaluationHelperAsyncTask().execute();
     }
 
@@ -54,11 +58,17 @@ public final class EvaluationHelper {
                         milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
                     }
 
+                    if(evaluateStation) {
+                        StationEvaluationHelper stationEvaluationHelper = new StationEvaluationHelper(milestone);
+                        stationEvaluationHelper.evaluate();
+                    }
+
                     milestone.setEvaluations(evaluations);
                     MilestoneDAO dao = new MilestoneDAO();
                     dao.addOrUpdate(milestone);
 
-                    listener.onDone();
+                    if(listener!=null)
+                        listener.onDone();
                 }
 
                 @Override

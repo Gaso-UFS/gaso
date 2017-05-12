@@ -25,9 +25,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.widget.DatePicker;
 
-import java.io.Serializable;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by ericm on 3/25/2016.
@@ -37,8 +35,12 @@ public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
 
     private DatePickerInterface datePickerInterface;
+    private Calendar calendar;
 
-    public DatePickerFragment(){
+    @SuppressLint("ValidFragment")
+    public DatePickerFragment(DatePickerInterface datePickerInterface, Calendar calendar){
+        this.datePickerInterface = datePickerInterface;
+        this.calendar = calendar;
     }
 
     @SuppressLint("ValidFragment")
@@ -48,7 +50,9 @@ public class DatePickerFragment extends DialogFragment
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
+        if (calendar != null)
+            c = calendar;
         int year = c.get(Calendar.YEAR);
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);

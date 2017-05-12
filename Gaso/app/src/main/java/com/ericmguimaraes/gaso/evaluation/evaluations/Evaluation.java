@@ -1,8 +1,5 @@
 package com.ericmguimaraes.gaso.evaluation.evaluations;
 
-import com.ericmguimaraes.gaso.evaluation.FeatureType;
-import com.google.firebase.database.Exclude;
-
 /**
  * Created by ericm on 18-Oct-16.
  */
@@ -15,7 +12,7 @@ public class Evaluation {
 
     private String message;
 
-    private FeatureType featureType;
+    private String featureType;
 
     public String getUid() {
         return uid;
@@ -41,11 +38,11 @@ public class Evaluation {
         this.message = message;
     }
 
-    public FeatureType getFeatureType() {
+    public String getFeatureType() {
         return featureType;
     }
 
-    public void setFeatureType(FeatureType featureType) {
+    public void setFeatureType(String featureType) {
         this.featureType = featureType;
     }
 

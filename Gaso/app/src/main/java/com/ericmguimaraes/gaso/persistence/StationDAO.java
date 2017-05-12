@@ -42,6 +42,10 @@ public class StationDAO {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
+    public void addOrUpdate(final Station station){
+        // TODO: 11/05/17
+    }
+
     public void addOrUpdate(final Station station, final OneStationReceivedListener listener){
         if(station.getId() != null) {
             mDatabase.child(Constants.FIREBASE_STATIONS).child(station.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
