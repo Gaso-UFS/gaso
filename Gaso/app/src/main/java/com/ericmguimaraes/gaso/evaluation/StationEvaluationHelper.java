@@ -2,7 +2,6 @@ package com.ericmguimaraes.gaso.evaluation;
 
 import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluations.GeneralStationEvaluation;
-import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.model.FuelSource;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
@@ -70,7 +69,7 @@ public class StationEvaluationHelper {
                                         }
                                         station.getGeneralEvaluations().put(eval.getFeatureType(), ge);
                                     }
-                                    dao.addOrUpdate(station);
+                                    dao.addOrUpdate(station, null);
                                 }
                             }
 

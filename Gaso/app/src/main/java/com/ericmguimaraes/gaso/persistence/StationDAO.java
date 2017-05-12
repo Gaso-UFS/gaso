@@ -47,11 +47,11 @@ public class StationDAO {
     }
 
     public void addOrUpdate(final Station station, final OneStationReceivedListener listener){
-        if(station.getId() != null) {
+        if (listener != null) {
             mDatabase.child(Constants.FIREBASE_STATIONS).child(station.getId()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    Station gasStation = dataSnapshot.getValue() != null ? merge(dataSnapshot.getValue(Station.class), station) : station;
+                    Station gasStation = dataSnapshot.getValue() != null ? merge(station, dataSnapshot.getValue(Station.class)) : station;
                     mDatabase.child(Constants.FIREBASE_STATIONS).child(gasStation.getId()).setValue(gasStation);
                     listener.onStationReceived(gasStation);
                 }
@@ -61,10 +61,14 @@ public class StationDAO {
                     listener.onCancelled(databaseError);
                 }
             });
+        } else {
+            mDatabase.child(Constants.FIREBASE_STATIONS).child(station.getId()).setValue(station);
         }
     }
 
     private Station merge(Station stationFromMemory, Station stationFromDatabase) {
+        if (stationFromMemory == null)
+            return  stationFromMemory;
         Station returnStation = new Station();
         returnStation.setId(stationFromMemory.getId());
         returnStation.setName(stationFromMemory.getName());
