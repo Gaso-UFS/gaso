@@ -56,24 +56,24 @@ public class MilestoneDAO {
         if(user!=null) {
             String key;
             if(milestone.getUid()==null || milestone.getUid().isEmpty()) {
-                key = mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).push().getKey();
+                key = mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).push().getKey();
                 milestone.setUid(key);
             }
-            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).setValue(milestone);
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).setValue(milestone);
         }
     }
 
     public void remove(Milestone milestone){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).removeValue();
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).removeValue();
         }
     }
 
     public void findMilestoneByID(String milestoneUid, final OneMilestoneReceivedListener listener) {
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).child(milestoneUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).child(milestoneUid).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     listener.onMilestoneReceived(dataSnapshot.getValue(Milestone.class));
@@ -90,7 +90,7 @@ public class MilestoneDAO {
     public void findLastMilestone(final OneMilestoneReceivedListener listener){
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     GenericTypeIndicator<Map<String,Milestone>> indicator = new GenericTypeIndicator<Map<String, Milestone>>() {};
@@ -142,7 +142,7 @@ public class MilestoneDAO {
     public void findAll(final MilestonesListReceivedListener listener){
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if(user!=null) {
-            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(Constants.FIREBASE_CARS).child(SessionSingleton.getInstance().currentCar.getid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     List<Milestone> list = new ArrayList<Milestone>();
