@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,6 +62,7 @@ public class LoggingService extends Service {
             "io.github.malvadeza.floatingcar.logging_service.service_bluetooth_error";
     public static final String SERVICE_MESSAGE =
             "io.github.malvadeza.floatingcar.logging_service.message";
+    public static final String SERVICE_UNSUPPORTED_ANALYSIS = "unsupported_analysis";
 
     protected LocalBroadcastManager mBroadcastManager;
 
