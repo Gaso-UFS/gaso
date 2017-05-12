@@ -135,4 +135,112 @@
         android:gravity="center"
         android:layout_marginBottom="@dimen/text_margin"/>
 
+
+    <LinearLayout
+        android:id="@+id/obdFuelDistance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_below="@id/money_rating_text">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/baixaFuelDistance"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_margin="5dp"
+                android:alpha="0.15"
+                android:src="@drawable/ic_arrowdown" />
+
+            <ImageView
+                android:id="@+id/igualFuelDistance"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="5dp"
+                android:src="@drawable/ic_circledot"
+                android:alpha="0.15"
+                />
+
+            <ImageView
+                android:id="@+id/altaFuelDistance"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_margin="5dp"
+                android:alpha="0.15"
+                android:src="@drawable/ic_arrowup" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Divergência entre abastecido e informado pelo OBD"
+            android:textSize="10sp"
+            android:textStyle="italic"
+
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/text_margin"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/obdFuelAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_below="@id/obdFuelDistance">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/baixaFuelAmount"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_margin="5dp"
+                android:alpha="0.15"
+                android:src="@drawable/ic_arrowdown" />
+
+            <ImageView
+                android:id="@+id/igualFuelAmount"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_margin="5dp"
+                android:src="@drawable/ic_circledot"
+                android:alpha="0.15"
+                />
+
+            <ImageView
+                android:id="@+id/altaFuelAmount"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_margin="5dp"
+                android:alpha="0.15"
+                android:src="@drawable/ic_arrowup" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Quantidade do consumo de combustível"
+            android:textSize="10sp"
+            android:textStyle="italic"
+
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/text_margin"/>
+    </LinearLayout>
+
+
 </RelativeLayout>

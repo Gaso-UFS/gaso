@@ -23,6 +23,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
@@ -30,10 +32,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.evaluation.FeatureType;
+import com.ericmguimaraes.gaso.evaluation.evaluations.GeneralStationEvaluation;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
 import com.google.firebase.database.DatabaseError;
+
+import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -63,6 +69,30 @@ public class StationDetailsActivity extends AppCompatActivity {
 
     @Bind(R.id.content)
     RelativeLayout contentRelativeLayout;
+
+    @Bind(R.id.obdFuelAmount)
+    LinearLayout obdFuelAmountLayout;
+
+    @Bind(R.id.baixaFuelAmount)
+    ImageView baixaFuelAmount;
+
+    @Bind(R.id.igualFuelAmount)
+    ImageView igualFuelAmount;
+
+    @Bind(R.id.altaFuelAmount)
+    ImageView altaFuelAmount;
+
+    @Bind(R.id.obdFuelDistance)
+    LinearLayout obdFuelDistanceLayout;
+
+    @Bind(R.id.baixaFuelDistance)
+    ImageView baixaFuelDistance;
+
+    @Bind(R.id.igualFuelDistance)
+    ImageView igualFuelDistance;
+
+    @Bind(R.id.altaFuelDistance)
+    ImageView altaFuelDistance;
 
     String stationId;
 
@@ -144,6 +174,21 @@ public class StationDetailsActivity extends AppCompatActivity {
 
         contentRelativeLayout.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.GONE);
+        fillAvaliations();
+    }
+
+    private void fillAvaliations() {
+        HashMap<String, GeneralStationEvaluation> generalEvaluations = station.getGeneralEvaluations();
+        for (String key : generalEvaluations.keySet()) {
+           if (key.equals(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
+               obdFuelDistanceLayout.setVisibility(View.VISIBLE);
+
+           }
+           if (key.equals(FeatureType.OBD_FUEL_AMOUNT)) {
+               obdFuelAmountLayout.setVisibility(View.VISIBLE);
+           }
+        }
+
     }
 
 }
