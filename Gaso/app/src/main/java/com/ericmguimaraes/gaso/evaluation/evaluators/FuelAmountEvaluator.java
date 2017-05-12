@@ -1,15 +1,17 @@
 package com.ericmguimaraes.gaso.evaluation.evaluators;
 
+import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.FeatureType;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
+import com.google.android.gms.cast.framework.Session;
 
 /**
  * Created by ericmguimaraes on 07/05/17.
  */
 public class FuelAmountEvaluator extends Evaluator {
 
-    private static float ALLOWANCE = 0.5f;
+    private static float ALLOWANCE = 1f;
 
     public FuelAmountEvaluator(Milestone milestone) {
         super(milestone);
@@ -17,9 +19,9 @@ public class FuelAmountEvaluator extends Evaluator {
 
     @Override
     public Evaluation evaluate() {
-        if(milestone.getExpense()==null)
+        if(milestone.getExpense()==null || !milestone.isHasTankMax())
             return null;
-        double diference = milestone.getExpense().getAmount() - milestone.getExpense().getAmountOBDRefil();
+        double diference = milestone.getExpense().getAmount() - ((milestone.getExpense().getAmountPercentageOBDRefil()*milestone.getTankMax())/100);
         Evaluation evaluation = new Evaluation();
         evaluation.setFeatureType(FeatureType.OBD_FUEL_AMOUNT);
         if(diference>0 && diference>ALLOWANCE) {
