@@ -19,6 +19,7 @@
 package com.ericmguimaraes.gaso.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,10 +29,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.activities.registers.ExpensesRegisterActivity;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.CombustiveType;
 import com.ericmguimaraes.gaso.model.Expense;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
+import com.ericmguimaraes.gaso.util.GsonManager;
+import com.ericmguimaraes.gaso.util.StringUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -75,11 +79,11 @@ public class ExpensesListAdapter extends RecyclerView.Adapter<ExpensesListAdapte
         Car car = expense.getCar();
         holder.carText.setText(car==null?"Carro não encontrado.":car.getModel());
         SimpleDateFormat formater = new SimpleDateFormat("dd/MM/yy hh:mm");
-        holder.dateText.setText(formater.format(expense.getDate()));
+        holder.dateText.setText(StringUtils.millisecondsToDateDMY(expense.getDate()) + " " + StringUtils.millisecondsToHM(expense.getDate()));
         holder.typeText.setText(CombustiveType.fromInteger(expense.getType()).toString());
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         holder.userText.setText(user==null?"Usuário não encontrado.":user.getDisplayName());
-        holder.valueText.setText("R$"+Double.toString(expense.getTotal()));
+        holder.valueText.setText("$"+String.format("%.2f", expense.getTotal()));
         holder.stationText.setText(expense.getStationName());
     }
 
@@ -154,11 +158,13 @@ public class ExpensesListAdapter extends RecyclerView.Adapter<ExpensesListAdapte
 
         @Override
         public void onClick(View v) {
-            /*int itemPosition = recyclerView.getChildAdapterPosition(v);
-            Expense c = expenseList.get(itemPosition);
-            Intent intent = new Intent(context, SpentDetails.class);
+            int itemPosition = recyclerView.getChildAdapterPosition(v);
+            Expense expense = expenseList.get(itemPosition);
+            Intent intent = new Intent(context, ExpensesRegisterActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);*/
+            String expenseStation = GsonManager.getGsonInstance().toJson(expense);
+            intent.putExtra("edit_expense", expenseStation);
+            context.startActivity(intent);
         }
     }
 

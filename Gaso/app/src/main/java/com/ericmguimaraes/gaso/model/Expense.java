@@ -20,10 +20,12 @@ package com.ericmguimaraes.gaso.model;
 
 import com.google.firebase.database.Exclude;
 
+import java.io.Serializable;
+
 /**
  * Created by ericm on 2/28/2016.
  */
-public class Expense {
+public class Expense implements Serializable {
 
     private String uid;
     private double total;

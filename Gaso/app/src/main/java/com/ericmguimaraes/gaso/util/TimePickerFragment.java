@@ -35,8 +35,15 @@ public class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener {
 
     TimePickerInterface timePickerInterface;
+    private Calendar calendar;
 
     public TimePickerFragment(){
+    }
+
+    @SuppressLint("ValidFragment")
+    public TimePickerFragment(TimePickerInterface timePickerInterface, Calendar calendar){
+        this.timePickerInterface = timePickerInterface;
+        this.calendar = calendar;
     }
 
     @SuppressLint("ValidFragment")
@@ -46,7 +53,9 @@ public class TimePickerFragment extends DialogFragment
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
+        if (calendar != null)
+            c = calendar;
         int hour = c.get(Calendar.HOUR_OF_DAY);
         int minute = c.get(Calendar.MINUTE);
 
