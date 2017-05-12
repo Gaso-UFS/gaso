@@ -20,6 +20,7 @@ package com.ericmguimaraes.gaso.activities.registers;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.renderscript.Double2;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +52,12 @@ public class CarRegisterActivity extends AppCompatActivity {
 
     @Bind(R.id.input_car_description)
     TextInputEditText inputCarDescrition;
+
+    @Bind(R.id.input_car_tank_size)
+    TextInputEditText inputCarTankSize;
+
+    @Bind(R.id.checkbox)
+    CheckBox checkBox;
 
     @Bind(R.id.btn_confirm)
     Button confirmBtn;
@@ -81,7 +89,7 @@ public class CarRegisterActivity extends AppCompatActivity {
         confirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(inputCar.getText().length()==0){
+                if(inputCar.getText().length()==0 || (inputCarTankSize.getText().length()==0 && !checkBox.isChecked())){
                     Log.d("Field Required", "");
                     Snackbar snackbar = Snackbar
                             .make(v, "Complete os campos obrigatorios.", Snackbar.LENGTH_LONG);
@@ -102,6 +110,8 @@ public class CarRegisterActivity extends AppCompatActivity {
         Car car = new Car();
         car.setDescription(inputCarDescrition.getText().toString());
         car.setModel(inputCar.getText().toString());
+        if(!checkBox.isChecked())
+            car.setTankMaxLevel(Double.parseDouble(inputCarTankSize.getText().toString()));
         carDAO.addOrUpdate(car);
         if(getIntent().getExtras()!=null && getIntent().getExtras().getBoolean("first_access",false))
             carDAO.setFavoriteCar(car);
