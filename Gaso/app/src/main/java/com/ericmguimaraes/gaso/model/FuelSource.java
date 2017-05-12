@@ -12,7 +12,10 @@ public class FuelSource {
 
     double value;
 
-    public FuelSource() {
+    public FuelSource(double value) {
+        this.value = value;
+        stationId = "";
+        stationName = "Outros";
     }
 
     public FuelSource(String stationId, String stationName, double value) {
@@ -43,5 +46,9 @@ public class FuelSource {
 
     public void setStationName(String stationName) {
         this.stationName = stationName;
+    }
+
+    public boolean isOutros(){
+        return stationId!=null && stationId.isEmpty();
     }
 }
