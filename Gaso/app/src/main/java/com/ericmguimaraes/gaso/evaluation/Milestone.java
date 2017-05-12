@@ -133,6 +133,7 @@ public class Milestone {
         this.expenseUid = expenseUid;
     }
 
+    @Exclude
     public Expense getExpense() {
         return expense;
     }
@@ -150,9 +151,9 @@ public class Milestone {
         List<FuelSource> fuelSources = new ArrayList<>();
         if(before==null || before.getFuelSources()==null) {
             if(expense==null)
-                fuelSources.add(new FuelSource("","Outros",initialFuelLevel));
+                fuelSources.add(new FuelSource(initialFuelLevel));
             else {
-                fuelSources.add(new FuelSource("","Outros",initialFuelLevel-expense.getAmountOBDRefil()));
+                fuelSources.add(new FuelSource(initialFuelLevel-expense.getAmountOBDRefil()));
                 if (expense.getStation() != null)
                     fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
             }
@@ -166,8 +167,10 @@ public class Milestone {
             }
             // adiciona os novos valores de combustiveis baseado na procentagem e quantidade de restante
             for(int i = 0; i<percentages.size(); i++) {
-                FuelSource f = fuelSourcesBefore.get(i);
-                fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (initialFuelLevel-amountOBDRefil)));
+                if(percentages.get(i)!=null && percentages.get(i).longValue()>0) {
+                    FuelSource f = fuelSourcesBefore.get(i);
+                    fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (initialFuelLevel - amountOBDRefil)));
+                }
             }
             //adiciona o refil
             if (expense==null) {
@@ -179,7 +182,7 @@ public class Milestone {
                     }
                 }
                 if(!found)
-                    fuelSources.add(new FuelSource("","Outros",amountOBDRefil));
+                    fuelSources.add(new FuelSource(amountOBDRefil));
             } else {
                 fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountOBDRefil()));
             }

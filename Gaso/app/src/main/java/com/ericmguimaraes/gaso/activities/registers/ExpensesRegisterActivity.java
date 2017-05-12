@@ -298,12 +298,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         if(obdRefil) {
             MilestoneDAO dao = new MilestoneDAO();
             Milestone milestone = dao.createNewMilestone(amountOBDRefil, SessionSingleton.getInstance().currentCar.getLastFuelLevel(), e);
-            EvaluationHelper.initEvaluation(milestone, new EvaluationHelper.OnEvaluationListener() {
-                @Override
-                public void onDone() {
-                    //ignore
-                }
-            });
+            EvaluationHelper.initEvaluation(milestone, true, null);
         }
         sucessEventUI();
     }

@@ -18,8 +18,10 @@
 
 package com.ericmguimaraes.gaso.model;
 
+import com.ericmguimaraes.gaso.evaluation.evaluations.GeneralStationEvaluation;
 import com.google.android.gms.location.places.Place;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -46,6 +48,8 @@ public class Station {
     private List<Combustive> combustives;
 
     private String reference;
+
+    private HashMap<String, GeneralStationEvaluation> generalEvaluations;
 
     public Station() {}
 
@@ -150,5 +154,13 @@ public class Station {
 
     public void setCombustives(List<Combustive> combustives) {
         this.combustives = combustives;
+    }
+
+    public HashMap<String, GeneralStationEvaluation> getGeneralEvaluations() {
+        return generalEvaluations;
+    }
+
+    public void setGeneralEvaluations(HashMap<String, GeneralStationEvaluation> generalEvaluations) {
+        this.generalEvaluations = generalEvaluations;
     }
 }
