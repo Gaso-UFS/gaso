@@ -43,7 +43,7 @@ public class StationDAO {
     }
 
     public void addOrUpdate(final Station station){
-        // TODO: 11/05/17
+        mDatabase.child(Constants.FIREBASE_STATIONS).child(station.getId()).setValue(station);
     }
 
     public void addOrUpdate(final Station station, final OneStationReceivedListener listener){

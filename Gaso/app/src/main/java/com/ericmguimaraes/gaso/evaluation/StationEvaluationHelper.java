@@ -69,7 +69,7 @@ public class StationEvaluationHelper {
                                         }
                                         station.getGeneralEvaluations().put(eval.getFeatureType(), ge);
                                     }
-                                    dao.addOrUpdate(station, null);
+                                    dao.addOrUpdate(station);
                                 }
                             }
 
