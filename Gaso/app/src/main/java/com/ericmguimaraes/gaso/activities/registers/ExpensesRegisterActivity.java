@@ -157,7 +157,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         setSpinner();
 
-        MaskEditTextChangedListener maskAmount = new MaskEditTextChangedListener("##.##L", inputAmount);
+        MaskEditTextChangedListener maskAmount = new MaskEditTextChangedListener("##,##L", inputAmount);
         inputAmount.addTextChangedListener(maskAmount);
 
         MaskEditTextChangedListener maskDate = new MaskEditTextChangedListener("##/##/##", inputDate);
@@ -365,12 +365,12 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
             e.setStation(stationSelected);
         }
         if (inputTotal.getText() != null && inputTotal.getText().length() != 0) {
-            String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "");
-            e.setTotal(Double.parseDouble(parsableDouble));
+            String parsableDouble = inputTotal.getText().toString().replace("R$", "").replace(",", "").replace("$", "").replace(".", "");
+            e.setTotal(Double.parseDouble(parsableDouble)/100);
         }
         if (inputAmount.getText() != null && inputAmount.getText().length() != 0) {
-            String parsableDouble = inputAmount.getText().toString().replace("L", "");
-            e.setAmount(Double.parseDouble(parsableDouble));
+            String parsableDouble = inputAmount.getText().toString().replace("L", "").replace(",","").replace(".","");
+            e.setAmount(Double.parseDouble(parsableDouble)/100);
         }
         e.setCar(SessionSingleton.getInstance().currentCar);
         e.setAmountPercentageOBDRefil(amountPercentageOBDRefil);
