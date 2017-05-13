@@ -148,7 +148,7 @@ public class Milestone {
         }
     }
 
-    public void calculateFuelSource(float amountOBDRefil, @Nullable Milestone before) {
+    public void calculateFuelSource(float amountPercentageOBDRefil, @Nullable Milestone before) {
         if(fuelSources==null)
             fuelSources = new ArrayList<>();
         if(before==null || before.getFuelSources()==null) {
@@ -171,7 +171,7 @@ public class Milestone {
             for(int i = 0; i<percentages.size(); i++) {
                 if(percentages.get(i)!=null && percentages.get(i).longValue()>0) {
                     FuelSource f = fuelSourcesBefore.get(i);
-                    fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (initialFuelLevel - amountOBDRefil)));
+                    fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (initialFuelLevel - amountPercentageOBDRefil)));
                 }
             }
         }
@@ -180,14 +180,14 @@ public class Milestone {
             boolean found = false;
             for(FuelSource f : fuelSources) {
                 if (f.getStationId().equals("")) {
-                    f.setValue(f.getValue() + amountOBDRefil);
+                    f.setValue(f.getValue() + amountPercentageOBDRefil);
                     found = true;
                 }
             }
             if(!found)
-                fuelSources.add(new FuelSource(amountOBDRefil));
+                fuelSources.add(new FuelSource(amountPercentageOBDRefil));
         } else {
-            fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountPercentageOBDRefil()));
+            fuelSources.add(new FuelSource(expense.getStationUid(),expense.getStationName(), amountPercentageOBDRefil));
         }
     }
 

@@ -55,6 +55,26 @@ public class FuzzyConsumption implements Serializable {
         return veryhigh;
     }
 
+    public void setVerylow(int verylow) {
+        this.verylow = verylow;
+    }
+
+    public void setLow(int low) {
+        this.low = low;
+    }
+
+    public void setAverage(int average) {
+        this.average = average;
+    }
+
+    public void setHigh(int high) {
+        this.high = high;
+    }
+
+    public void setVeryhigh(int veryhigh) {
+        this.veryhigh = veryhigh;
+    }
+
     public void incrementComsuption(String str) {
         if (str.equals("muito_baixo")) {
             incrementVeryLow();

@@ -27,7 +27,7 @@ public class FuelAmountEvaluator extends Evaluator {
         if(diference>0 && diference>ALLOWANCE) {
             evaluation.setRate(-1);
             evaluation.setMessage("A quantidade de combustível detectada pelo OBD foi menor do que o informado pelo usuário. Isso pode significar problema com o leitor do carro ou com a bomba de combustível do posto.");
-        } if (diference<0 && Math.abs(diference)>ALLOWANCE) {
+        } else if (diference<0 && Math.abs(diference)>ALLOWANCE) {
             evaluation.setRate(1);
             evaluation.setMessage("A quantidade de combustível detectada pelo OBD foi maior do que o informado pelo usuário. Isso pode significar problema com o leitor do carro ou com a bomba de combustível do posto.");
         } else {

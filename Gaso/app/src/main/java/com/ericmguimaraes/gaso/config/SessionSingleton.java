@@ -36,6 +36,8 @@ public class SessionSingleton {
     
     public Car currentCar;
 
+    public boolean isConsumptionCalculated;
+
     private SessionSingleton(){
     }
 

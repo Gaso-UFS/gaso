@@ -114,7 +114,7 @@ public class MilestoneDAO {
         }
     }
 
-    public Milestone createNewMilestone(final float amountOBDRefil, final float fuelLevel, @Nullable final Expense expense) {
+    public Milestone createNewMilestone(final float amountPercentageOBDRefil, final float fuelLevel, @Nullable final Expense expense) {
         final Milestone milestone = new Milestone();
         milestone.setCreationDate(new Date().getTime());
         milestone.setCombustivePercentageConsumed(0);
@@ -126,7 +126,7 @@ public class MilestoneDAO {
         findLastMilestone(new OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(@Nullable Milestone lastmilestone) {
-                milestone.calculateFuelSource(amountOBDRefil, lastmilestone);
+                milestone.calculateFuelSource(amountPercentageOBDRefil, lastmilestone);
                 addOrUpdate(milestone);
             }
 

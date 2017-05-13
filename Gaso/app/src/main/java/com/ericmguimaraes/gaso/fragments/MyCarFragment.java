@@ -536,31 +536,32 @@ public class MyCarFragment extends Fragment {
 
     private void showExpenseConfirmationDialog(final float valorTotal, final boolean hasDiference) {
 
-        if(getContext()!=null && !isAlertShowing) {
+        if (getContext() != null && !isAlertShowing) {
             isAlertShowing = true;
             new AlertDialog.Builder(getContext())
-                .setTitle("Confirmação.")
-                .setMessage("Parece que você abasteceu, deseja cadastrar este abastecimento?")
+                    .setTitle("Confirmação.")
+                    .setMessage("Parece que você abasteceu, deseja cadastrar este abastecimento?")
 
-                .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        handleExpenseRefil(false, valorTotal, hasDiference);
-                    }
-                })
-                .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        handleExpenseRefil(true, valorTotal, hasDiference);
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        isAlertShowing = false;
-                    }
-                })
-                .setCancelable(false)
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .show();
+                    .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            handleExpenseRefil(false, valorTotal, hasDiference);
+                        }
+                    })
+                    .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            handleExpenseRefil(true, valorTotal, hasDiference);
+                        }
+                    })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            isAlertShowing = false;
+                        }
+                    })
+                    .setCancelable(false)
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .show();
+        }
     }
 
     private void handleExpenseRefil(final boolean hasAlreadyRegisteredExpense, final float valorTotal, final boolean hasRefilDiference) {

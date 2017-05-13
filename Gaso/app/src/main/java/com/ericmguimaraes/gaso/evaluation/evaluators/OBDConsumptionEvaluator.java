@@ -13,7 +13,7 @@ import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 
 public class OBDConsumptionEvaluator extends Evaluator {
 
-    private static final double ALLOWANCE = 0.2d;
+    private static final double ALLOWANCE = 0.5d;
 
     private FuzzyConsumption userConsumption;
 
@@ -48,10 +48,10 @@ public class OBDConsumptionEvaluator extends Evaluator {
         double diference = consumptionRateCar - consumptionRateMilestone;
         if(userConsumption==null || milestone.getFuzzyConsumption()==null || milestone.getFuzzyConsumption().isSimilar(userConsumption)) {
             if(diference>0 && diference>ALLOWANCE) {
-                evaluation.setRate(1);
-                evaluation.setMessage("O consumo de combustível nesse percurso foi menor que a média geral de consumo do carro. Isso pode significar um problema no carro, variações na qualidade do combustível ou uma forma diferente de dirigir durante esse percurso.");
-            } if (diference<0 && Math.abs(diference)>ALLOWANCE) {
                 evaluation.setRate(-1);
+                evaluation.setMessage("O consumo de combustível nesse percurso foi menor que a média geral de consumo do carro. Isso pode significar um problema no carro, variações na qualidade do combustível ou uma forma diferente de dirigir durante esse percurso.");
+            } else if (diference<0 && Math.abs(diference)>ALLOWANCE) {
+                evaluation.setRate(1);
                 evaluation.setMessage("O consumo de combustível nesse percurso foi maior que a média geral de consumo do carro. Isso pode significar um problema no carro, variações na qualidade do combustível ou uma forma diferente de dirigir durante esse percurso.");
             } else {
                 evaluation.setRate(0);

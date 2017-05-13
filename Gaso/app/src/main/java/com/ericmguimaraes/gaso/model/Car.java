@@ -18,6 +18,8 @@
 
 package com.ericmguimaraes.gaso.model;
 
+import com.ericmguimaraes.gaso.config.SessionSingleton;
+
 /**
  * Created by ericm on 2/27/2016.
  */
@@ -71,6 +73,7 @@ public class Car {
 
     public void setLastFuelPercentageLevel(float lastFuelPercentageLevel) {
         this.lastFuelPercentageLevel = lastFuelPercentageLevel;
+        SessionSingleton.getInstance().isConsumptionCalculated = false;
     }
 
     public float getTotalDistance() {
