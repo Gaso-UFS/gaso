@@ -23,7 +23,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -43,6 +42,8 @@ import java.util.HashMap;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+
+import static com.ericmguimaraes.gaso.evaluation.FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE;
 
 public class StationDetailsActivity extends AppCompatActivity {
 
@@ -74,25 +75,25 @@ public class StationDetailsActivity extends AppCompatActivity {
     LinearLayout obdFuelAmountLayout;
 
     @Bind(R.id.baixaFuelAmount)
-    ImageView baixaFuelAmount;
+    TextView baixaFuelAmount;
 
     @Bind(R.id.igualFuelAmount)
-    ImageView igualFuelAmount;
+    TextView igualFuelAmount;
 
     @Bind(R.id.altaFuelAmount)
-    ImageView altaFuelAmount;
+    TextView altaFuelAmount;
 
     @Bind(R.id.obdFuelDistance)
     LinearLayout obdFuelDistanceLayout;
 
     @Bind(R.id.baixaFuelDistance)
-    ImageView baixaFuelDistance;
+    TextView baixaFuelDistance;
 
     @Bind(R.id.igualFuelDistance)
-    ImageView igualFuelDistance;
+    TextView igualFuelDistance;
 
     @Bind(R.id.altaFuelDistance)
-    ImageView altaFuelDistance;
+    TextView altaFuelDistance;
 
     String stationId;
 
@@ -178,15 +179,29 @@ public class StationDetailsActivity extends AppCompatActivity {
     }
 
     private void fillAvaliations() {
-        HashMap<String, GeneralStationEvaluation> generalEvaluations = station.getGeneralEvaluations();
-        for (String key : generalEvaluations.keySet()) {
-           if (key.equals(FeatureType.FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
-               obdFuelDistanceLayout.setVisibility(View.VISIBLE);
-
-           }
-           if (key.equals(FeatureType.OBD_FUEL_AMOUNT)) {
-               obdFuelAmountLayout.setVisibility(View.VISIBLE);
-           }
+//        HashMap<String, GeneralStationEvaluation> genEval = new HashMap<String, GeneralStationEvaluation>();
+//        GeneralStationEvaluation stationEvaluation = new GeneralStationEvaluation();
+//        stationEvaluation.setOkTotal(20.645904590);
+//        stationEvaluation.setDownTotal(25.4556456);
+//        stationEvaluation.setUpTotal(30.5654645);
+//        genEval.put(FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE, stationEvaluation);
+//        station.setGeneralEvaluations(genEval);
+        if (station.getGeneralEvaluations() != null) {
+            HashMap<String, GeneralStationEvaluation> generalEvaluations = station.getGeneralEvaluations();
+            for (String key : generalEvaluations.keySet()) {
+                if (key.equals(FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
+                    obdFuelDistanceLayout.setVisibility(View.VISIBLE);
+                    baixaFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getDownTotal()));
+                    igualFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getOkTotal()));
+                    altaFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getUpTotal()));
+                }
+                if (key.equals(FeatureType.OBD_FUEL_AMOUNT)) {
+                    obdFuelAmountLayout.setVisibility(View.VISIBLE);
+                    baixaFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getDownTotal()));
+                    igualFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getOkTotal()));
+                    altaFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getUpTotal()));
+                }
+            }
         }
 
     }
