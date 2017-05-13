@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -134,16 +135,30 @@ public class StationDetailsActivity extends AppCompatActivity {
     }
 
     private void getStationFromGoogle() {
+        final StationDAO dao = new StationDAO();
         PlacesHelper placesHelper = new PlacesHelper(this);
         placesHelper.findStationByID(stationId, new PlacesHelper.StationFoundListener() {
             @Override
             public void OnFindStationResult(final Station station) {
                 if(station==null){
-                    Toast toast = Toast.makeText(getApplicationContext(),"ops, tivemos um problema.",Toast.LENGTH_SHORT);
-                    toast.show();
-                    onBackPressed();
+                    dao.findStationById(stationId, new StationDAO.OneStationReceivedListener() {
+                        @Override
+                        public void onStationReceived(Station gasStation) {
+                            if (gasStation != null) {
+                                StationDetailsActivity.this.station = gasStation;
+                                fillFields();
+                            } else {
+                                showAlertNoDetails();
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            showAlertNoDetails();
+                        }
+                    });
                 } else {
-                    StationDAO dao = new StationDAO();
                     dao.addOrUpdate(station, new StationDAO.OneStationReceivedListener() {
                         @Override
                         public void onStationReceived(Station gasStation) {
@@ -163,6 +178,12 @@ public class StationDetailsActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void showAlertNoDetails() {
+        Toast toast = Toast.makeText(getApplicationContext(),"ops, tivemos um problema.",Toast.LENGTH_SHORT);
+        toast.show();
+        onBackPressed();
     }
 
     private void fillFields() {
