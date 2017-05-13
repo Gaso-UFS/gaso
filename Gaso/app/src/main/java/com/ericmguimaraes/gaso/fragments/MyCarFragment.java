@@ -130,6 +130,8 @@ public class MyCarFragment extends Fragment {
 
     OnMyCarFragmentInteractionListener mListener;
 
+    boolean isAlertShowing = false;
+
     public MyCarFragment() {
         // Required empty public constructor
     }
@@ -534,7 +536,8 @@ public class MyCarFragment extends Fragment {
 
     private void showExpenseConfirmationDialog(final float valorTotal, final boolean hasDiference) {
 
-        if(getContext()!=null)
+        if(getContext()!=null && !isAlertShowing) {
+            isAlertShowing = true;
             new AlertDialog.Builder(getContext())
                 .setTitle("Confirmação.")
                 .setMessage("Parece que você abasteceu, deseja cadastrar este abastecimento?")
@@ -547,6 +550,12 @@ public class MyCarFragment extends Fragment {
                 .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         handleExpenseRefil(true, valorTotal, hasDiference);
+                    }
+                })
+                .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+                        isAlertShowing = false;
                     }
                 })
                 .setCancelable(false)
