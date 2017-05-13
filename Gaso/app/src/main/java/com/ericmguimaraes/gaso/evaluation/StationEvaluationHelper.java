@@ -3,8 +3,7 @@ package com.ericmguimaraes.gaso.evaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 import com.ericmguimaraes.gaso.evaluation.evaluations.GeneralStationEvaluation;
 import com.ericmguimaraes.gaso.model.FuelSource;
-import com.ericmguimaraes.gaso.model.Station;
-import com.ericmguimaraes.gaso.persistence.StationDAO;
+import com.ericmguimaraes.gaso.persistence.StationEvaluationDAO;
 import com.google.firebase.database.DatabaseError;
 
 import java.util.ArrayList;
@@ -27,50 +26,47 @@ public class StationEvaluationHelper {
 
     public void evaluate() {
         if(milestone!=null && milestone.getFuelSources()!=null && milestone.getFuelSources().size()>0 && milestone.getEvaluations()!=null && milestone.getEvaluations().size()>0) {
-            List<FuelSource> fuelSourcesBefore = milestone.getFuelSources();
+            final List<FuelSource> fuelSourcesBefore = milestone.getFuelSources();
             float beforeFuelLevel = milestone.getInitialFuelLevel();
             List<Double> percentages = new ArrayList<>();
             // prepara as porcentagens de cada combustivel no milestone
             for(FuelSource f : fuelSourcesBefore) {
                 percentages.add(f.getValue() / beforeFuelLevel);
             }
-            final StationDAO dao = new StationDAO();
+            final StationEvaluationDAO dao = new StationEvaluationDAO();
             for (int i=0; i<percentages.size(); i++) {
                 FuelSource fs = fuelSourcesBefore.get(i);
                 final Double percentage = percentages.get(i);
                 if(!fs.isOutros()) {
                     Iterator<String> iterator = milestone.getEvaluations().keySet().iterator();
+                    final int index = i;
                     while (iterator.hasNext()) {
                         final Evaluation eval = milestone.getEvaluations().get(iterator.next());
-                        dao.findStationById(fuelSourcesBefore.get(i).getStationId(), new StationDAO.OneStationReceivedListener() {
+                        dao.findStationEvaluationById(fuelSourcesBefore.get(i).getStationId(), new StationEvaluationDAO.OneStationEvaluationReceivedListener() {
                             @Override
-                            public void onStationReceived(Station station) {
-                                if(station!=null) {
-                                    if(station.getGeneralEvaluations()==null)
-                                        station.setGeneralEvaluations(new HashMap<String, GeneralStationEvaluation>());
-                                    if(!station.getGeneralEvaluations().containsKey(eval.getFeatureType())){
-                                        GeneralStationEvaluation ge = new GeneralStationEvaluation();
-                                        ge.setFeatureType(eval.getFeatureType());
-                                        if(eval.getRate()>0) {
-                                            ge.setUpTotal(percentage+ge.getUpTotal());
-                                            if(ge.getUps()==null)
-                                                ge.setUps(new HashMap<Long, Double>());
-                                            ge.getUps().put(new Date().getTime(), percentage);
-                                        } if (eval.getRate()<0) {
-                                            ge.setDownTotal(percentage+ge.getDownTotal());
-                                            if(ge.getDowns()==null)
-                                                ge.setDowns(new HashMap<Long, Double>());
-                                            ge.getDowns().put(new Date().getTime(), percentage);
-                                        } else {
-                                            ge.setOkTotal(percentage+ge.getOkTotal());
-                                            if(ge.getOks()==null)
-                                                ge.setOks(new HashMap<Long, Double>());
-                                            ge.getOks().put(new Date().getTime(), percentage);
-                                        }
-                                        station.getGeneralEvaluations().put(eval.getFeatureType(), ge);
-                                    }
-                                    dao.addOrUpdate(station);
+                            public void onStationEvaluationReceived(HashMap<String, GeneralStationEvaluation> evaluations) {
+                                if(evaluations==null)
+                                    evaluations = new HashMap<String, GeneralStationEvaluation>();
+                                GeneralStationEvaluation ge = new GeneralStationEvaluation();
+                                ge.setFeatureType(eval.getFeatureType());
+                                if(eval.getRate()>0) {
+                                    ge.setUpTotal(percentage+ge.getUpTotal());
+                                    if(ge.getUps()==null)
+                                        ge.setUps(new HashMap<Long, Double>());
+                                    ge.getUps().put(new Date().getTime(), percentage);
+                                } if (eval.getRate()<0) {
+                                    ge.setDownTotal(percentage+ge.getDownTotal());
+                                    if(ge.getDowns()==null)
+                                        ge.setDowns(new HashMap<Long, Double>());
+                                    ge.getDowns().put(new Date().getTime(), percentage);
+                                } else {
+                                    ge.setOkTotal(percentage+ge.getOkTotal());
+                                    if(ge.getOks()==null)
+                                        ge.setOks(new HashMap<Long, Double>());
+                                    ge.getOks().put(new Date().getTime(), percentage);
                                 }
+                                evaluations.put(eval.getFeatureType(), ge);
+                                dao.addOrUpdate(fuelSourcesBefore.get(index).getStationId(), evaluations);
                             }
 
                             @Override

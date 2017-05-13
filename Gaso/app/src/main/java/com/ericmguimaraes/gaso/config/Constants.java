@@ -64,5 +64,6 @@ public class Constants {
     public static final String FIREBASE_UNTRACEABLE_OBD_LOG = "untraceable_obd_logs";
     public static final String FIREBASE_MILESTONES = "milestones";
     public static final String FIREBASE_STATIONS = "stations";
+    public static final String FIREBASE_STATIONS_EVALUATIONS = "stationEvaluations";
     public static final String FIREBASE_FUZZYCONSUMPTION = "fuzzyConsumption";
 }

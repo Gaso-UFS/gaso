@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -37,6 +36,7 @@ import com.ericmguimaraes.gaso.evaluation.evaluations.GeneralStationEvaluation;
 import com.ericmguimaraes.gaso.maps.PlacesHelper;
 import com.ericmguimaraes.gaso.model.Station;
 import com.ericmguimaraes.gaso.persistence.StationDAO;
+import com.ericmguimaraes.gaso.persistence.StationEvaluationDAO;
 import com.google.firebase.database.DatabaseError;
 
 import java.util.HashMap;
@@ -200,30 +200,41 @@ public class StationDetailsActivity extends AppCompatActivity {
     }
 
     private void fillAvaliations() {
-//        HashMap<String, GeneralStationEvaluation> genEval = new HashMap<String, GeneralStationEvaluation>();
-//        GeneralStationEvaluation stationEvaluation = new GeneralStationEvaluation();
-//        stationEvaluation.setOkTotal(20.645904590);
-//        stationEvaluation.setDownTotal(25.4556456);
-//        stationEvaluation.setUpTotal(30.5654645);
-//        genEval.put(FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE, stationEvaluation);
-//        station.setGeneralEvaluations(genEval);
-        if (station.getGeneralEvaluations() != null) {
-            HashMap<String, GeneralStationEvaluation> generalEvaluations = station.getGeneralEvaluations();
-            for (String key : generalEvaluations.keySet()) {
-                if (key.equals(FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
-                    obdFuelDistanceLayout.setVisibility(View.VISIBLE);
-                    baixaFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getDownTotal()));
-                    igualFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getOkTotal()));
-                    altaFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getUpTotal()));
+        StationEvaluationDAO dao = new StationEvaluationDAO();
+        dao.findStationEvaluationById(stationId, new StationEvaluationDAO.OneStationEvaluationReceivedListener() {
+                @Override
+                public void onStationEvaluationReceived(HashMap<String, GeneralStationEvaluation> evaluations) {
+                    if (evaluations != null) {
+
+                        HashMap<String, GeneralStationEvaluation> generalEvaluations = evaluations;
+                        for (String key : generalEvaluations.keySet()) {
+                            if (key.equals(FUEL_CONSUMPTION_OBD_FUEL_LEVEL_AND_OBD_DISTANCE)) {
+                                obdFuelDistanceLayout.setVisibility(View.VISIBLE);
+                                baixaFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getDownTotal()));
+                                igualFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getOkTotal()));
+                                altaFuelDistance.setText(String.format("%.2f", generalEvaluations.get(key).getUpTotal()));
+                            }
+                            if (key.equals(FeatureType.OBD_FUEL_AMOUNT)) {
+                                obdFuelAmountLayout.setVisibility(View.VISIBLE);
+                                baixaFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getDownTotal()));
+                                igualFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getOkTotal()));
+                                altaFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getUpTotal()));
+                            }
+                        }
+
+                        station.setGeneralEvaluations(evaluations);
+                        StationDAO stationDAO = new StationDAO();
+                        stationDAO.addOrUpdate(station);
+                    }
                 }
-                if (key.equals(FeatureType.OBD_FUEL_AMOUNT)) {
-                    obdFuelAmountLayout.setVisibility(View.VISIBLE);
-                    baixaFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getDownTotal()));
-                    igualFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getOkTotal()));
-                    altaFuelAmount.setText(String.format("%.2f", generalEvaluations.get(key).getUpTotal()));
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    //ignore
                 }
             }
-        }
+        );
+
 
     }
 
