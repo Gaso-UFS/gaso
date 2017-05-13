@@ -28,6 +28,8 @@ public class FuelSource {
     }
 
     public String getStationId() {
+        if(stationName==null)
+            return "";
         return stationId;
     }
 
@@ -44,6 +46,8 @@ public class FuelSource {
     }
 
     public String getStationName() {
+        if(stationName==null || stationName.isEmpty())
+            return "Outros";
         return stationName;
     }
 

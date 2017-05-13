@@ -44,7 +44,9 @@ public final class EvaluationHelper {
             dao.findFuzzyConsumption(new FuzzyConsumption.FuzzyConsumptionListener() {
                 @Override
                 public void onConsumptionFound(FuzzyConsumption consumption) {
-                    HashMap<String, Evaluation> evaluations = new HashMap<String, Evaluation>();
+                    HashMap<String, Evaluation> evaluations = milestone.getEvaluations();
+                    if(evaluations==null)
+                        evaluations = new HashMap<String, Evaluation>();
 
                     milestone.setTankMax(SessionSingleton.getInstance().currentCar.getTankMaxLevel());
 

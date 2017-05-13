@@ -12,7 +12,7 @@ import java.util.List;
 
 public class FuzzyConsumption implements Serializable {
 
-    private static final float ALLOWANCE = 20f;
+    private static final float ALLOWANCE = 50f;
     private int verylow = 0;
     private int low = 0;
     private int average = 0;
@@ -128,6 +128,8 @@ public class FuzzyConsumption implements Serializable {
     }
 
     public float getPercentage(int value){
+        if(getTotal()==0)
+            return 0;
         return ((float) value/getTotal()*100);
     }
 

@@ -154,11 +154,6 @@ public class Milestone {
         if(before==null || before.getFuelSources()==null) {
             if(expense==null)
                 fuelSources.add(new FuelSource(initialFuelLevel));
-            else {
-                fuelSources.add(new FuelSource(initialFuelLevel-expense.getAmountPercentageOBDRefil()));
-                if (expense.getStation() != null)
-                    fuelSources.add(new FuelSource(expense.getStation().getId(),expense.getStationName(), expense.getAmountPercentageOBDRefil()));
-            }
         } else {
             List<FuelSource> fuelSourcesBefore = before.getFuelSources();
             float beforeFuelLevel = before.getInitialFuelLevel();

@@ -51,7 +51,7 @@ public class MyFuelSourceRecyclerViewAdapter extends RecyclerView.Adapter<MyFuel
         String nomePosto = itemList.get(listPosition).getStationName();
         String quantidadeL;
         if(milestone.isHasTankMax())
-            quantidadeL = String.format("%.2f", itemList.get(listPosition).getValue()*milestone.getTankMax()/100) + "%";
+            quantidadeL = String.format("%.2f", itemList.get(listPosition).getValue()*milestone.getTankMax()/100) + "L";
         else
             quantidadeL = String.format("%.2f", itemList.get(listPosition).getValue()) + "%";
         item.setText(nomePosto + ": "+ quantidadeL);

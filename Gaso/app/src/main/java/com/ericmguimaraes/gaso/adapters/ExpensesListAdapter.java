@@ -159,12 +159,14 @@ public class ExpensesListAdapter extends RecyclerView.Adapter<ExpensesListAdapte
         @Override
         public void onClick(View v) {
             int itemPosition = recyclerView.getChildAdapterPosition(v);
-            Expense expense = expenseList.get(itemPosition);
-            Intent intent = new Intent(context, ExpensesRegisterActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            String expenseStation = GsonManager.getGsonInstance().toJson(expense);
-            intent.putExtra("edit_expense", expenseStation);
-            context.startActivity(intent);
+            if(itemPosition!=-1) {
+                Expense expense = expenseList.get(itemPosition);
+                Intent intent = new Intent(context, ExpensesRegisterActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                String expenseStation = GsonManager.getGsonInstance().toJson(expense);
+                intent.putExtra("edit_expense", expenseStation);
+                context.startActivity(intent);
+            }
         }
     }
 

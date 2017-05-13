@@ -198,8 +198,10 @@ public class MyCarFragment extends Fragment {
                 startActivity(intent);
                 return true;
             case R.id.evaluation_menu:
-                intent = new Intent(getActivity(), EvaluationActivity.class);
-                startActivity(intent);
+                if(SessionSingleton.getInstance().currentCar!=null) {
+                    intent = new Intent(getActivity(), EvaluationActivity.class);
+                    startActivity(intent);
+                }
                 return true;
             case R.id.action_help:
                 Intent intentHelp = new Intent(getActivity(), PlainTextActivity.class);

@@ -64,7 +64,7 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
         } else
             holder.consumidoPericorridoSection.setVisibility(View.GONE);
 
-        if (m.getFuzzyConsumption()!=null) {
+        if (m.getFuzzyConsumption()!=null && m.getFuzzyConsumption().getTotal()>0) {
             FuzzyConsumption f = m.getFuzzyConsumption();
             holder.muitoBaixoConsumo.setText(String.format("%.2f", f.getPercentage(f.getVerylow()))+"%");
             holder.baixoConsumo.setText(String.format("%.2f", f.getPercentage(f.getLow()))+"%");
