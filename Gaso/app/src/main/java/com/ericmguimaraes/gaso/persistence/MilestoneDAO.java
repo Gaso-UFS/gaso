@@ -126,8 +126,7 @@ public class MilestoneDAO {
         findLastMilestone(new OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(@Nullable Milestone lastmilestone) {
-                if(lastmilestone != null)
-                    milestone.calculateFuelSource(amountOBDRefil, lastmilestone);
+                milestone.calculateFuelSource(amountOBDRefil, lastmilestone);
                 addOrUpdate(milestone);
             }
 

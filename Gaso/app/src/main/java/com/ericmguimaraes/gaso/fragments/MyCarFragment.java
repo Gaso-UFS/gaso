@@ -63,11 +63,14 @@ import com.ericmguimaraes.gaso.bluetooth.BluetoothHelper;
 import com.ericmguimaraes.gaso.config.Constants;
 import com.ericmguimaraes.gaso.config.SessionSingleton;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
+import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
 import com.ericmguimaraes.gaso.model.Car;
 import com.ericmguimaraes.gaso.model.Expense;
+import com.ericmguimaraes.gaso.model.FuelSource;
 import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 import com.ericmguimaraes.gaso.model.ObdLog;
 import com.ericmguimaraes.gaso.model.ObdLogGroup;
+import com.ericmguimaraes.gaso.persistence.CarDAO;
 import com.ericmguimaraes.gaso.persistence.ExpensesDAO;
 import com.ericmguimaraes.gaso.persistence.MilestoneDAO;
 import com.ericmguimaraes.gaso.persistence.UserDAO;
@@ -76,8 +79,11 @@ import com.ericmguimaraes.gaso.util.FuzzyManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -516,6 +522,11 @@ public class MyCarFragment extends Fragment {
                             ((MainActivity)getActivity()).showAnalysisLayout();
                         break;
                     }
+                    case LoggingService.SERVICE_SUPPORTED_ANALYSIS: {
+                        if (isAdded() && getActivity()!=null)
+                            ((MainActivity)getActivity()).hideAnalysisLayout();
+                        break;
+                    }
                 }
             }
         }
@@ -526,16 +537,16 @@ public class MyCarFragment extends Fragment {
         if(getContext()!=null)
             new AlertDialog.Builder(getContext())
                 .setTitle("Confirmação.")
-                .setMessage("Parece que você abasteceu, você já cadastrou este abastecimento?")
+                .setMessage("Parece que você abasteceu, deseja cadastrar este abastecimento?")
 
                 .setPositiveButton(R.string.sim, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        handleExpenseRefil(true, valorTotal, hasDiference);
+                        handleExpenseRefil(false, valorTotal, hasDiference);
                     }
                 })
                 .setNegativeButton(R.string.nao, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        handleExpenseRefil(false, valorTotal, hasDiference);
+                        handleExpenseRefil(true, valorTotal, hasDiference);
                     }
                 })
                 .setCancelable(false)
@@ -557,6 +568,11 @@ public class MyCarFragment extends Fragment {
                     MilestoneDAO milestoneDAO = new MilestoneDAO();
                     Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelPercentageLevel(), expense);
                     milestoneDAO.addOrUpdate(milestone);
+
+                    Car c = SessionSingleton.getInstance().currentCar;
+                    c.setLastFuelPercentageLevel(c.getLastFuelPercentageLevel()+valorTotal);
+                    CarDAO dao = new CarDAO();
+                    dao.addOrUpdate(c);
 
                 }
 

@@ -63,6 +63,7 @@ public class LoggingService extends Service {
     public static final String SERVICE_MESSAGE =
             "io.github.malvadeza.floatingcar.logging_service.message";
     public static final String SERVICE_UNSUPPORTED_ANALYSIS = "unsupported_analysis";
+    public static final String SERVICE_SUPPORTED_ANALYSIS = "supported_analysis";
 
     protected LocalBroadcastManager mBroadcastManager;
 

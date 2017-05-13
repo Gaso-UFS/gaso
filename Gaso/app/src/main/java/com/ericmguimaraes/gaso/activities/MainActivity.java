@@ -278,6 +278,10 @@ public class MainActivity extends AppCompatActivity implements ObdLogFragment.On
         analysisRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    public void hideAnalysisLayout(){
+        analysisRecyclerView.setVisibility(View.VISIBLE);
+    }
+
     public void hideAnalysistLayout(){
         analysisRecyclerView.setVisibility(View.GONE);
     }

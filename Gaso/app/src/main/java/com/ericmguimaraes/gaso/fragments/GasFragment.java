@@ -267,8 +267,10 @@ public class GasFragment extends Fragment {
 
 
     private void updateData() {
-        stationFragment.setStationList(stationsList);
-        mapGasoFragment.setStationList(stationsList);
+        if(stationFragment!=null)
+            stationFragment.setStationList(stationsList);
+        if(mapGasoFragment!=null)
+            mapGasoFragment.setStationList(stationsList);
     }
 
     public class StationSearch extends AsyncTask<Void,Void,Void> {

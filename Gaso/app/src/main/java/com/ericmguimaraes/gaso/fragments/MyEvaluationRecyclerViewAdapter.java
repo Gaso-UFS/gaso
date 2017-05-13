@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
-import com.ericmguimaraes.gaso.adapters.TextAdapter;
+import com.ericmguimaraes.gaso.adapters.MyFuelSourceRecyclerViewAdapter;
 import com.ericmguimaraes.gaso.evaluation.FeatureType;
 import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.evaluation.evaluations.Evaluation;
@@ -44,14 +44,14 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
 
         if(m.getEvaluations()!=null && m.getEvaluations().containsKey(FeatureType.OBD_FUEL_AMOUNT) && m.isHasTankMax()) {
             holder.abastecidoUsuario.setText("Usuário : " + m.getExpenseAmount() + "L");
-            holder.abastecidoOBD.setText("OBDII: " + m.getExpenseAmountPercentageOBDRefil() + "L");
+            holder.abastecidoOBD.setText("OBDII: " + String.format("%.2f", (m.getExpenseAmountPercentageOBDRefil()*m.getTankMax()/100))+ "L");
             holder.abastecidoDescricao.setText(m.getEvaluations().get(FeatureType.OBD_FUEL_AMOUNT).getMessage());
         } else
             holder.abastecimentoSection.setVisibility(View.GONE);
 
         holder.recyclerView.setLayoutManager(new LinearLayoutManager(holder.recyclerView.getContext(), LinearLayoutManager.HORIZONTAL, true));
         if(m.getFuelSources()!=null && m.getFuelSources().size()>0)
-            holder.recyclerView.setAdapter(new TextAdapter(m.getFuelSources()));
+            holder.recyclerView.setAdapter(new MyFuelSourceRecyclerViewAdapter(m.getFuelSources(), m));
         else
             holder.origemSection.setVisibility(View.GONE);
 

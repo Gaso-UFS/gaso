@@ -200,7 +200,11 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
 
         if(obdRefil) {
             amountPercentageOBDRefil = getIntent().getExtras().getFloat(REFIL_EXTRA);
-            inputAmount.setText(String.format("%.2f", getIntent().getExtras().getFloat(REFIL_EXTRA)) + "L");
+
+            if (SessionSingleton.getInstance().currentCar.isHasTankMaxLevel()) {
+                inputAmount.setText(String.format("%.2f", (getIntent().getExtras().getFloat(REFIL_EXTRA) * SessionSingleton.getInstance().currentCar.getTankMaxLevel()) / 100) + "L");
+            }
+
         }
     }
 
@@ -355,7 +359,7 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
     private void setExpense(Expense e) {
         e.setDate(calendarSelected == null ? new Date().getTime() : calendarSelected.getTime().getTime());
         e.setType(typeSelected);
-        if (stationSelected.getId() != null)
+        if (stationSelected!=null && stationSelected.getId() != null)
             e.setStationUid(stationSelected.getId());
         if (SessionSingleton.getInstance().currentCar != null && SessionSingleton.getInstance().currentCar.getid() != null)
             e.setCarUid(SessionSingleton.getInstance().currentCar.getid());

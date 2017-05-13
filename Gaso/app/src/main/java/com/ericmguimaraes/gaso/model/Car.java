@@ -116,4 +116,5 @@ public class Car {
     public boolean isHasTankMaxLevel(){
         return tankMaxLevel>0;
     }
+
 }

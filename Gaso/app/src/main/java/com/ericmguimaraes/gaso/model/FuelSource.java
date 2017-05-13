@@ -12,6 +12,9 @@ public class FuelSource {
 
     double value;
 
+    public FuelSource() {
+    }
+
     public FuelSource(double value) {
         this.value = value;
         stationId = "";

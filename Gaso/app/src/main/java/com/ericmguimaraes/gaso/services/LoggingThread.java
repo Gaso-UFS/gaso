@@ -53,6 +53,7 @@ public class LoggingThread implements Runnable,
 
     private float[] mAcc;
     private int count = 0;
+    private boolean refilBroadcastSent = false;
 
     public LoggingThread(LoggingService service) {
         this(service, null);
@@ -96,10 +97,11 @@ public class LoggingThread implements Runnable,
                 if(obdValues.size()>1)
                     sendInformationBroadcast(obdValues);
 
-                if(mObdReader.isHasGotDistanceFuel())
+                if(mObdReader.isHasGotDistanceFuel()) {
                     calculateConsumption();
-                else
-                    sendUnsupportedAnalysisBroadcas();
+                    sendUnsupportedAnalysisBroadcas(true);
+                } else
+                    sendUnsupportedAnalysisBroadcas(false);
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error", e);
                 e.printStackTrace();
@@ -128,7 +130,8 @@ public class LoggingThread implements Runnable,
                     milestone.setCombustivePercentageConsumed(milestone.getCombustivePercentageConsumed() + fuelDiference);
                     dao.addOrUpdate(milestone);
                 } else {
-                    sendBroadcastRefilled(fuelDiference * -1);
+                    if(!refilBroadcastSent)
+                        sendBroadcastRefilled(fuelDiference * -1);
                 }
             }
 
@@ -157,6 +160,7 @@ public class LoggingThread implements Runnable,
     }
 
     private void sendBroadcastRefilled(float diference) {
+        refilBroadcastSent = true;
         LoggingService service = mLoggingServiceReference.get();
 
         if (service == null) return;
@@ -179,12 +183,14 @@ public class LoggingThread implements Runnable,
         service.mBroadcastManager.sendBroadcast(intent);
     }
 
-    private void sendUnsupportedAnalysisBroadcas() {
+    private void sendUnsupportedAnalysisBroadcas(boolean supported) {
         LoggingService service = mLoggingServiceReference.get();
         if (service == null) return;
         Intent intent = new Intent(LoggingService.SERVICE_BROADCAST_MESSAGE);
-        intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_UNSUPPORTED_ANALYSIS);
-
+        if(!supported)
+            intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_UNSUPPORTED_ANALYSIS);
+        else
+            intent.putExtra(LoggingService.SERVICE_MESSAGE, LoggingService.SERVICE_SUPPORTED_ANALYSIS);
         service.mBroadcastManager.sendBroadcast(intent);
     }
 

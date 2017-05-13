@@ -7,21 +7,26 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ericmguimaraes.gaso.R;
+import com.ericmguimaraes.gaso.config.SessionSingleton;
+import com.ericmguimaraes.gaso.evaluation.Milestone;
 import com.ericmguimaraes.gaso.model.FuelSource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by adrianodias on 5/7/17.
  */
 
-public class TextAdapter extends RecyclerView.Adapter<TextAdapter.ViewHolder> {
+public class MyFuelSourceRecyclerViewAdapter extends RecyclerView.Adapter<MyFuelSourceRecyclerViewAdapter.ViewHolder> {
     //All methods in this adapter are required for a bare minimum recyclerview adapter
     private List<FuelSource> itemList;
+
+    private Milestone milestone;
+
     // Constructor of the class
-    public TextAdapter(List<FuelSource> itemList) {
+    public MyFuelSourceRecyclerViewAdapter(List<FuelSource> itemList, Milestone milestone) {
         this.itemList = itemList;
+        this.milestone = milestone;
     }
 
     // get the size of the list
@@ -44,7 +49,11 @@ public class TextAdapter extends RecyclerView.Adapter<TextAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, final int listPosition) {
         TextView item = holder.item;
         String nomePosto = itemList.get(listPosition).getStationName();
-        String quantidadeL = String.format("%.2f", itemList.get(listPosition).getValue()) + "L";
+        String quantidadeL;
+        if(milestone.isHasTankMax())
+            quantidadeL = String.format("%.2f", itemList.get(listPosition).getValue()*milestone.getTankMax()/100) + "%";
+        else
+            quantidadeL = String.format("%.2f", itemList.get(listPosition).getValue()) + "%";
         item.setText(nomePosto + ": "+ quantidadeL);
     }
 
