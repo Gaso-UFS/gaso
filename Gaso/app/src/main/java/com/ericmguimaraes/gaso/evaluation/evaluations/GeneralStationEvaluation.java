@@ -8,11 +8,11 @@ import java.util.HashMap;
 
 public class GeneralStationEvaluation extends Evaluation {
 
-    private HashMap<Long, Double> ups;
+    private HashMap<String, Double> ups;
 
-    private HashMap<Long, Double> oks;
+    private HashMap<String, Double> oks;
 
-    private HashMap<Long, Double> downs;
+    private HashMap<String, Double> downs;
 
     private double upTotal;
 
@@ -20,27 +20,27 @@ public class GeneralStationEvaluation extends Evaluation {
 
     private double downTotal;
 
-    public HashMap<Long, Double> getUps() {
+    public HashMap<String, Double> getUps() {
         return ups;
     }
 
-    public void setUps(HashMap<Long, Double> ups) {
+    public void setUps(HashMap<String, Double> ups) {
         this.ups = ups;
     }
 
-    public HashMap<Long, Double> getOks() {
+    public HashMap<String, Double> getOks() {
         return oks;
     }
 
-    public void setOks(HashMap<Long, Double> oks) {
+    public void setOks(HashMap<String, Double> oks) {
         this.oks = oks;
     }
 
-    public HashMap<Long, Double> getDowns() {
+    public HashMap<String, Double> getDowns() {
         return downs;
     }
 
-    public void setDowns(HashMap<Long, Double> downs) {
+    public void setDowns(HashMap<String, Double> downs) {
         this.downs = downs;
     }
 

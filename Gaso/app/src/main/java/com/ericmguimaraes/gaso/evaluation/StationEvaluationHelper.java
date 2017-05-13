@@ -52,18 +52,18 @@ public class StationEvaluationHelper {
                                 if(eval.getRate()>0) {
                                     ge.setUpTotal(percentage+ge.getUpTotal());
                                     if(ge.getUps()==null)
-                                        ge.setUps(new HashMap<Long, Double>());
-                                    ge.getUps().put(new Date().getTime(), percentage);
+                                        ge.setUps(new HashMap<String, Double>());
+                                    ge.getUps().put(String.valueOf(new Date().getTime()), percentage);
                                 } if (eval.getRate()<0) {
                                     ge.setDownTotal(percentage+ge.getDownTotal());
                                     if(ge.getDowns()==null)
-                                        ge.setDowns(new HashMap<Long, Double>());
-                                    ge.getDowns().put(new Date().getTime(), percentage);
+                                        ge.setDowns(new HashMap<String, Double>());
+                                    ge.getDowns().put(String.valueOf(new Date().getTime()), percentage);
                                 } else {
                                     ge.setOkTotal(percentage+ge.getOkTotal());
                                     if(ge.getOks()==null)
-                                        ge.setOks(new HashMap<Long, Double>());
-                                    ge.getOks().put(new Date().getTime(), percentage);
+                                        ge.setOks(new HashMap<String, Double>());
+                                    ge.getOks().put(String.valueOf(new Date().getTime()), percentage);
                                 }
                                 evaluations.put(eval.getFeatureType(), ge);
                                 dao.addOrUpdate(fuelSourcesBefore.get(index).getStationId(), evaluations);
