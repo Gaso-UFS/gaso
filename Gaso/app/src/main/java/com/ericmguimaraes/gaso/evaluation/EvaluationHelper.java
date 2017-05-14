@@ -28,10 +28,22 @@ public final class EvaluationHelper {
 
     private static OnEvaluationListener listener;
 
+    private static EvaluationHelperAsyncTask task;
+
+    private static boolean isToEvaluateAgain = false;
+
+    private static Milestone backupMilestone;
+
     public static void initEvaluation(Milestone milestone, OnEvaluationListener listener) {
-        EvaluationHelper.milestone = milestone;
-        EvaluationHelper.listener = listener;
-        new EvaluationHelperAsyncTask().execute();
+        if(task==null) {
+            EvaluationHelper.milestone = milestone;
+            EvaluationHelper.listener = listener;
+            task = new EvaluationHelperAsyncTask();
+            task.execute();
+        } else {
+            backupMilestone = milestone;
+            isToEvaluateAgain = true;
+        }
     }
 
     private static class EvaluationHelperAsyncTask extends AsyncTask<Void, Void , Void> {
@@ -69,6 +81,13 @@ public final class EvaluationHelper {
 
                     MilestoneDAO dao = new MilestoneDAO();
                     dao.addOrUpdate(milestone);
+
+                    task = null;
+                    if(isToEvaluateAgain) {
+                        milestone = backupMilestone;
+                        task = new EvaluationHelperAsyncTask();
+                        task.execute();
+                    }
 
                     if(listener!=null)
                         listener.onDone();
