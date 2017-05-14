@@ -72,7 +72,7 @@ public class EvaluationFragment extends Fragment {
             @Override
             public void onMilestoneReceived(@Nullable Milestone milestone) {
                 if(milestone!=null)
-                    EvaluationHelper.initEvaluation(milestone, false, new EvaluationHelper.OnEvaluationListener() {
+                    EvaluationHelper.initEvaluation(milestone, new EvaluationHelper.OnEvaluationListener() {
                         @Override
                         public void onDone() {
                             loadData();

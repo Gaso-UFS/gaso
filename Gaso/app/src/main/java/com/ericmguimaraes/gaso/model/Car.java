@@ -30,8 +30,8 @@ public class Car {
     private String description;
     private long creationDate;
     private float lastFuelPercentageLevel;
-    private float totalDistance;
-    private float lastDistanceRead;
+    private double totalDistance;
+    private double lastDistanceRead;
     private double totalFuelPercentageUsed;
     private double tankMaxLevel;
 
@@ -73,22 +73,21 @@ public class Car {
 
     public void setLastFuelPercentageLevel(float lastFuelPercentageLevel) {
         this.lastFuelPercentageLevel = lastFuelPercentageLevel;
-        SessionSingleton.getInstance().isConsumptionCalculated = false;
     }
 
-    public float getTotalDistance() {
+    public double getTotalDistance() {
         return totalDistance;
     }
 
-    public void setTotalDistance(float totalDistance) {
+    public void setTotalDistance(double totalDistance) {
         this.totalDistance = totalDistance;
     }
 
-    public float getLastDistanceRead() {
+    public double getLastDistanceRead() {
         return lastDistanceRead;
     }
 
-    public void setLastDistanceRead(float lastDistanceRead) {
+    public void setLastDistanceRead(double lastDistanceRead) {
         this.lastDistanceRead = lastDistanceRead;
     }
 

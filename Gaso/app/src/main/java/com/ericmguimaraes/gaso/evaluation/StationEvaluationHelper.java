@@ -66,7 +66,8 @@ public class StationEvaluationHelper {
                                     ge.getOks().put(String.valueOf(new Date().getTime()), percentage);
                                 }
                                 evaluations.put(eval.getFeatureType(), ge);
-                                dao.addOrUpdate(fuelSourcesBefore.get(index).getStationId(), evaluations);
+                                if(fuelSourcesBefore.get(index).getStationId()!=null && !fuelSourcesBefore.get(index).getStationId().isEmpty())
+                                    dao.addOrUpdate(fuelSourcesBefore.get(index).getStationId(), evaluations);
                             }
 
                             @Override

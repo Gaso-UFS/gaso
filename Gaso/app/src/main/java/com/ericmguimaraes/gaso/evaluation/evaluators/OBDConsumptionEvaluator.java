@@ -13,7 +13,7 @@ import com.ericmguimaraes.gaso.model.FuzzyConsumption;
 
 public class OBDConsumptionEvaluator extends Evaluator {
 
-    private static final double ALLOWANCE = 0.5d;
+    private static final double ALLOWANCE = 0.4d;
 
     private FuzzyConsumption userConsumption;
 

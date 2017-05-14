@@ -22,7 +22,7 @@ public class Milestone {
     private String uid;
     private long creationDate;
     private float combustivePercentageConsumed;
-    private float distanceRolled;
+    private double distanceRolled;
     private FuzzyConsumption fuzzyConsumption;
     private List<FuelSource> fuelSources;
     private float initialFuelLevel;
@@ -70,11 +70,11 @@ public class Milestone {
         this.combustivePercentageConsumed = combustivePercentageConsumed;
     }
 
-    public float getDistanceRolled() {
+    public double getDistanceRolled() {
         return distanceRolled;
     }
 
-    public void setDistanceRolled(float distanceRolled) {
+    public void setDistanceRolled(double distanceRolled) {
         this.distanceRolled = distanceRolled;
     }
 

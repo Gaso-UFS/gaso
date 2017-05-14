@@ -60,9 +60,9 @@ public class OBDConsumptionEvaluatorUnitTest {
         assertTrue(e.getRate()<0);
 
         FuzzyConsumption consumptionHigh = new FuzzyConsumption();
-        consumptionHigh.setAverage(20);
-        consumptionHigh.setHigh(60);
-        consumptionHigh.setLow(20);
+        consumptionHigh.setAverage(10);
+        consumptionHigh.setHigh(80);
+        consumptionHigh.setLow(10);
         consumptionHigh.setVeryhigh(0);
         consumptionHigh.setVerylow(0);
 

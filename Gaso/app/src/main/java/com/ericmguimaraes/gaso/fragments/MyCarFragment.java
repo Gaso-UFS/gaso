@@ -581,11 +581,6 @@ public class MyCarFragment extends Fragment {
                     Milestone milestone = milestoneDAO.createNewMilestone(valorTotal, SessionSingleton.getInstance().currentCar.getLastFuelPercentageLevel(), expense);
                     milestoneDAO.addOrUpdate(milestone);
 
-                    Car c = SessionSingleton.getInstance().currentCar;
-                    c.setLastFuelPercentageLevel(c.getLastFuelPercentageLevel()+valorTotal);
-                    CarDAO dao = new CarDAO();
-                    dao.addOrUpdate(c);
-
                 }
 
                 @Override

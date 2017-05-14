@@ -27,12 +27,10 @@ public final class EvaluationHelper {
     private static Milestone milestone;
 
     private static OnEvaluationListener listener;
-    private static boolean evaluateStation;
 
-    public static void initEvaluation(Milestone milestone, boolean evaluateStation, OnEvaluationListener listener) {
+    public static void initEvaluation(Milestone milestone, OnEvaluationListener listener) {
         EvaluationHelper.milestone = milestone;
         EvaluationHelper.listener = listener;
-        EvaluationHelper.evaluateStation = evaluateStation;
         new EvaluationHelperAsyncTask().execute();
     }
 
@@ -48,6 +46,7 @@ public final class EvaluationHelper {
                     if(evaluations==null)
                         evaluations = new HashMap<String, Evaluation>();
 
+                    milestone.setCar(SessionSingleton.getInstance().currentCar);
                     milestone.setTankMax(SessionSingleton.getInstance().currentCar.getTankMaxLevel());
 
                     FuelAmountEvaluator fuelAmountEvaluator = new FuelAmountEvaluator(milestone);
@@ -63,12 +62,11 @@ public final class EvaluationHelper {
                         milestone.setConsumptionRateMilestone(obdConsumptionEvaluation.getConsumptionRateMilestone());
                     }
 
-                    if(evaluateStation) {
-                        StationEvaluationHelper stationEvaluationHelper = new StationEvaluationHelper(milestone);
-                        stationEvaluationHelper.evaluate();
-                    }
-
                     milestone.setEvaluations(evaluations);
+
+                    StationEvaluationHelper stationEvaluationHelper = new StationEvaluationHelper(milestone);
+                    stationEvaluationHelper.evaluate();
+
                     MilestoneDAO dao = new MilestoneDAO();
                     dao.addOrUpdate(milestone);
 
