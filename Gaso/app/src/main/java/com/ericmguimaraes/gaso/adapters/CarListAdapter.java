@@ -104,7 +104,7 @@ public class CarListAdapter extends RecyclerView.Adapter<CarListAdapter.ViewHold
             if(carList.isEmpty())
                 SessionSingleton.getInstance().currentCar = null;
             else
-                SessionSingleton.getInstance().currentCar = carList.get(0);
+                SessionSingleton.getInstance().currentCar = carList.get(carList.size()-1);
 
             notifyDataSetChanged();
         } catch (Exception e){

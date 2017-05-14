@@ -132,5 +132,11 @@ public class LoggingThreadUnitTest {
         assertTrue(c.getLastFuelPercentageLevel()==79);
         assertTrue(c.getTotalFuelPercentageUsed()==41);
 
+        //spent 1
+        fuel = loggingThread.calculateOverFuel(c, 78);
+        assertTrue(fuel==1);
+        assertTrue(c.getLastFuelPercentageLevel()==78);
+        assertTrue(c.getTotalFuelPercentageUsed()==42);
+
     }
 }

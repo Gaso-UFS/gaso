@@ -33,6 +33,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -61,6 +63,36 @@ public class MilestoneDAO {
             }
             mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).child(milestone.getUid()).setValue(milestone);
         }
+    }
+
+    public void doTransaction(String uid, final OnMilestoneTransaction listener){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user!=null) {
+            String key;
+            if(uid==null || uid.isEmpty())
+                return;
+            DatabaseReference mRef = mDatabase.child(Constants.FIREBASE_MILESTONES).child(user.getUid()).child(SessionSingleton.getInstance().currentCar.getid()).child(uid);
+            mRef.runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    Milestone milestone = mutableData.getValue(Milestone.class);
+                    if(milestone==null)
+                        return Transaction.success(mutableData);
+                    milestone = listener.onTransaction(milestone);
+                    mutableData.setValue(milestone);
+                    return Transaction.success(mutableData);
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                }
+            });
+        }
+    }
+
+    public interface OnMilestoneTransaction {
+        public Milestone onTransaction(Milestone m);
     }
 
     public void remove(Milestone milestone){

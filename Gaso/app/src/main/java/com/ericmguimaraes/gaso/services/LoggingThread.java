@@ -54,8 +54,9 @@ public class LoggingThread implements Runnable,
     private float[] mAcc;
     private int count = 0;
     private boolean refilBroadcastSent = false;
-    private double tempMilestoneDistanceAccumulator = 0;
-    private float tempMilestoneFuelConsumedAccumulator = 0;
+    private double milestoneDistanceAccumulator = 0;
+    private float milestoneFuelConsumedAccumulator = 0;
+    private boolean isFirstNotNull = true;
 
     public LoggingThread(LoggingService service) {
         this(service, null);
@@ -131,6 +132,10 @@ public class LoggingThread implements Runnable,
 
         //calculate over combustive
         milestoneFuelToAdd = calculateOverFuel(c, currentFuelLevel);
+        if(milestoneFuelToAdd>0)
+            Log.e("milestoneFuelToAdd","milestoneFuelToAdd = "+milestoneFuelToAdd);
+        else
+            Log.d("milestoneFuelToAdd","milestoneFuelToAdd = "+milestoneFuelToAdd);
 
         //store data on milestone
         final MilestoneDAO dao = new MilestoneDAO();
@@ -139,15 +144,22 @@ public class LoggingThread implements Runnable,
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(Milestone milestone) {
+                milestoneDistanceAccumulator += finalMilestoneDistanceToAdd;
+                milestoneFuelConsumedAccumulator += finalMilestoneFuelToAdd;
                 if(milestone!=null) {
-                    milestone.setDistanceRolled(milestone.getDistanceRolled() + finalMilestoneDistanceToAdd + tempMilestoneDistanceAccumulator);
-                    milestone.setCombustivePercentageConsumed(milestone.getCombustivePercentageConsumed() + finalMilestoneFuelToAdd + tempMilestoneFuelConsumedAccumulator);
-                    dao.addOrUpdate(milestone);
-                    tempMilestoneDistanceAccumulator = 0;
-                    tempMilestoneFuelConsumedAccumulator = 0;
-                } else {
-                    tempMilestoneDistanceAccumulator += finalMilestoneDistanceToAdd;
-                    tempMilestoneFuelConsumedAccumulator += finalMilestoneFuelToAdd;
+                    if(isFirstNotNull) {
+                        milestoneDistanceAccumulator += milestone.getDistanceRolled();
+                        milestoneFuelConsumedAccumulator += milestone.getCombustivePercentageConsumed();
+                        isFirstNotNull = false;
+                    }
+                    dao.doTransaction(milestone.getUid(), new MilestoneDAO.OnMilestoneTransaction() {
+                        @Override
+                        public Milestone onTransaction(Milestone m) {
+                            m.setDistanceRolled(milestoneDistanceAccumulator);
+                            m.setCombustivePercentageConsumed(milestoneFuelConsumedAccumulator);
+                            return m;
+                        }
+                    });
                 }
 
                 //store data on car
@@ -166,6 +178,7 @@ public class LoggingThread implements Runnable,
     }
 
     public double calculateOverDistance(Car c, double currentobdDistance) {
+        Log.d("currentobdDistance","currentobdDistance = "+currentobdDistance);
         double milestoneDistanceToAdd = 0;
         if(c.getTotalDistance()!=0 || c.getLastDistanceRead()!=0) {
             if(currentobdDistance<c.getLastDistanceRead()){
@@ -181,6 +194,11 @@ public class LoggingThread implements Runnable,
     }
 
     public float calculateOverFuel(Car c, float currentFuelLevel) {
+        if(currentFuelLevel<3) {
+            Log.e("currentFuelLevel","currentFuelLevel = "+currentFuelLevel);
+            return 0;
+        }
+        Log.d("currentFuelLevel","currentFuelLevel = "+currentFuelLevel);
         float milestoneFuelToAdd = 0;
         if ((c.getTotalFuelPercentageUsed()!=0 || c.getLastFuelPercentageLevel()!=0) && currentFuelLevel<c.getLastFuelPercentageLevel()) {
             milestoneFuelToAdd = c.getLastFuelPercentageLevel() - currentFuelLevel;

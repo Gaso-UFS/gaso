@@ -84,8 +84,8 @@ public class MyEvaluationRecyclerViewAdapter extends RecyclerView.Adapter<MyEval
                 holder.igualAvaliacao.setAlpha(1f);
 
             if(m.isHasTankMax()) {
-                holder.avaliacaoGeral.setText("Geral: " + m.getConsumptionRateCar() + "KM/L");
-                holder.avaliacaoAtual.setText("Atual: " + m.getConsumptionRateMilestone() + "KM/L");
+                holder.avaliacaoGeral.setText("Geral: " + String.format("%.2f", m.getConsumptionRateCar()) + " KM/L");
+                holder.avaliacaoAtual.setText("Atual: " + String.format("%.2f", m.getConsumptionRateMilestone()) + " KM/L");
             } else {
                 holder.avaliacaoGeral.setVisibility(View.GONE);
                 holder.avaliacaoAtual.setVisibility(View.GONE);

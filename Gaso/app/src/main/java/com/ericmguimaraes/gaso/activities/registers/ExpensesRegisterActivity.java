@@ -344,7 +344,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         Expense e = new Expense();
         setExpense(e);
         dao.addOrUpdate(e);
-        saveCarLastFluel();
         return e;
     }
 
@@ -352,7 +351,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         ExpensesDAO dao = new ExpensesDAO();
         setExpense(expenseSelected);
         dao.addOrUpdate(expenseSelected);
-        saveCarLastFluel();
         return expenseSelected;
     }
 
@@ -378,15 +376,6 @@ public class ExpensesRegisterActivity extends AppCompatActivity implements DateP
         }
         e.setCar(SessionSingleton.getInstance().currentCar);
         e.setAmountPercentageOBDRefil(amountPercentageOBDRefil);
-    }
-
-    private void saveCarLastFluel() {
-        if(obdRefil){
-            Car c = SessionSingleton.getInstance().currentCar;
-            c.setLastFuelPercentageLevel(c.getLastFuelPercentageLevel()+ amountPercentageOBDRefil);
-            CarDAO dao = new CarDAO();
-            dao.addOrUpdate(c);
-        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

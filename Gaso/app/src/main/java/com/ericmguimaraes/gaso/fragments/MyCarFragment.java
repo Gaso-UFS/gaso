@@ -319,12 +319,17 @@ public class MyCarFragment extends Fragment {
         dao.findLastMilestone(new MilestoneDAO.OneMilestoneReceivedListener() {
             @Override
             public void onMilestoneReceived(@Nullable final Milestone milestone) {
-                if(milestone==null)
+                if(milestone==null || milestone.getUid()==null)
                     return;
-                if (milestone.getFuzzyConsumption() == null)
-                    milestone.setFuzzyConsumption(new FuzzyConsumption());
-                milestone.getFuzzyConsumption().incrementComsuption(consumptionName);
-                dao.addOrUpdate(milestone);
+                dao.doTransaction(milestone.getUid(), new MilestoneDAO.OnMilestoneTransaction() {
+                    @Override
+                    public Milestone onTransaction(Milestone m) {
+                        if (m.getFuzzyConsumption() == null)
+                            m.setFuzzyConsumption(new FuzzyConsumption());
+                        m.getFuzzyConsumption().incrementComsuption(consumptionName);
+                        return m;
+                    }
+                });
 
                 final UserDAO userDAO = new UserDAO();
                 userDAO.findFuzzyConsumption(new FuzzyConsumption.FuzzyConsumptionListener() {
