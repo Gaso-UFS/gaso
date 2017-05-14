@@ -164,7 +164,7 @@ public class Milestone {
             }
             // adiciona os novos valores de combustiveis baseado na procentagem e quantidade de restante
             for(int i = 0; i<percentages.size(); i++) {
-                if(percentages.get(i)!=null && percentages.get(i).longValue()>0) {
+                if(percentages.get(i)!=null && percentages.get(i).doubleValue()>0) {
                     FuelSource f = fuelSourcesBefore.get(i);
                     fuelSources.add(new FuelSource(f.getStationId(), f.getStationName(), percentages.get(i) * (initialFuelLevel - amountPercentageOBDRefil)));
                 }
